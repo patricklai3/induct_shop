@@ -13,3 +13,11 @@ Welcome to the central repository for metadata, context, and operational playboo
 # Scripts
 
 * [Installer](/scripts/installer.md) - The primary installation script for provisioning dependencies and apps.
+
+# Playbooks
+
+* [Agentic Development](/playbooks/agentic-development.md) - Guide for UI-less, programmatic scaffolding of Frappe features.
+
+# Standards
+
+* [Open Knowledge Format (OKF)](/okf-spec.md) - The OKF specification for documentation.
