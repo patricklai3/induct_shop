@@ -16,4 +16,4 @@ Welcome to the central repository for metadata, context, and operational playboo
 
 # Playbooks
 
-* [Agentic Development in Frappe](/playbooks/agentic-development.md) - Workflow for provisioning features programmatically without the Frappe UI.
+* [Playbooks & References](/playbooks/index.md) - Workflow for provisioning features and frappe development references.
