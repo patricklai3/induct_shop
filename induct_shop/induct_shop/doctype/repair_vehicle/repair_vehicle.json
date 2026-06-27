@@ -1,0 +1,188 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{vin}",
+ "creation": "2026-06-26 23:35:32.208667",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "customer",
+  "license_plate",
+  "color",
+  "vin",
+  "is_valid_vin",
+  "sb_details",
+  "manufacturer",
+  "model",
+  "model_year",
+  "body_type",
+  "cb_drivetrain",
+  "trim",
+  "drivetrain",
+  "battery_type",
+  "drive_unit",
+  "sb_production",
+  "assembly_plant",
+  "production_sequence",
+  "cb_hw",
+  "autopilot_hardware",
+  "manufactured_month"
+ ],
+ "fields": [
+  {
+   "bold": 1,
+   "fieldname": "vin",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "VIN",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_valid_vin",
+   "fieldtype": "Check",
+   "label": "Is Valid VIN?",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_details",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Details"
+  },
+  {
+   "fieldname": "manufacturer",
+   "fieldtype": "Data",
+   "label": "Manufacturer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "model",
+   "fieldtype": "Data",
+   "label": "Model",
+   "read_only": 1
+  },
+  {
+   "fieldname": "model_year",
+   "fieldtype": "Data",
+   "label": "Model Year",
+   "read_only": 1
+  },
+  {
+   "fieldname": "body_type",
+   "fieldtype": "Data",
+   "label": "Body Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_drivetrain",
+   "fieldtype": "Column Break",
+   "label": "Drivetrain Specs"
+  },
+  {
+   "fieldname": "trim",
+   "fieldtype": "Data",
+   "label": "Trim",
+   "read_only": 1
+  },
+  {
+   "fieldname": "drivetrain",
+   "fieldtype": "Data",
+   "label": "Drivetrain",
+   "read_only": 1
+  },
+  {
+   "fieldname": "battery_type",
+   "fieldtype": "Data",
+   "label": "Battery Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "drive_unit",
+   "fieldtype": "Data",
+   "label": "Drive Unit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_production",
+   "fieldtype": "Section Break",
+   "label": "Production & Hardware"
+  },
+  {
+   "fieldname": "assembly_plant",
+   "fieldtype": "Data",
+   "label": "Assembly Plant",
+   "read_only": 1
+  },
+  {
+   "fieldname": "production_sequence",
+   "fieldtype": "Data",
+   "label": "Production Sequence",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_hw",
+   "fieldtype": "Column Break",
+   "label": "Hardware"
+  },
+  {
+   "fieldname": "autopilot_hardware",
+   "fieldtype": "Data",
+   "label": "Autopilot Hardware",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "license_plate",
+   "fieldtype": "Data",
+   "label": "License Plate"
+  },
+  {
+   "fieldname": "color",
+   "fieldtype": "Data",
+   "label": "Color"
+  },
+  {
+   "description": "e.g., 05/22 (from B-pillar label)",
+   "fieldname": "manufactured_month",
+   "fieldtype": "Data",
+   "label": "Manufactured Month"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-06-26 23:49:12.397230",
+ "modified_by": "Administrator",
+ "module": "Induct Shop",
+ "name": "Repair Vehicle",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "show_name_in_global_search": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
