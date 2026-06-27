@@ -16,8 +16,4 @@ Welcome to the central repository for metadata, context, and operational playboo
 
 # Playbooks
 
-* [Agentic Development](/playbooks/agentic-development.md) - Guide for UI-less, programmatic scaffolding of Frappe features.
-
-# Standards
-
-* [Open Knowledge Format (OKF)](/okf-spec.md) - The OKF specification for documentation.
+* [Agentic Development in Frappe](/playbooks/agentic-development.md) - Workflow for provisioning features programmatically without the Frappe UI.
