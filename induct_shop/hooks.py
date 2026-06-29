@@ -5,6 +5,8 @@ app_description = "Shop Management System"
 app_email = "admin@example.com"
 app_license = "mit"
 
+fixtures = ["Custom Field"]
+
 # Apps
 # ------------------
 
@@ -43,7 +45,7 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"Project": "public/js/project.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -190,9 +192,9 @@ app_license = "mit"
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
-# override_doctype_dashboards = {
-# 	"Task": "induct_shop.task.get_dashboard_data"
-# }
+override_doctype_dashboards = {
+	"Project": "induct_shop.induct_shop.overrides.project_dashboard.override_dashboard"
+}
 
 # exempt linked doctypes from being automatically cancelled
 #

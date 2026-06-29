@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - OKF documentation baseline and directory structure.
 - Vehicle Repair DocType and functionality.
+- Custom Link field `project` to Quotation DocType.
+- Customizations to Project DocType dashboard (hidden Progress tab, reorganized connections).
 
 ### Changed
 ### Deprecated
