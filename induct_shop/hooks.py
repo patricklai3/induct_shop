@@ -91,7 +91,7 @@ app_license = "mit"
 # Uninstallation
 # ------------
 
-# before_uninstall = "induct_shop.uninstall.before_uninstall"
+before_uninstall = "induct_shop.uninstall.before_uninstall"
 # after_uninstall = "induct_shop.uninstall.after_uninstall"
 
 # Integration Setup

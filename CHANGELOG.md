@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added `before_uninstall` hook to automatically remove custom fields, property setters, and scripts injected by the app upon uninstallation.
 - OKF documentation baseline and directory structure.
 - Vehicle Repair DocType and functionality.
 
