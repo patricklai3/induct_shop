@@ -1,5 +1,10 @@
 # Directory Update Log
 
+## 2026-06-29
+* **Update**: Updated `project.md` to document the hiding of the Progress tab via custom client script.
+* **Creation**: Added `project.md` to `doctypes` to document the customizations to the Project DocType dashboard.
+* **Creation**: Added `quotation.md` to `doctypes` to document the addition of the Project link field to the Quotation DocType.
+
 ## 2026-06-27
 * **Update**: Moved custom implemented `repair-vehicle.md` to `doctypes` folder.
 * **Initialization**: Created foundational directory structure adhering to OKF v0.1 guidelines.
