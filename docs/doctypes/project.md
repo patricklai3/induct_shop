@@ -40,10 +40,10 @@ The following documents have been grouped under the "Sales" section, ordered as 
 These changes are implemented by registering an `override_doctype_dashboards` hook in `hooks.py` for the `Project` DocType, which filters and regroups the `data["transactions"]` dictionary returned by the base Frappe dashboard generator.
 
 ## Costing Calculation Mechanism
-The `induct_shop` app customizes the core ERPNext Project costing logic to include additional stock transactions. Two custom read-only fields have been added to the Project DocType to track these values:
-- `custom_sales_stock_cost` (Sales Stock Cost): The aggregate stock value of Delivery Notes and Sales Invoices (with "Update Stock" checked) connected to the project.
-- `custom_incoming_material_value` (Incoming Material Value): The aggregate incoming value from Stock Entries of type "Material Receipt" connected to the project.
+The custom costing mechanism for projects is implemented via a Python override (`induct_shop.overrides.project.CustomProject`) registered via `override_doctype_class`.
 
-### Technical Implementation
-1. **Class Override**: The standard `Project` class is extended via `induct_shop.induct_shop.overrides.project.CustomProject` in `hooks.py`. The `update_costing()` method is overridden to query `Stock Ledger Entry` for the respective values and set the custom fields. The `calculate_gross_margin()` method is also overridden to factor these new values into the overall `expense_amount`.
-2. **Document Events**: `doc_events` hooks are registered in `hooks.py` for `Delivery Note`, `Sales Invoice`, and `Stock Entry`. When these documents are submitted or cancelled, they trigger an asynchronous update (`erpnext.projects.doctype.project.project.update_costing_and_billing`) for all referenced projects.
+The standard gross margin and costing logic is extended with two custom fields:
+- **Sales Stock Cost** (`custom_sales_stock_cost`): Sums the stock value difference of all outgoing stock from Delivery Notes and Sales Invoices (when "Update Stock" is selected) connected to the project. This amount is added to the total `expense_amount`.
+- **Incoming Material Value** (`custom_incoming_material_value`): Sums the incoming value of parts harvested or acquired via Stock Entries of type "Material Receipt" connected to the project. This incoming value reduces the total `expense_amount`.
+
+Additionally, the `hooks.py` registers `on_submit` and `on_cancel` events for `Delivery Note`, `Sales Invoice`, and `Stock Entry` documents to automatically recalculate and synchronize the linked project's costing when any of these documents change.

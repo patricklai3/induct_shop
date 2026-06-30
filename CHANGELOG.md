@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Vehicle Repair DocType and functionality.
 - Custom Link field `project` to Quotation DocType.
 - Customizations to Project DocType dashboard (hidden Progress tab, reorganized connections).
-- Custom fields (`custom_sales_stock_cost` and `custom_incoming_material_value`) and logic to include Delivery Notes, Sales Invoices, and Material Receipts in Project Costing.
+- Custom costing logic for Project DocType to calculate `custom_sales_stock_cost` and `custom_incoming_material_value` from stock ledger entries, and dynamically update `expense_amount`.
 
 ### Changed
 ### Deprecated
