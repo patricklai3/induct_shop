@@ -140,13 +140,20 @@ doctype_js = {"Project": "public/js/project.js"}
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Delivery Note": {
+		"on_submit": "induct_shop.induct_shop.overrides.project.update_project_costing",
+		"on_cancel": "induct_shop.induct_shop.overrides.project.update_project_costing"
+	},
+	"Sales Invoice": {
+		"on_submit": "induct_shop.induct_shop.overrides.project.update_project_costing",
+		"on_cancel": "induct_shop.induct_shop.overrides.project.update_project_costing"
+	},
+	"Stock Entry": {
+		"on_submit": "induct_shop.induct_shop.overrides.project.update_project_costing",
+		"on_cancel": "induct_shop.induct_shop.overrides.project.update_project_costing"
+	}
+}
 
 # Scheduled Tasks
 # ---------------
@@ -181,6 +188,10 @@ doctype_js = {"Project": "public/js/project.js"}
 # extend_doctype_class = {
 # 	"Task": "induct_shop.custom.task.CustomTaskMixin"
 # }
+
+override_doctype_class = {
+	"Project": "induct_shop.induct_shop.overrides.project.CustomProject"
+}
 
 # Overriding Methods
 # ------------------------------

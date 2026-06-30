@@ -12,7 +12,7 @@ tags: [project, dashboard, doctype, customization]
 The `induct_shop` application modifies the standard Frappe `Project` DocType's dashboard connections to align with the specific workflow requirements of the application.
 
 ## Form Modifications
-The standard "Progress" tab is hidden on the Project DocType using a client-side script (`induct_shop/public/js/project.js`) via the `doctype_js` hook in `hooks.py`.
+The standard "Progress" tab is hidden on the Project DocType using a client-side script (`induct_shop/public/js/project.js`) via the `doctype_js` hook in `hooks.py`. To ensure the tab completely collapses in modern Frappe versions, this script explicitly iterates through and hides all constituent fields of the progress tab (e.g., `collect_progress`, `holiday_list`, etc.) across both `setup` and `refresh` form events.
 
 ## Dashboard Customizations
 The following modifications have been made to the Project connections tab via the `override_dashboard` function in `induct_shop/induct_shop/overrides/project_dashboard.py`:

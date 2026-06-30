@@ -17,4 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 ### Removed
 ### Fixed
+- Enforced the hiding of the Progress tab in Project DocType by explicitly hiding its individual field components via client script.
+
 ### Security

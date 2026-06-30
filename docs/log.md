@@ -1,5 +1,8 @@
 # Directory Update Log
 
+## 2026-06-30
+* **Update**: Updated `project.md` to reflect the comprehensive field-hiding mechanism required to successfully hide the Progress tab.
+
 ## 2026-06-29
 * **Update**: Updated `project.md` to document the hiding of the Progress tab via custom client script.
 * **Creation**: Added `project.md` to `doctypes` to document the customizations to the Project DocType dashboard.
