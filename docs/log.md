@@ -1,6 +1,7 @@
 # Directory Update Log
 
 ## 2026-06-30
+* **Update**: Updated `project.md` to document the implemented project costing customizations (custom fields and python overrides).
 * **Update**: Updated `project.md` to reflect the comprehensive field-hiding mechanism required to successfully hide the Progress tab.
 
 ## 2026-06-29
