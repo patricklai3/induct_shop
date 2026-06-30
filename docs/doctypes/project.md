@@ -38,3 +38,9 @@ The following documents have been grouped under the "Sales" section, ordered as 
 
 ## Technical Implementation
 These changes are implemented by registering an `override_doctype_dashboards` hook in `hooks.py` for the `Project` DocType, which filters and regroups the `data["transactions"]` dictionary returned by the base Frappe dashboard generator.
+
+## Costing Calculation Mechanism
+The following conclusions have been established for the future implementation of project cost calculations:
+- **Sales Invoices with Stock Update**: If a Sales Invoice is submitted with the "Update Stock" option selected, the resulting stock transaction must count towards the cost of the given project.
+- **Delivery Notes**: When a Delivery Note is made, its associated stock transaction should also count towards the cost of the project.
+- **Incoming Material Value**: In the event of harvesting parts from a vehicle or acquiring core-return parts from a customer repair vehicle, a Stock Entry of type "Material Receipt" will be submitted. This results in incoming value (instead of outgoing value) that needs to be considered in the cost calculation as well.
