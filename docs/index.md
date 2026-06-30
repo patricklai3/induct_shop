@@ -18,6 +18,7 @@ Welcome to the central repository for metadata, context, and operational playboo
 
 * [Playbooks & References](/playbooks/index.md) - Workflow for provisioning features and frappe development references.
 
+
 # Doctypes
 
 * [Doctypes](/doctypes/index.md) - Custom implemented doctypes and their documentation.
