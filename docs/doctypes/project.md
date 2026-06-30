@@ -24,9 +24,12 @@ To streamline the interface, the following standard ERPNext document connections
 - BOM (Bill of Materials)
 - Work Order
 
+### Project Section Re-organization
+The following documents have been moved to or grouped under the "Project" section:
+- Stock Entry
+
 ### Purchase Section Re-organization
 The following documents have been moved to or grouped under the "Purchase" section:
-- Stock Entry
 - Expense Claim
 
 ### Sales Section Re-organization

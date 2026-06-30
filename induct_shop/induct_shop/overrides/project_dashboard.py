@@ -6,9 +6,10 @@ def override_dashboard(data=None):
 		return data
 
 	items_to_remove = ["Project Update", "Material Request", "BOM", "Work Order"]
-	items_to_move_to_purchase = ["Stock Entry", "Expense Claim"]
+	items_to_move_to_purchase = ["Expense Claim"]
+	items_to_move_to_project = ["Stock Entry"]
 	
-	all_removals = items_to_remove + items_to_move_to_purchase
+	all_removals = items_to_remove + items_to_move_to_purchase + items_to_move_to_project
 
 	# Filter out unwanted items from all transaction groups
 	for group in data.get("transactions", []):
@@ -17,6 +18,7 @@ def override_dashboard(data=None):
 
 	purchase_group = None
 	sales_group = None
+	project_group = None
 
 	for group in data.get("transactions", []):
 		label = group.get("label")
@@ -24,13 +26,23 @@ def override_dashboard(data=None):
 			purchase_group = group
 		elif label in ("Sales", _("Sales")):
 			sales_group = group
+		elif label in ("Project", _("Project")):
+			project_group = group
 
 	if purchase_group is not None:
-		purchase_group["items"].extend(["Stock Entry", "Expense Claim"])
+		purchase_group["items"].extend(["Expense Claim"])
 	else:
 		data["transactions"].append({
 			"label": _("Purchase"),
-			"items": ["Stock Entry", "Expense Claim"]
+			"items": ["Expense Claim"]
+		})
+
+	if project_group is not None:
+		project_group["items"].extend(["Stock Entry"])
+	else:
+		data["transactions"].insert(0, {
+			"label": _("Project"),
+			"items": ["Stock Entry"]
 		})
 
 	if sales_group is not None:

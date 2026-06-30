@@ -1,6 +1,7 @@
 # Directory Update Log
 
 ## 2026-06-30
+* **Update**: Updated `project.md` to document the relocation of the "Stock Entry" item from the Purchase section to the Project section in the Project dashboard.
 * **Update**: Updated `project.md` to reflect the completed implementation of custom project costing logic including new fields and automated hooks.
 * **Update**: Updated `project.md` to reflect the comprehensive field-hiding mechanism required to successfully hide the Progress tab.
 
