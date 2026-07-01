@@ -31,7 +31,7 @@ A customizable checklist (via a separate template or child table) to document th
 - **Issue Documentation:** Pictures can be directly attached to specific line items inside the inspection checklist to visually document discovered problems.
 
 ### 4. Integration & Connections
-- **Project / Work Order Link:** Ability to create or link to a Project or subsequent Work Order directly from the Check-in document.
+- **Automated Project Creation:** Automatically create a new Project upon saving the check-in record, as the vehicle has arrived at the shop. The Check-in document should be directly linked to this new Project.
 - **Quotation Link:** Direct connection to the automatically generated Quotation for discovered issues.
 - **Customer Signature:** (Optional) Digital signature field for the customer to acknowledge the check-in condition and mileage.
 
@@ -41,6 +41,7 @@ A customizable checklist (via a separate template or child table) to document th
 |---|---|---|
 | Customer | Link | Link to standard Customer DocType. |
 | Vehicle | Link | Link to Repair Vehicle DocType. |
+| Project | Link | Automatically generated Project for this check-in. (Read Only) |
 | Intake Mileage | Int/Float | Odometer reading at check-in. |
 | Check-in Date | Datetime | Date and time the vehicle arrived. |
 | Inspection Checklist | Table | Child table for dynamic inspection items, linking to Services/Items. |
