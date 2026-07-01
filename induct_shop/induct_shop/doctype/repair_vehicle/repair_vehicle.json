@@ -36,7 +36,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "VIN",
-   "unique": 1
+   "unique": 1,
+   "allow_in_quick_entry": 1
   },
   {
    "default": "0",
@@ -147,13 +148,15 @@
   {
    "fieldname": "color",
    "fieldtype": "Data",
-   "label": "Color"
+   "label": "Color",
+   "allow_in_quick_entry": 1
   },
   {
    "description": "e.g., 05/22 (from B-pillar label)",
    "fieldname": "manufactured_month",
    "fieldtype": "Data",
-   "label": "Manufactured Month"
+   "label": "Manufactured Month",
+   "allow_in_quick_entry": 1
   }
  ],
  "grid_page_length": 50,
@@ -185,5 +188,6 @@
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
- "track_changes": 1
+ "track_changes": 1,
+ "quick_entry": 1
 }
