@@ -50,3 +50,6 @@ The standard gross margin and costing logic is extended with two custom fields:
 - **Incoming Material Value** (`custom_incoming_material_value`): Sums the incoming value of parts harvested or acquired via Stock Entries of type "Material Receipt" connected to the project. This incoming value reduces the total `expense_amount`.
 
 Additionally, the `hooks.py` registers `on_submit` and `on_cancel` events for `Delivery Note`, `Sales Invoice`, and `Stock Entry` documents to automatically recalculate and synchronize the linked project's costing when any of these documents change.
+
+## Vehicle Information
+The `induct_shop` app integrates the `Repair Vehicle` DocType with the Project. A new "Shop Operations" tab has been added to the Project form to store and display a linked `Repair Vehicle`. When a vehicle is selected, the project automatically displays read-only vehicle details (e.g. VIN, License Plate, Model, Model Year, Color, and Trim). This centralized view ensures shop technicians can easily reference the vehicle context from within the project.

@@ -2,6 +2,7 @@
 
 ## 2026-07-01
 * **Creation**: Added `vehicle-check-in.md` to `doctypes` to begin specifying the proposed Vehicle Check-in DocType features.
+* **Update**: Updated `repair-vehicle.md` to document the addition of Quick Entry capabilities and the implementation of a server-side VIN decoder.
 
 ## 2026-06-30
 * **Update**: Updated `project.md` to document the relocation of the "Stock Entry" item from the Purchase section to the Project section in the Project dashboard.
