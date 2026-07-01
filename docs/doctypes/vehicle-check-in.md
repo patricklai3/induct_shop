@@ -19,20 +19,18 @@ The **Vehicle Check-in** DocType is a dedicated document designed to facilitate 
 - **Date and Time of Intake:** Automatically logged timestamp of when the check-in occurred.
 - **Intake Mileage / Odometer:** Required field to record the exact mileage of the vehicle at the time of drop-off.
 
-### 2. Customizable Vehicle Inspection Checklist
-A customizable checklist (via a separate template or child table) to document the vehicle's condition upon arrival. This helps protect the shop from liability and provides a baseline for the vehicle's state.
+### 2. Pre-existing Damage Log
+A simple table to document the vehicle's condition upon arrival. This helps protect the shop from liability and provides a baseline for the vehicle's state.
 
-- **Dynamic Checklist Items:** Instead of static fields, use a child table to allow mechanics to customize inspection points (e.g., Exterior Condition, Dashboard Lights, Fluids, Tires) per check-in.
-- **Service Linking:** Each inspection result item has the ability to link to a specific `Item` (Service or Part) required to address the discovered issues.
-- **Automated Quoting:** A feature to automatically generate and populate a `Quotation` containing the linked services/parts for all inspection items marked as needing attention.
+- **Damage Line Items:** A child table to allow the person inspecting the car at check-in to describe pre-existing damages (e.g., dents, scratches, interior tears) the customer has on their car.
+- **Visual Documentation:** Pictures can be directly attached to specific line items inside the damage log to visually document the pre-existing issues.
 
 ### 3. Intake Media & Attachments
 - **General Photos:** Ability to upload general photos of the vehicle (all four corners, interior, dashboard mileage/lights) at the time of drop-off.
-- **Issue Documentation:** Pictures can be directly attached to specific line items inside the inspection checklist to visually document discovered problems.
+- **Damage Photos:** As mentioned above, pictures can be attached to the specific pre-existing damage line items.
 
 ### 4. Integration & Connections
 - **Automated Project Creation:** Automatically create a new Project upon saving the check-in record, as the vehicle has arrived at the shop. The Check-in document should be directly linked to this new Project.
-- **Quotation Link:** Direct connection to the automatically generated Quotation for discovered issues.
 - **Customer Signature:** (Optional) Digital signature field for the customer to acknowledge the check-in condition and mileage.
 
 ## Data Structure / Schema Draft
@@ -44,6 +42,6 @@ A customizable checklist (via a separate template or child table) to document th
 | Project | Link | Automatically generated Project for this check-in. (Read Only) |
 | Intake Mileage | Int/Float | Odometer reading at check-in. |
 | Check-in Date | Datetime | Date and time the vehicle arrived. |
-| Inspection Checklist | Table | Child table for dynamic inspection items, linking to Services/Items. |
+| Pre-existing Damages | Table | Child table for documenting existing damages on the vehicle. |
 | Media | Attach | Photos of the vehicle condition. |
 
