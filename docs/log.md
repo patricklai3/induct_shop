@@ -1,5 +1,8 @@
 # Directory Update Log
 
+## 2026-07-01
+* **Creation**: Added `vehicle-check-in.md` to `doctypes` to begin specifying the proposed Vehicle Check-in DocType features.
+
 ## 2026-06-30
 * **Update**: Updated `project.md` to document the relocation of the "Stock Entry" item from the Purchase section to the Project section in the Project dashboard.
 * **Update**: Updated `project.md` to reflect the completed implementation of custom project costing logic including new fields and automated hooks.
