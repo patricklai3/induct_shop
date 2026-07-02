@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Vehicle Check-in workflow including `Vehicle Check-in`, `Inspection Template`, and respective child tables.
+- Automated project creation triggered upon Vehicle Check-in record submission.
+- Client-side intake mileage validation for `Vehicle Check-in`.
+- Standard inspection template provisioning on app install.
 - Added `before_uninstall` hook to automatically remove custom fields, property setters, and scripts injected by the app upon uninstallation.
 - OKF documentation baseline and directory structure.
 - Vehicle Repair DocType and functionality, including Quick Entry capabilities and server-side VIN decoding.

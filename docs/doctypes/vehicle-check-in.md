@@ -1,7 +1,7 @@
 ---
 type: DocType Specification
 title: Vehicle Check-in
-description: Specification and feature list for the proposed Vehicle Check-in DocType.
+description: Specification and feature list for the implemented Vehicle Check-in DocType.
 resource: vehicle_check_in
 tags: [doctype, specification, vehicle, check-in]
 ---
@@ -16,13 +16,13 @@ The **Vehicle Check-in** DocType is a dedicated document designed to facilitate 
 ### 1. Basic Intake Information
 - **Customer / Client:** Link to the Customer DocType to identify the owner.
 - **Vehicle:** Link to the Repair Vehicle DocType to identify the specific vehicle being checked in.
-- **Date and Time of Intake:** Automatically logged timestamp of when the check-in occurred.
-- **Intake Mileage / Odometer:** Required field to record the exact mileage of the vehicle at the time of drop-off.
+- **Date and Time of Intake:** Automatically logged timestamp of when the check-in occurred (`check_in_date`).
+- **Intake Mileage / Odometer:** Required field (`intake_mileage`) to record the exact mileage of the vehicle at the time of drop-off. A client-side safeguard script prevents accidental modification of this field post-creation without explicit user confirmation via a dialogue.
 
 ### 2. Inspection & Damage Log
 A simple table to document the vehicle's condition upon arrival. This helps protect the shop from liability and provides a baseline for the vehicle's state.
 
-- **Inspection Template:** A template feature, similar to tax templates, allowing the inspection table to be pre-populated. The app will come preloaded with a standard template containing the following required line items:
+- **Inspection Template:** A template feature allowing the inspection table to be pre-populated. A `Standard` template is automatically provisioned via the `after_install` hook, containing the following required line items:
   - Manufacturing Certification Label
   - Front Left Corner
   - Front Right Corner
@@ -32,11 +32,11 @@ A simple table to document the vehicle's condition upon arrival. This helps prot
   - Interior (Rear Seats)
   - Dashboard Mileage
   - Service Mode Alert Page
-- **Damage Line Items:** A child table to allow the person inspecting the car at check-in to describe pre-existing damages (e.g., dents, scratches, interior tears) the customer has on their car. This table can be populated via the Inspection Template.
-- **Visual Documentation & Media:** Ability to upload general photos of the vehicle (all four corners, interior, dashboard mileage/lights) at the time of drop-off. Pictures can also be directly attached to specific line items inside the damage log to visually document the pre-existing issues.
+- **Damage Line Items:** The `Vehicle Check-in Item` child table allows the person inspecting the car at check-in to describe pre-existing damages. This table is auto-populated dynamically when an Inspection Template is selected.
+- **Visual Documentation & Media:** Users can attach general photos or evidence directly to specific line items inside the child table to visually document pre-existing issues.
 
 ### 3. Integration & Connections
-- **Automated Project Creation:** Automatically create a new Project upon saving the check-in record, as the vehicle has arrived at the shop. The Check-in document should be directly linked to this new Project.
+- **Automated Project Creation:** Automatically creates a new Project upon saving the check-in record. The Check-in document is linked back directly to this new Project via the `after_insert` server script in the DocType controller.
 
 ## Data Structure / Schema Draft
 

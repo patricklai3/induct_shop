@@ -1,5 +1,8 @@
 # Directory Update Log
 
+## 2026-07-02
+* **Update**: Updated `vehicle-check-in.md` to reflect the completed implementation of the Vehicle Check-in DocType and Inspection Templates.
+
 ## 2026-07-01
 * **Creation**: Added `vehicle-check-in.md` to `doctypes` to begin specifying the proposed Vehicle Check-in DocType features.
 * **Update**: Updated `repair-vehicle.md` to document the addition of Quick Entry capabilities and the implementation of a server-side VIN decoder.

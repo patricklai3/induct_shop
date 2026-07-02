@@ -1,0 +1,31 @@
+{
+ "actions": [],
+ "creation": "2026-07-01 14:38:24.961260",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "inspection_description"
+ ],
+ "fields": [
+  {
+   "fieldname": "inspection_description",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Inspection Description",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-01 14:40:55.291701",
+ "modified_by": "Administrator",
+ "module": "Induct Shop",
+ "name": "Inspection Template Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

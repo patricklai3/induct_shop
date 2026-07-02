@@ -88,7 +88,7 @@ doctype_js = {"Project": "public/js/project.js"}
 # ------------
 
 # before_install = "induct_shop.install.before_install"
-# after_install = "induct_shop.install.after_install"
+after_install = "induct_shop.install.after_install"
 
 # Uninstallation
 # ------------
