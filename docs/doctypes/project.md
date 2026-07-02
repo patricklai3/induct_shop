@@ -1,9 +1,10 @@
 ---
-type: DocType Modification
+type: Reference
 title: Project Dashboard Modifications
 description: Documentation for changes made to the Project DocType's connections dashboard.
 resource: project
-tags: [project, dashboard, doctype, customization]
+tags: [doctype, project, customization]
+status: Implemented
 ---
 
 # Project Dashboard Modifications

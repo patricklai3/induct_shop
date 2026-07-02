@@ -1,9 +1,10 @@
 ---
-type: DocType Specification
+type: Specification
 title: Vehicle Health Check
 description: Specification and feature list for the proposed Vehicle Health Check DocType.
 resource: vehicle_health_check
-tags: [doctype, specification, vehicle, inspection, health-check]
+tags: [doctype, vehicle, inspection, specification]
+status: Proposed
 ---
 
 # Vehicle Health Check DocType

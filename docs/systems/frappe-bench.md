@@ -1,9 +1,8 @@
 ---
-type: Development Environment
+type: System
 title: Frappe Bench
 description: The local Frappe and ERPNext development environment.
-resource: file:///workspace/development/frappe-bench
-tags: [frappe, development, bench]
+tags: [system, frappe, environment]
 timestamp: 2026-06-27T00:00:00Z
 ---
 

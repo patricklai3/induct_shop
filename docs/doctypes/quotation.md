@@ -1,9 +1,10 @@
 ---
-type: DocType Modification
+type: Reference
 title: Quotation Customizations
 description: Documentation for changes made to the Quotation DocType.
 resource: quotation
-tags: [quotation, doctype, customization, link, project]
+tags: [doctype, quotation, customization]
+status: Implemented
 ---
 
 # Quotation Customizations

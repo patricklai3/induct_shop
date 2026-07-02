@@ -2,7 +2,7 @@
 type: Playbook
 title: "How to Clean Up Customizations on Uninstall"
 description: "Instructions and overview of the app uninstallation hook used to remove custom fields and other customizations."
-tags: [frappe, development, uninstallation, cleanup]
+tags: [playbook, maintenance, uninstall]
 timestamp: 2026-06-29T16:40:00Z
 ---
 

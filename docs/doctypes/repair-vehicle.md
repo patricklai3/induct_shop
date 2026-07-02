@@ -2,8 +2,10 @@
 type: Reference
 title: "Repair Vehicle DocType"
 description: Documentation for the Repair Vehicle DocType and its integrated Tesla VIN Decoder.
-tags: [frappe, development, doctype, feature]
+tags: [doctype, vehicle, repair, tesla]
 timestamp: 2026-06-27T08:37:00Z
+resource: repair_vehicle
+status: Implemented
 ---
 
 # Repair Vehicle DocType

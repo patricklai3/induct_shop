@@ -1,9 +1,10 @@
 ---
-type: DocType Specification
+type: Reference
 title: Vehicle Check-in
 description: Specification and feature list for the implemented Vehicle Check-in DocType.
 resource: vehicle_check_in
-tags: [doctype, specification, vehicle, check-in]
+tags: [doctype, vehicle, check-in]
+status: Implemented
 ---
 
 # Vehicle Check-in DocType
