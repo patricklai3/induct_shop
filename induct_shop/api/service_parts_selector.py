@@ -102,6 +102,7 @@ def ingest_part(payload):
                 "item_group": parent_group,
                 "is_stock_item": 1,
                 "has_batch_no": 1,
+                "stock_uom": "Unit",
                 "custom_model_compatibility": []
             })
             item.insert(ignore_permissions=True)
