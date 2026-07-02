@@ -5,6 +5,8 @@ app_description = "Shop Management System"
 app_email = "admin@example.com"
 app_license = "mit"
 
+fixtures = ["Custom Field"]
+
 # Apps
 # ------------------
 
@@ -43,7 +45,7 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"Project": "public/js/project.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -86,12 +88,12 @@ app_license = "mit"
 # ------------
 
 # before_install = "induct_shop.install.before_install"
-# after_install = "induct_shop.install.after_install"
+after_install = "induct_shop.install.after_install"
 
 # Uninstallation
 # ------------
 
-# before_uninstall = "induct_shop.uninstall.before_uninstall"
+before_uninstall = "induct_shop.uninstall.before_uninstall"
 # after_uninstall = "induct_shop.uninstall.after_uninstall"
 
 # Integration Setup
@@ -138,13 +140,20 @@ app_license = "mit"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Delivery Note": {
+		"on_submit": "induct_shop.induct_shop.overrides.project.update_project_costing",
+		"on_cancel": "induct_shop.induct_shop.overrides.project.update_project_costing"
+	},
+	"Sales Invoice": {
+		"on_submit": "induct_shop.induct_shop.overrides.project.update_project_costing",
+		"on_cancel": "induct_shop.induct_shop.overrides.project.update_project_costing"
+	},
+	"Stock Entry": {
+		"on_submit": "induct_shop.induct_shop.overrides.project.update_project_costing",
+		"on_cancel": "induct_shop.induct_shop.overrides.project.update_project_costing"
+	}
+}
 
 # Scheduled Tasks
 # ---------------
@@ -180,6 +189,10 @@ app_license = "mit"
 # 	"Task": "induct_shop.custom.task.CustomTaskMixin"
 # }
 
+override_doctype_class = {
+	"Project": "induct_shop.induct_shop.overrides.project.CustomProject"
+}
+
 # Overriding Methods
 # ------------------------------
 #
@@ -190,9 +203,9 @@ app_license = "mit"
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
-# override_doctype_dashboards = {
-# 	"Task": "induct_shop.task.get_dashboard_data"
-# }
+override_doctype_dashboards = {
+	"Project": "induct_shop.induct_shop.overrides.project_dashboard.override_dashboard"
+}
 
 # exempt linked doctypes from being automatically cancelled
 #

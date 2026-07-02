@@ -2,8 +2,10 @@
 type: Reference
 title: "Repair Vehicle DocType"
 description: Documentation for the Repair Vehicle DocType and its integrated Tesla VIN Decoder.
-tags: [frappe, development, doctype, feature]
+tags: [doctype, vehicle, repair, tesla]
 timestamp: 2026-06-27T08:37:00Z
+resource: repair_vehicle
+status: Implemented
 ---
 
 # Repair Vehicle DocType
@@ -12,7 +14,8 @@ The `Repair Vehicle` DocType is designed to keep a detailed record of Tesla vehi
 
 ## Core Features
 
-- **Tesla VIN Decoder**: This DocType includes a built-in Client Script that listens to the `vin` field. When a 17-character Tesla VIN is entered, it automatically decodes the VIN and instantly populates the standard Read Only fields.
+- **Quick Entry Integration**: The DocType supports Quick Entry (`quick_entry: 1`). The dialog exposes editable fields including `customer`, `license_plate`, `color`, `vin`, and `manufactured_month`.
+- **Tesla VIN Decoder**: This DocType includes a dual-layered VIN decoder (client-side JS for instant feedback, and server-side Python `before_save` hook for data integrity during Quick Entry and API creation). When a 17-character Tesla VIN is entered, it automatically decodes the VIN and populates the standard Read Only fields.
 - **Data Extracted**:
   - `manufacturer`: e.g. Tesla Fremont, CA
   - `model`: e.g. Model 3, Model Y

@@ -2,8 +2,7 @@
 type: Script
 title: Installer Script
 description: Python utility script to automate dependency and app installation.
-resource: file:///workspace/development/installer.py
-tags: [install, python, setup]
+tags: [script, installation, hook]
 timestamp: 2026-06-27T00:00:00Z
 ---
 
