@@ -1,3 +1,11 @@
+---
+type: Reference
+title: "Induct Shop OKF Standards"
+description: "Domain-specific extension of OKF for the induct_shop repository."
+tags: [reference, specification, okf, standards]
+timestamp: 2026-07-02T00:00:00Z
+---
+
 # Induct Shop OKF Standards
 
 **Version 1.0**

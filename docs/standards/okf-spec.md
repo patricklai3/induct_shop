@@ -1,3 +1,11 @@
+---
+type: Reference
+title: "Open Knowledge Format (OKF)"
+description: "The base Open Knowledge Format (OKF) specification (Version 0.1)."
+tags: [reference, specification, okf, standards]
+timestamp: 2026-07-02T00:00:00Z
+---
+
 # Open Knowledge Format (OKF)
 
 **Version 0.1 — Draft**
