@@ -5,7 +5,7 @@ app_description = "Shop Management System"
 app_email = "admin@example.com"
 app_license = "mit"
 
-fixtures = ["Custom Field"]
+fixtures = ["Custom Field", "Property Setter"]
 
 # Apps
 # ------------------
@@ -141,6 +141,9 @@ before_uninstall = "induct_shop.uninstall.before_uninstall"
 # Hook on document methods and events
 
 doc_events = {
+	"Batch": {
+		"autoname": "induct_shop.induct_shop.overrides.batch.autoname"
+	},
 	"Delivery Note": {
 		"on_submit": "induct_shop.induct_shop.overrides.project.update_project_costing",
 		"on_cancel": "induct_shop.induct_shop.overrides.project.update_project_costing"

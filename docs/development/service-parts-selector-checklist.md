@@ -1,16 +1,16 @@
 # Staged Implementation Plan: Service & Parts Selector
 
 ## Phase 1: Data Schema & Core Backend Setup
-- [ ] Modify `Item` DocType via Custom Fields (or standard properties):
+- [x] Modify `Item` DocType via Custom Fields (or standard properties):
   - Add `Model Compatibility` (Child Table: Model, Date Range).
   - Ensure `has_batch_no` is checked by default for ingested parts.
-- [ ] Modify `Batch` DocType:
+- [x] Modify `Batch` DocType:
   - Add Custom Field `Revision / Suffix` (e.g., `-00-C`).
   - Add Custom Field `Condition` (`New`, `Reconditioned`, `Used`).
   - Add Custom Field `OEM Status` (`OEM`, `Aftermarket`).
   - Implement `autoname` hook to automatically generate the Batch ID in the format `#######-##-X-XXX-XXX` (e.g., `1234567-00-D-AFT-NEW` or `1234567-00-D-OEM-USD`), combining Item Code, Revision, OEM Status, and Condition.
-- [ ] Implement `after_install` hook (or patch) to automatically enable "Use batch-wise valuation" in Stock Settings.
-- [ ] Add Custom Field `Parent Service Reference` (or `Job Group ID`) to Transaction Item Tables for relational grouping.
+- [x] Implement `after_install` hook (or patch) to automatically enable "Use batch-wise valuation" in Stock Settings.
+- [x] Add Custom Field `Parent Service Reference` (or `Job Group ID`) to Transaction Item Tables for relational grouping.
 
 ## Phase 2: Data Ingestion & API Logic (Python Backend)
 - [ ] Implement Part Ingestion Logic (Tesla Catalog Text Parser):
