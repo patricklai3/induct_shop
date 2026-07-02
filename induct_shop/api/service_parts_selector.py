@@ -180,6 +180,32 @@ def _parse_model_string(model_str):
         return match.group(1), match.group(2).strip()
     return model_str, ""
 
+def _get_generations_for_service_url(url):
+    generations = []
+    
+    if "/ModelS/" in url:
+        if "/Palladium/" in url:
+            generations = ["Model S Feb 2021 - May 2025", "Model S June 2025"]
+        else:
+            generations = ["Model S Feb 2012 - Mar 2016", "Model S Apr 2016 - Jan 2021"]
+    elif "/Model3/" in url:
+        if "/2024/" in url:
+            generations = ["Model 3 Jan 2024"]
+        else:
+            generations = ["Model 3 Jun 2017 - Dec 2023"]
+    elif "/ModelX/" in url:
+        if "/Palladium/" in url:
+            generations = ["Model X Mar 2021 - May 2025", "Model X June 2025"]
+        else:
+            generations = ["Model X Sep 2015 - Feb 2021"]
+    elif "/ModelY/" in url:
+        if "/2025/" in url:
+            generations = ["Model Y Feb 2025"]
+        else:
+            generations = ["Model Y Jan 2020 - Jan 2025"]
+            
+    return generations
+
 @frappe.whitelist()
 def ingest_service(url):
     """
@@ -232,11 +258,8 @@ def ingest_service(url):
     if not correction_code:
         frappe.throw(_("Could not find Correction Code in the provided manual."))
         
-    # Model from URL
-    # https://service.tesla.com/docs/Model3/...
-    model_match = re.search(r"/docs/(Model[A-Za-z0-9]+)/", url, re.I)
-    model = model_match.group(1) if model_match else "Unknown Model"
-
+    # Generations from URL
+    generations = _get_generations_for_service_url(url)
     
     # Category and Subcategory
     cat_id = correction_code[:2] if len(correction_code) >= 2 else "00"
@@ -277,28 +300,34 @@ def ingest_service(url):
             "is_sales_item": 1,
             "stock_uom": "Hour",
             "custom_frt": frt_value,
-            "custom_model_compatibility": [
-                {
-                    "model": model
-                }
-            ]
+            "custom_model_compatibility": []
         })
+        for gen in generations:
+            model, date_range = _parse_model_string(gen)
+            item.append("custom_model_compatibility", {
+                "model": model,
+                "date_range": date_range
+            })
         item.insert(ignore_permissions=True)
     else:
         item = frappe.get_doc("Item", correction_code)
         item.custom_frt = frt_value
         item.item_group = item_group
-        exists = any(d.model == model for d in item.custom_model_compatibility)
-        if not exists:
-            item.append("custom_model_compatibility", {
-                "model": model
-            })
+        for gen in generations:
+            model, date_range = _parse_model_string(gen)
+            exists = any(d.model == model and d.date_range == date_range for d in item.custom_model_compatibility)
+            if not exists:
+                item.append("custom_model_compatibility", {
+                    "model": model,
+                    "date_range": date_range
+                })
         item.save(ignore_permissions=True)
+        
     return {
         "item_code": correction_code,
         "title": title,
         "frt_value": frt_value,
-        "model": model
+        "generations": generations
     }
 
 @frappe.whitelist()
