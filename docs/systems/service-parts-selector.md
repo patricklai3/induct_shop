@@ -57,12 +57,7 @@ To support accurate searching, filtering, and documentation without cluttering t
   * **Base Part Number:** The first 7 digits (e.g., `1974875`), acting as the `item_code`.
   * **Description & Categorization:** (Category, Subcategory, Group).
   * **Model Compatibility:** A custom child table mapping the base part to vehicle models and exact date ranges.
-  * **Batch Configuration:** The native `has_batch_no` property must be checked by default for ingested parts. Native `has_serial_no` must be left unchecked to prevent strict operational blocking.
-
-### Optional Serial Number Registry
-To track high-value or scanned parts (like HV batteries or data matrices) without enforcing ERPNext's rigid native rules (which would block transactions if an aftermarket variant lacks a serial), the system utilizes a custom, non-blocking registry.
-* **Component Serial Record:** A custom doctype acts as a centralized ledger tracking the `Serial Number`, `Item`, `Batch`, `Status` (e.g., In Stock, Installed), and a dynamic link to the specific `Transaction Document` (e.g., Purchase Receipt, Sales Invoice) that spawned the current status.
-* **Frictionless Workflow:** Standard transaction item tables (e.g., `Purchase Receipt Item`, `Sales Invoice Item`) will include a custom `Scanned Serial Numbers` field. Technicians can optionally scan serials into this field. Background scripts will automatically create or update the `Component Serial Record` upon submission, never halting the transaction if left blank.
+  * **Batch Configuration:** The native `has_batch_no` property must be checked by default for ingested parts.
 
 ### Item Master Field Mapping
 To ensure maximum scalability and speed within standard ERPNext workflows, the utility explicitly maps ingested data to the core `Item` fields as follows:
@@ -70,10 +65,13 @@ To ensure maximum scalability and speed within standard ERPNext workflows, the u
 * **`item_name`:** The short Part Name / Title (e.g., `COMPONENT - FRONT END CARRIER`).
 * **`description`:** The detailed or localized description for printing on sales and inventory documents.
 
-* **Batch Master (Specific Variance):** The `Batch` doctype will track the specific physical variants of that base part. We will inject custom fields into the `Batch` doctype via the app to store:
-  * **Revision / Suffix:** (e.g., `-00-C`). This is crucial for inventory tracking and explicit documentation on sales invoices.
-  * **Condition:** `New`, `Reconditioned`, `Used`.
-  * **OEM Status:** `OEM`, `Aftermarket`.
+* **Batch Master (Specific Variance):** The `Batch` doctype will track the specific physical variants of that base part. We will inject custom fields into the `Batch` doctype via the app to store structured data, while automatically generating a descriptive Batch ID:
+  * **Revision / Suffix:** Custom field (e.g., `-00-C`). This is crucial for inventory tracking and explicit documentation on sales invoices.
+  * **Condition:** Custom field with standard options (`New`, `Reconditioned`, `Used`).
+  * **OEM Status:** Custom field with standard options (`OEM`, `Aftermarket`).
+  * **Smart Batch ID Generation:** A hook will automatically combine these fields into a structured Batch ID format: `#######-##-X-XXX-XXX`. 
+    * For example: `1234567-00-D-AFT-NEW` or `1234567-00-D-OEM-USD`.
+    * This ensures clean structured data for querying within the selector, while providing a descriptive, glanceable ID everywhere else in the system.
 
 This architecture ensures the Item master remains clean (one record per base component), while the stock ledger natively tracks quantities and values at the exact revision and condition level via Batches.
 
