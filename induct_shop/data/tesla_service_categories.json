@@ -1,0 +1,278 @@
+{
+  "00": {
+    "id": "00",
+    "name": "INSPECTION AND SERVICE",
+    "subcategories": {
+      "0001": "Scheduled Service",
+      "0002": "Firmware Service",
+      "0005": "Service Modes",
+      "0006": "Periodic Roadworthiness Inspections"
+    }
+  },
+  "10": {
+    "id": "10",
+    "name": "BODY",
+    "subcategories": {
+      "1000": "Vehicle Lifting",
+      "1001": "Bumper/Fascia",
+      "1010": "Body Panels",
+      "1020": "Windshield and Body Glass",
+      "1030": "Paint",
+      "1040": "Spine"
+    }
+  },
+  "11": {
+    "id": "11",
+    "name": "CLOSURE COMPONENTS",
+    "subcategories": {
+      "1133": "Closure Assist Mechanisms and Hinges",
+      "1135": "Latches Strikers and Pinch Sensors",
+      "1140": "Interior Door Handles",
+      "1145": "Exterior Door Handles",
+      "1150": "Door Glass and Regulators",
+      "1170": "Seals Body Enclosures",
+      "1120": "Tonneau"
+    }
+  },
+  "12": {
+    "id": "12",
+    "name": "EXTERIOR FITTINGS",
+    "subcategories": {
+      "1201": "Wheel Arch Liners",
+      "1203": "Undertray and Diffuser",
+      "1205": "Badges and Films",
+      "1207": "License Plate Mountings",
+      "1209": "Exterior Mirrors",
+      "1220": "Exterior Trim",
+      "1222": "Spoiler",
+      "1225": "Underhood Trim",
+      "1227": "Liftgate Trough Trim",
+      "1230": "Trailer Hitch",
+      "1224": "Luggage Compartment Trim",
+      "1240": "Roof Rack",
+      "1215": "Truck Bed",
+      "1245": "Door Triggers",
+      "1250": "Terrestrial Armor Package"
+    }
+  },
+  "13": {
+    "id": "13",
+    "name": "SEATS",
+    "subcategories": {
+      "1301": "Front Seat Tracks",
+      "1302": "2nd Row Seat Tracks and Motors",
+      "1304": "Front Seat Assemblies and Hardware",
+      "1305": "2nd Row Seat Assemblies and Hardware",
+      "1307": "Front Seat Covers, Pads, and Trims",
+      "1308": "2nd Row Seat Covers Pads and Trims",
+      "1306": "3rd Row Seat Assemblies and Hardware",
+      "1303": "3rd Row Seat Tracks and Motors",
+      "1309": "3rd Row Seat Covers Pads and Trims"
+    }
+  },
+  "14": {
+    "id": "14",
+    "name": "INSTRUMENT PANELS AND PEDALS",
+    "subcategories": {
+      "1405": "Instrument Panel"
+    }
+  },
+  "15": {
+    "id": "15",
+    "name": "INTERIOR TRIM",
+    "subcategories": {
+      "1505": "Interior Mirror and Sun Visors",
+      "1511": "Liftgate Trim",
+      "1513": "Door Trim",
+      "1518": "Pillar and Sill Trim",
+      "1519": "Center Console",
+      "1520": "Headliner",
+      "1524": "Luggage Compartment Trim",
+      "1530": "Carpeting and Mats",
+      "1535": "Center Console - 2nd Row"
+    }
+  },
+  "16": {
+    "id": "16",
+    "name": "HV BATTERY SYSTEM",
+    "subcategories": {
+      "1601": "HV Battery Assembly",
+      "1610": "HV Battery Enclosure",
+      "1620": "HV Battery Cooling System",
+      "1630": "HV Battery Electrical Components"
+    }
+  },
+  "17": {
+    "id": "17",
+    "name": "ELECTRICAL",
+    "subcategories": {
+      "1701": "12V Battery and Fuses",
+      "1710": "Harnesses",
+      "1715": "Electronic Control Modules",
+      "1720": "Radar Sensor",
+      "1722": "Cameras",
+      "1727": "Parking Sensors",
+      "1730": "Interior Switches",
+      "1735": "Interior Lighting",
+      "1740": "Exterior Lights",
+      "1745": "Keyless Entry and Security",
+      "1750": "Wipers and Washers",
+      "1753": "Horn",
+      "1754": "Pedestrian Warning Speaker",
+      "1755": "Accelerator Pedal",
+      "1723": "Front Cameras",
+      "1725": "Rear Cameras",
+      "1726": "B-Pillar Cameras",
+      "1757": "Pyrotechnic Battery Disconnect",
+      "1724": "Interior Camera",
+      "1756": "Temperature and Humidity Sensors",
+      "1702": "MV Battery"
+    }
+  },
+  "18": {
+    "id": "18",
+    "name": "THERMAL MANAGEMENT",
+    "subcategories": {
+      "1810": "Cabin HVAC",
+      "1820": "Refrigerant System",
+      "1830": "Cooling System",
+      "1840": "Supermanifold",
+      "1850": "Air Distribution"
+    }
+  },
+  "20": {
+    "id": "20",
+    "name": "SAFETY AND RESTRAINT",
+    "subcategories": {
+      "2001": "Air Bags",
+      "2005": "Seat Belts",
+      "2010": "Pre-Tensioners",
+      "2020": "Sensors",
+      "2030": "Pedestrian Protection System"
+    }
+  },
+  "21": {
+    "id": "21",
+    "name": "INFOTAINMENT",
+    "subcategories": {
+      "2105": "Touchscreen",
+      "2115": "Car Computer",
+      "2121": "Audio System - Speakers, Subwoofer, Amplifier",
+      "2122": "Audio System - AM, FM, and HD Radio",
+      "2123": "Audio System - AM, FM and HD Radio",
+      "2130": "Antenna - AM, FM, and HD Radio",
+      "2131": "Antenna - Satellite Radio",
+      "2125": "Audio System - Bluetooth",
+      "2126": "Audio System - USB Media Port",
+      "2132": "Antenna - GPS",
+      "2133": "Antenna - Wi-Fi",
+      "2135": "Antennas and Amplifiers",
+      "2106": "Media Control Unit",
+      "2134": "Antenna - eCall",
+      "2110": "Car Computer",
+      "2107": "Touchscreen"
+    }
+  },
+  "24": {
+    "id": "24",
+    "name": "ROOF",
+    "subcategories": {
+      "2430": "Fixed Glass Roof",
+      "2410": "Panoramic Roof"
+    }
+  },
+  "30": {
+    "id": "30",
+    "name": "CHASSIS",
+    "subcategories": {
+      "3001": "Chassis and Subframes"
+    }
+  },
+  "31": {
+    "id": "31",
+    "name": "SUSPENSION",
+    "subcategories": {
+      "3100": "Adjustment",
+      "3101": "Front Suspension (including Hubs)",
+      "3103": "Rear Suspension (including Hubs)",
+      "3110": "Air Suspension System",
+      "3115": "Coil Suspension System"
+    }
+  },
+  "32": {
+    "id": "32",
+    "name": "STEERING",
+    "subcategories": {
+      "3201": "Steering Rack and Lower Column",
+      "3205": "Upper Column, Steering Wheel"
+    }
+  },
+  "33": {
+    "id": "33",
+    "name": "BRAKES",
+    "subcategories": {
+      "3301": "Brake Discs and Calipers",
+      "3303": "Brake Pipes and Hoses",
+      "3305": "Parking Brake",
+      "3310": "ABS, Traction, and Stability Control",
+      "3320": "Electromechanical Brake Booster",
+      "3325": "Brake Pedal",
+      "3317": "Vacuum Brake Booster"
+    }
+  },
+  "34": {
+    "id": "34",
+    "name": "WHEELS AND TIRES",
+    "subcategories": {
+      "3401": "Wheels",
+      "3402": "Tires",
+      "3404": "Tire Pressure Monitoring System (TPMS)"
+    }
+  },
+  "39": {
+    "id": "39",
+    "name": "FRONT DRIVE UNIT",
+    "subcategories": {
+      "3901": "Front Drive Unit Assembly",
+      "3920": "Front Inverter",
+      "3930": "Front Gearbox and Halfshafts"
+    }
+  },
+  "40": {
+    "id": "40",
+    "name": "REAR DRIVE UNIT",
+    "subcategories": {
+      "4001": "Rear Drive Unit Assembly",
+      "4010": "Rear Motor",
+      "4020": "Rear Inverter",
+      "4030": "Rear Gearbox and Halfshafts"
+    }
+  },
+  "44": {
+    "id": "44",
+    "name": "HIGH VOLTAGE SYSTEM",
+    "subcategories": {
+      "4400": "High Voltage Testing",
+      "4401": "Charge System Inlet",
+      "4450": "HV Harnesses",
+      "4410": "Onboard Charger",
+      "4420": "DCDC Converter",
+      "4430": "High Voltage Junction Box",
+      "4440": "Rapid Mate and Rapid Splitter"
+    }
+  },
+  "50": {
+    "id": "50",
+    "name": "EXTERNAL CHARGING CONNECTORS",
+    "subcategories": {
+      "5001": "Mobile Connector",
+      "5002": "Wall Connector",
+      "5003": "Charging Adapters"
+    }
+  },
+  "90": {
+    "id": "90",
+    "name": "ACCESSORIES",
+    "subcategories": {}
+  }
+}

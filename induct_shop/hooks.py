@@ -149,12 +149,21 @@ doc_events = {
 		"on_cancel": "induct_shop.induct_shop.overrides.project.update_project_costing"
 	},
 	"Sales Invoice": {
-		"on_submit": "induct_shop.induct_shop.overrides.project.update_project_costing",
+		"on_submit": [
+			"induct_shop.induct_shop.overrides.project.update_project_costing",
+			"induct_shop.api.service_parts_selector.update_associations"
+		],
 		"on_cancel": "induct_shop.induct_shop.overrides.project.update_project_costing"
 	},
 	"Stock Entry": {
 		"on_submit": "induct_shop.induct_shop.overrides.project.update_project_costing",
 		"on_cancel": "induct_shop.induct_shop.overrides.project.update_project_costing"
+	},
+	"Quotation": {
+		"on_submit": "induct_shop.api.service_parts_selector.update_associations"
+	},
+	"Sales Order": {
+		"on_submit": "induct_shop.api.service_parts_selector.update_associations"
 	}
 }
 
