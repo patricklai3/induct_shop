@@ -368,7 +368,8 @@ def update_associations(doc, method=None):
         doc = frappe.get_doc(method, doc)
         
     for item in doc.get("items", []):
-        if item.custom_parent_service_reference and item.is_stock_item:
+        is_stock_item = frappe.get_cached_value("Item", item.item_code, "is_stock_item")
+        if item.custom_parent_service_reference and is_stock_item:
             service_code = item.custom_parent_service_reference
             part_code = item.item_code
             
@@ -405,7 +406,8 @@ def auto_assign_parent_services(doc, method=None):
     sorted_items = sorted(doc.get("items", []), key=lambda x: x.idx)
     
     for item in sorted_items:
-        if not item.is_stock_item:
+        is_stock_item = frappe.get_cached_value("Item", item.item_code, "is_stock_item")
+        if not is_stock_item:
             last_service_code = item.item_code
         else:
             if last_service_code and not item.custom_parent_service_reference:
