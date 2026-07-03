@@ -149,6 +149,7 @@ doc_events = {
 		"on_cancel": "induct_shop.induct_shop.overrides.project.update_project_costing"
 	},
 	"Sales Invoice": {
+		"validate": "induct_shop.api.service_parts_selector.auto_assign_parent_services",
 		"on_submit": [
 			"induct_shop.induct_shop.overrides.project.update_project_costing",
 			"induct_shop.api.service_parts_selector.update_associations"
@@ -160,9 +161,11 @@ doc_events = {
 		"on_cancel": "induct_shop.induct_shop.overrides.project.update_project_costing"
 	},
 	"Quotation": {
+		"validate": "induct_shop.api.service_parts_selector.auto_assign_parent_services",
 		"on_submit": "induct_shop.api.service_parts_selector.update_associations"
 	},
 	"Sales Order": {
+		"validate": "induct_shop.api.service_parts_selector.auto_assign_parent_services",
 		"on_submit": "induct_shop.api.service_parts_selector.update_associations"
 	}
 }

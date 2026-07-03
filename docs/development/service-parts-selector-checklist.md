@@ -21,12 +21,13 @@
 - [ ] Implement Service Ingestion Logic (Tesla Manual URL Parser):
   - Parse service manual URL to extract Title, Correction Code, FRT Value, Compatible Model.
   - Generate Service Record (using Correction Code as unique identifier).
-- [ ] Implement Service & Parts Association Logic:
+- [x] Implement Service & Parts Association Logic:
   - Background logic to record relational links when services and parts are grouped together on a document.
 - [ ] Create Whitelisted API endpoints:
   - Fetching services & parts (with pricing/stock).
   - Processing part/service ingestion payloads.
   - Fetching smart part suggestions based on a given service.
+  - Resolving vehicle context from a connected `Project` to filter search queries by compatibility.
 
 ## Phase 3: Frontend UI Components (Vue 3)
 - [ ] Setup `public/js/service_parts_selector.bundle.js` build configuration.
@@ -40,6 +41,7 @@
 ## Phase 4: Frappe Client Integration (ERPNext Standard Docs)
 - [ ] Inject `service_parts_selector.bundle.js` into targeted DocTypes (`Quotation`, `Sales Order`, `Sales Invoice`, `Purchase Receipt`, `Stock Entry`) via `doctype_js` in `hooks.py`.
 - [ ] Add a custom button `"Service & Parts Selector"` to the items table in targeted forms (using `frm.add_custom_button`).
+- [ ] Implement logic to extract the `project` reference from the active document and pass it to the selector/backend for vehicle context filtering.
 - [ ] Implement Item Insertion Logic (JavaScript) to push selections back to the ERPNext document:
   - Call `frm.add_child("items")` to instantiate new rows.
   - Use `frappe.model.set_value` to set `item_code` (crucial to trigger native Frappe fetch scripts for price/tax/uom).

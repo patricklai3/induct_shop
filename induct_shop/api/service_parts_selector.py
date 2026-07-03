@@ -336,41 +336,61 @@ def get_smart_suggestions(service_code):
     """
     Returns parts frequently associated with the given service.
     """
-    associations = frappe.get_all(
-        "Service Part Association",
-        filters={"service_code": service_code},
-        fields=["part_code", "frequency"],
-        order_by="frequency desc",
-        limit_page_length=5
-    )
-    return associations
+    if frappe.db.exists("Service Part Association", service_code):
+        doc = frappe.get_doc("Service Part Association", service_code)
+        # Sort by frequency descending
+        parts = sorted(doc.parts, key=lambda x: x.frequency, reverse=True)
+        return [{"part_code": p.part_code, "frequency": p.frequency} for p in parts[:5]]
+    return []
 
 @frappe.whitelist()
-def update_associations(doc_name, doctype):
+def update_associations(doc, method=None):
     """
     Background job to learn associations from a submitted sales document.
     """
-    doc = frappe.get_doc(doctype, doc_name)
-    for item in doc.items:
-        if item.custom_parent_service_reference:
+    if isinstance(doc, str):
+        doc = frappe.get_doc(method, doc)
+        
+    for item in doc.get("items", []):
+        if item.custom_parent_service_reference and item.is_stock_item:
             service_code = item.custom_parent_service_reference
             part_code = item.item_code
             
-            # Check if association exists
-            existing = frappe.get_all("Service Part Association", filters={
-                "service_code": service_code,
-                "part_code": part_code
-            }, limit=1)
-            
-            if existing:
-                assoc = frappe.get_doc("Service Part Association", existing[0].name)
-                assoc.frequency += 1
-                assoc.save(ignore_permissions=True)
-            else:
+            # Check if parent association exists
+            if not frappe.db.exists("Service Part Association", service_code):
                 assoc = frappe.get_doc({
                     "doctype": "Service Part Association",
-                    "service_code": service_code,
+                    "service_code": service_code
+                })
+                assoc.insert(ignore_permissions=True)
+            else:
+                assoc = frappe.get_doc("Service Part Association", service_code)
+                
+            # Check if part already exists in child table
+            existing_part = next((p for p in assoc.parts if p.part_code == part_code), None)
+            
+            if existing_part:
+                existing_part.frequency += 1
+            else:
+                assoc.append("parts", {
                     "part_code": part_code,
                     "frequency": 1
                 })
-                assoc.insert(ignore_permissions=True)
+                
+            assoc.save(ignore_permissions=True)
+
+def auto_assign_parent_services(doc, method=None):
+    """
+    Automatically associates parts with the nearest preceding service by row order.
+    Triggered on validate of Quotation, Sales Order, and Sales Invoice.
+    """
+    last_service_code = None
+    
+    sorted_items = sorted(doc.get("items", []), key=lambda x: x.idx)
+    
+    for item in sorted_items:
+        if not item.is_stock_item:
+            last_service_code = item.item_code
+        else:
+            if last_service_code and not item.custom_parent_service_reference:
+                item.custom_parent_service_reference = last_service_code

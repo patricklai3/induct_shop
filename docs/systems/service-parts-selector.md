@@ -20,6 +20,7 @@ A combined utility that allows users to quickly search, filter, and select both 
 
 * **Unified Search:** A single search bar or integrated filtering mechanism to look up both Items (Parts) and Services.
 * **Context-Aware Visibility:** Hide service-related filters, tabs, and results when opened from stock or procurement documents (e.g., Purchase Receipt, Stock Entry) since services are non-stock items.
+* **Vehicle Context Filtering:** Automatically query the vehicle information through the connected project of the doctype that is opened in, and filter available services and parts accordingly to ensure model compatibility.
 * **Quick Add:** Ability to add multiple items to the sales document without closing the selector.
 * **Pricing & Availability:** Display real-time pricing and stock availability (for parts) directly in the selector.
 
@@ -47,6 +48,7 @@ Based on Frappe development playbooks, the proper way to implement this is:
    * **Service Logic:** For services, the utility will automatically set the UOM to `Hour` and call `frappe.model.set_value(row.doctype, row.name, 'qty', frt_value);` to ensure the correct Flat Rate Time is billed.
 5. **Backend API:**
    * Whitelisted Python methods to fetch services, parts, pricing, and stock.
+   * Logic to query vehicle information from the document's connected `Project` and filter search results by `Model Compatibility`.
 
 # Data Schema & Part Categorization
 
