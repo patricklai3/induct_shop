@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Provisioned Frappe UI for Vue 3 frontend development.
+- Added Frappe UI playbooks to OKF documentation.
+- Standardized OKF documentation frontmatter across all knowledge documents and relocated specifications to the standards directory.
 - Vehicle Check-in workflow including `Vehicle Check-in`, `Inspection Template`, and respective child tables.
 - Automated project creation triggered upon Vehicle Check-in record submission.
 - Client-side intake mileage validation for `Vehicle Check-in`.
@@ -23,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved Stock Entry from Purchase section to Project section in Project DocType dashboard.
 ### Deprecated
 ### Removed
+- Removed entire legacy frontend directory and associated build configuration files in favor of Frappe UI scaffold.
 ### Fixed
 - Enforced the hiding of the Progress tab in Project DocType by explicitly hiding its individual field components via client script.
 
