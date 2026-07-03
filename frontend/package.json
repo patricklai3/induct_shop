@@ -1,0 +1,28 @@
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "frappe-ui": "^1.0.0-beta.20",
+    "vue": "^3.5.39"
+  },
+  "devDependencies": {
+    "@iconify/json": "^2.2.495",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "autoprefixer": "^10.5.2",
+    "lucide-static": "^1.23.0",
+    "postcss": "^8.5.16",
+    "tailwindcss": "^3.4.19",
+    "unplugin-auto-import": "^21.0.0",
+    "unplugin-icons": "^23.0.1",
+    "unplugin-vue-components": "^32.1.0",
+    "vite": "^5.4.21",
+    "vue-router": "^4.6.4"
+  }
+}
