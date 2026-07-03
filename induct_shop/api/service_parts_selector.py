@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import re
 
 @frappe.whitelist()
-def search_catalog(query, doc_type=None):
+def search_catalog(query, doc_type=None, project=None):
     """
     Searches for items (parts) and services.
     Returns list of matching items with their prices and stock availability.
@@ -19,16 +19,29 @@ def search_catalog(query, doc_type=None):
     # If opened from a Stock document, hide services
     is_stock_doc = doc_type in ["Purchase Receipt", "Stock Entry"]
     
+    vehicle_model = None
+    if project:
+        project_doc = frappe.get_cached_doc("Project", project)
+        vehicle_model = project_doc.get("custom_vehicle_model")
+    
     items = frappe.get_all("Item", 
         or_filters=filters,
         fields=["item_code", "item_name", "description", "item_group", "is_stock_item", "custom_frt"],
-        limit=20
+        limit=100
     )
     
     results = []
     for item in items:
         if is_stock_doc and not item.is_stock_item:
             continue
+            
+        # Model Compatibility Filtering
+        if vehicle_model:
+            item_compats = frappe.get_all("Model Compatibility", filters={"parent": item.item_code, "parenttype": "Item"}, fields=["model"])
+            if item_compats:
+                # If this item has specified compatible models, ensure our vehicle model is one of them
+                if not any(c.model == vehicle_model for c in item_compats):
+                    continue
             
         # Get stock and pricing based on batches if it's a part
         batches = []
@@ -44,6 +57,9 @@ def search_catalog(query, doc_type=None):
             "custom_frt": item.custom_frt,
             "batches": batches
         })
+        
+        if len(results) >= 20:
+            break
         
     return results
 

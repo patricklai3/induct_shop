@@ -13,17 +13,17 @@
 - [x] Add Custom Field `Parent Service Reference` (or `Job Group ID`) to Transaction Item Tables for relational grouping.
 
 ## Phase 2: Data Ingestion & API Logic (Python Backend)
-- [ ] Implement Part Ingestion Logic (Tesla Catalog Text Parser):
+- [x] Implement Part Ingestion Logic (Tesla Catalog Text Parser):
   - Parse tab-delimited text for Base Part Number, Revision, Description, Localized Description, Model Compatibility, Category, Subcategory, Group.
   - Dynamically generate `Item Group` tree (`Make` -> `Category` -> `Subcategory` -> `Group`).
   - Deduplicate models and intelligently append to the `Model Compatibility` child table.
   - Create/Update `Item` and `Batch` records.
-- [ ] Implement Service Ingestion Logic (Tesla Manual URL Parser):
+- [x] Implement Service Ingestion Logic (Tesla Manual URL Parser):
   - Parse service manual URL to extract Title, Correction Code, FRT Value, Compatible Model.
   - Generate Service Record (using Correction Code as unique identifier).
 - [x] Implement Service & Parts Association Logic:
   - Background logic to record relational links when services and parts are grouped together on a document.
-- [ ] Create Whitelisted API endpoints:
+- [x] Create Whitelisted API endpoints:
   - Fetching services & parts (with pricing/stock).
   - Processing part/service ingestion payloads.
   - Fetching smart part suggestions based on a given service.
