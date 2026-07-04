@@ -27,6 +27,7 @@ A combined utility that allows users to quickly search, filter, and select both 
 # User Interface
 
 * A modal or a slide-out panel accessible via a custom button on the Sales Document items table.
+* **CRITICAL CSS REQUIREMENT**: The utility should be strictly a pop-up and MUST NOT affect the styling of the other components in the ERPNext system. If using Tailwind CSS (via `frappe-ui`), you MUST disable or scope Tailwind's Preflight (`@tailwind base`) so that global resets do not bleed out of the modal and destroy the native Frappe Desk styling.
 
 # Technical Implementation
 

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
+    "build:bundle": "vite build -c vite.bundle.config.js",
     "preview": "vite preview"
   },
   "dependencies": {

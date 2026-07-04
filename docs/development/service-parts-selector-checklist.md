@@ -30,21 +30,21 @@
   - Resolving vehicle context from a connected `Project` to filter search queries by compatibility.
 
 ## Phase 3: Frontend UI Components (Vue 3)
-- [ ] Setup `public/js/service_parts_selector.bundle.js` build configuration.
-- [ ] Create Vue 3 Single File Component (`.vue`) for the Dialog/Modal interface.
-- [ ] Implement Unified Search UI to query both Items (Parts) and Services.
-- [ ] Implement Context-Aware logic to dynamically hide service-related filters/results when opened from stock/procurement docs (e.g., Purchase Receipt).
-- [ ] Implement UI for real-time pricing and stock availability display.
-- [ ] Implement Smart Suggestions UI to prompt users with parts associated with their selected services.
-- [ ] Implement Ingestion Forms/Inputs within the modal (URL input for services, Text area for parts) to trigger the backend ingestion APIs.
+- [x] Setup `public/js/service_parts_selector.bundle.js` build configuration.
+- [x] Create Vue 3 Single File Component (`.vue`) for the Dialog/Modal interface.
+- [x] Implement Unified Search UI to query both Items (Parts) and Services.
+- [x] Implement Context-Aware logic to dynamically hide service-related filters/results when opened from stock/procurement docs (e.g., Purchase Receipt).
+- [x] Implement UI for real-time pricing and stock availability display.
+- [x] Implement Smart Suggestions UI to prompt users with parts associated with their selected services.
+- [x] Implement Ingestion Forms/Inputs within the modal (URL input for services, Text area for parts) to trigger the backend ingestion APIs.
 
 ## Phase 4: Frappe Client Integration (ERPNext Standard Docs)
 - [ ] Inject `service_parts_selector.bundle.js` into targeted DocTypes (`Quotation`, `Sales Order`, `Sales Invoice`, `Purchase Receipt`, `Stock Entry`) via `doctype_js` in `hooks.py`.
 - [ ] Add a custom button `"Service & Parts Selector"` to the items table in targeted forms (using `frm.add_custom_button`).
 - [ ] Implement logic to extract the `project` reference from the active document and pass it to the selector/backend for vehicle context filtering.
 - [ ] Implement Item Insertion Logic (JavaScript) to push selections back to the ERPNext document:
-  - Call `frm.add_child("items")` to instantiate new rows.
-  - Use `frappe.model.set_value` to set `item_code` (crucial to trigger native Frappe fetch scripts for price/tax/uom).
-  - Explicitly set `batch_no` for parts.
-  - Set `qty` (FRT value) and UOM (`Hour`) for services.
-  - Populate the `Parent Service Reference` field to ensure parts visually nest under services for future print formats.
+  - [ ] Call `frm.add_child("items")` to instantiate new rows.
+  - [ ] Use `frappe.model.set_value` to set `item_code` (crucial to trigger native Frappe fetch scripts for price/tax/uom).
+  - [ ] Explicitly set `batch_no` for parts.
+  - [ ] Set `qty` (FRT value) and UOM (`Hour`) for services.
+  - [ ] Populate the `Parent Service Reference` field to ensure parts visually nest under services for future print formats.

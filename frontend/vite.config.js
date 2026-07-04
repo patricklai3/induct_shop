@@ -8,6 +8,7 @@ export default defineConfig({
       frappeProxy: true,
       jinjaBootData: true,
       buildConfig: true,
+      frontendRoute: '/frontend',
     }),
     vue(),
   ],
