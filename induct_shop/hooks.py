@@ -45,7 +45,14 @@ fixtures = ["Custom Field", "Property Setter"]
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"Project": "public/js/project.js"}
+doctype_js = {
+    "Project": "public/js/project.js",
+    "Quotation": "public/js/service_parts_selector.bundle.js",
+    "Sales Order": "public/js/service_parts_selector.bundle.js",
+    "Sales Invoice": "public/js/service_parts_selector.bundle.js",
+    "Purchase Receipt": "public/js/service_parts_selector.bundle.js",
+    "Stock Entry": "public/js/service_parts_selector.bundle.js"
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}

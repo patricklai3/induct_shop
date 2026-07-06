@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Service and Parts Selector feature providing a unified modal for searching, parsing, and associating services and parts within standard transaction documents.
 - Vehicle Check-in workflow including `Vehicle Check-in`, `Inspection Template`, and respective child tables.
 - Automated project creation triggered upon Vehicle Check-in record submission.
 - Client-side intake mileage validation for `Vehicle Check-in`.

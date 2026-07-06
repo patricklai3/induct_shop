@@ -1,13 +1,13 @@
 ---
-type: Specification
+type: Feature
 title: Service and Parts Selector
-description: Specifications for a combined service and parts selector utility accessed via sales documents.
+description: A combined service and parts selector utility accessed via sales documents.
 tags: [feature, ui, inventory]
 ---
 
 # Overview
 
-A combined utility that allows users to quickly search, filter, and select both services (labor, operations) and parts (items) directly from within various documents. While primarily accessed via sales documents like Quotation, Sales Order, and Sales Invoice (where both services and parts are relevant), it must also intelligently adapt to stock and procurement documents like Purchase Receipt and Stock Entry, where services (non-stock items) are not applicable.
+A combined utility that allows users to quickly search, filter, and select both services (labor, operations) and parts (items) directly from within various documents. While primarily accessed via sales documents like Quotation, Sales Order, and Sales Invoice (where both services and parts are relevant), it also intelligently adapts to stock and procurement documents like Purchase Receipt and Stock Entry, where services (non-stock items) are not applicable.
 
 # Goals
 
@@ -18,48 +18,48 @@ A combined utility that allows users to quickly search, filter, and select both 
 
 # Features
 
-* **Unified Search:** A single search bar or integrated filtering mechanism to look up both Items (Parts) and Services.
-* **Context-Aware Visibility:** Hide service-related filters, tabs, and results when opened from stock or procurement documents (e.g., Purchase Receipt, Stock Entry) since services are non-stock items.
-* **Vehicle Context Filtering:** Automatically query the vehicle information through the connected project of the doctype that is opened in, and filter available services and parts accordingly to ensure model compatibility.
+* **Unified Search:** A single search bar and integrated filtering mechanism to look up both Items (Parts) and Services.
+* **Context-Aware Visibility:** Hides service-related filters, tabs, and results when opened from stock or procurement documents (e.g., Purchase Receipt, Stock Entry) since services are non-stock items.
+* **Vehicle Context Filtering:** Automatically queries the vehicle information through the connected project of the doctype it is opened in, and filters available services and parts accordingly to ensure model compatibility.
 * **Quick Add:** Ability to add multiple items to the sales document without closing the selector.
-* **Pricing & Availability:** Display real-time pricing and stock availability (for parts) directly in the selector.
+* **Pricing & Availability:** Displays real-time pricing and stock availability (for parts) directly in the selector.
 
 # User Interface
 
-* A modal or a slide-out panel accessible via a custom button on the Sales Document items table.
+* A modal interface accessible via a custom button ("Service & Parts Selector") on the Sales Document items table.
 
 # Technical Implementation
 
-Based on Frappe development playbooks, the proper way to implement this is:
+The implementation utilizes a Frappe-native Vanilla JS / jQuery architecture to remain lightweight and fully integrated:
 
 1. **Client Script Injection:**
-   * Create a centralized JavaScript file (e.g., `public/js/service_parts_selector.bundle.js`).
-   * Inject this script into standard sales and stock documents (`Quotation`, `Sales Order`, `Sales Invoice`, `Purchase Receipt`, `Stock Entry`) using the `doctype_js` hook in `hooks.py`.
+   * A centralized JavaScript file (`public/js/service_parts_selector.bundle.js`).
+   * Injected into standard sales and stock documents (`Quotation`, `Sales Order`, `Sales Invoice`, `Purchase Receipt`, `Stock Entry`) using the `doctype_js` hook in `hooks.py`.
 2. **Custom Button:**
-   * Use `frm.add_custom_button(__('Service & Parts Selector'), function() { ... }, __('Utilities'))` in the `refresh` event of the targeted forms to launch the utility.
-3. **User Interface (Vue 3 in Dialog):**
-   * Use `frappe.ui.Dialog` to create a modal interface containing a custom HTML field.
-   * Create a Vue 3 Single File Component (`.vue`) to handle the complex state (searching, filtering, selecting items) and mount it into the Dialog's HTML wrapper.
+   * The button `"Service & Parts Selector"` is added in the `refresh` event of the targeted forms to launch the utility.
+3. **User Interface (Vanilla JS in Dialog):**
+   * Uses `frappe.ui.Dialog` to create the modal interface containing custom HTML fields.
+   * Leverages jQuery and plain JavaScript to handle the complex state (searching, filtering, selecting items) and binds events to the DOM.
 4. **Item Insertion Method:**
-   * To insert selected parts and services into the target doctypes (`Quotation`, `Sales Order`, etc.) robustly, the utility will utilize the standard Frappe Client API.
-   * **Row Creation:** It will call `let row = frm.add_child("items");` to instantiate a new record in the document's items table.
-   * **Triggering Native Logic:** It will use `frappe.model.set_value(row.doctype, row.name, 'item_code', selected_item_code);` to set the item. Using `set_value` instead of direct assignment is a crucial, robust practice because it automatically triggers ERPNext's native field scripts (fetching prices, taxes, UOM, and descriptions).
-   * **Batch Assignment:** For physical parts, it will subsequently call `frappe.model.set_value(row.doctype, row.name, 'batch_no', selected_batch_no);` to explicitly link the correct condition and revision.
-   * **Service Logic:** For services, the utility will automatically set the UOM to `Hour` and call `frappe.model.set_value(row.doctype, row.name, 'qty', frt_value);` to ensure the correct Flat Rate Time is billed.
+   * Uses the standard Frappe Client API to insert selected parts and services into the target doctypes (`Quotation`, `Sales Order`, etc.).
+   * **Row Creation:** Calls `let row = frm.add_child("items");` to instantiate a new record.
+   * **Triggering Native Logic:** Uses `frappe.model.set_value` to set the item code. This robust practice automatically triggers ERPNext's native field scripts (fetching prices, taxes, UOM, and descriptions).
+   * **Batch Assignment:** For physical parts, explicitly links the correct condition and revision by setting `batch_no`.
+   * **Service Logic:** For services, automatically sets the UOM to `Hour` and populates `qty` to ensure the correct Flat Rate Time is billed.
 5. **Backend API:**
-   * Whitelisted Python methods to fetch services, parts, pricing, and stock.
-   * Logic to query vehicle information from the document's connected `Project` and filter search results by `Model Compatibility`.
+   * Whitelisted Python methods fetch services, parts, pricing, and stock.
+   * Queries vehicle information from the document's connected `Project` and filters search results by `Model Compatibility`.
 
 # Data Schema & Part Categorization
 
-To support accurate searching, filtering, and documentation without cluttering the ERPNext database, the system will utilize the native **ERPNext Batch System** to manage part variances.
+To support accurate searching, filtering, and documentation without cluttering the ERPNext database, the system utilizes the native **ERPNext Batch System** to manage part variances.
 
 ## Item vs. Batch Architecture
-* **Item Master (Base Part):** The standard `Item` doctype will represent the base part. It will store:
+* **Item Master (Base Part):** The standard `Item` doctype represents the base part. It stores:
   * **Base Part Number:** The first 7 digits (e.g., `1974875`), acting as the `item_code`.
   * **Description & Categorization:** (Category, Subcategory, Group).
   * **Model Compatibility:** A custom child table mapping the base part to vehicle models and exact date ranges.
-  * **Batch Configuration:** The native `has_batch_no` property must be checked by default for ingested parts.
+  * **Batch Configuration:** The native `has_batch_no` property is checked by default for ingested parts.
 
 ### Item Master Field Mapping
 To ensure maximum scalability and speed within standard ERPNext workflows, the utility explicitly maps ingested data to the core `Item` fields as follows:
@@ -67,79 +67,56 @@ To ensure maximum scalability and speed within standard ERPNext workflows, the u
 * **`item_name`:** The short Part Name / Title (e.g., `COMPONENT - FRONT END CARRIER`).
 * **`description`:** The detailed or localized description for printing on sales and inventory documents.
 
-* **Batch Master (Specific Variance):** The `Batch` doctype will track the specific physical variants of that base part. We will inject custom fields into the `Batch` doctype via the app to store structured data, while automatically generating a descriptive Batch ID:
-  * **Revision / Suffix:** Custom field (e.g., `-00-C`). This is crucial for inventory tracking and explicit documentation on sales invoices.
+* **Batch Master (Specific Variance):** The `Batch` doctype tracks the specific physical variants of that base part via injected custom fields, while automatically generating a descriptive Batch ID:
+  * **Revision / Suffix:** Custom field (e.g., `-00-C`).
   * **Condition:** Custom field with standard options (`New`, `Reconditioned`, `Used`).
   * **OEM Status:** Custom field with standard options (`OEM`, `Aftermarket`).
-  * **Smart Batch ID Generation:** A hook will automatically combine these fields into a structured Batch ID format: `#######-##-X-XXX-XXX`. 
-    * For example: `1234567-00-D-AFT-NEW` or `1234567-00-D-OEM-USD`.
-    * This ensures clean structured data for querying within the selector, while providing a descriptive, glanceable ID everywhere else in the system.
-
-This architecture ensures the Item master remains clean (one record per base component), while the stock ledger natively tracks quantities and values at the exact revision and condition level via Batches.
+  * **Smart Batch ID Generation:** A hook automatically combines these fields into a structured Batch ID format: `#######-##-X-XXX-XXX` (e.g., `1234567-00-D-AFT-NEW`).
 
 ## Installation & Configuration Requirements
-To ensure the accounting engine correctly differentiates the cost and valuation of a "Used" part versus a "New" part (which share the same base Item Code but reside in different Batches), **Batch-wise Valuation** must be enforced globally.
-* The `induct_shop` app must programmatically enable the "Use batch-wise valuation" toggle within ERPNext's `Stock Settings` upon app installation (e.g., via the `after_install` hook).
+To ensure the accounting engine correctly differentiates the cost and valuation, **Batch-wise Valuation** must be enforced globally.
+* The `induct_shop` app programmatically enables the "Use batch-wise valuation" toggle within ERPNext's `Stock Settings` upon app installation.
 
 ## Categorization Hierarchy & Item Group Generation
-The utility must automatically configure ERPNext's standard `Item Group` hierarchy during ingestion. 
-* **Dynamic Tree Generation:** When a part or service is ingested, the system will verify and dynamically generate (if missing) an `Item Group` tree structured as: `Make` (e.g., Tesla) -> `Category` -> `Subcategory` -> `Group`.
-* **Example Path:** `Tesla` -> `10 - BODY` -> `1001 - Bumper and Fascia` -> `Front Bumper Carrier`.
-* **Item Assignment:** The newly created part will be assigned directly to the leaf node (e.g., `Front Bumper Carrier`).
-* **Model Exclusion:** Vehicle models are explicitly excluded from this Item Group tree to prevent massive structural duplication, as one part can be compatible with multiple models. Model compatibility remains exclusively managed by the custom child table on the Item.
+The utility automatically configures ERPNext's standard `Item Group` hierarchy during ingestion. 
+* **Dynamic Tree Generation:** Verifies and dynamically generates an `Item Group` tree structured as: `Make` -> `Category` -> `Subcategory` -> `Group`.
+* **Model Exclusion:** Vehicle models are explicitly excluded from this Item Group tree to prevent massive structural duplication. Model compatibility remains exclusively managed by the custom child table on the Item.
 
 # Part Ingestion Workflow
 
-Just like services, the system will not crawl or pre-populate the database with the entire Tesla parts catalog. Parts will be ingested incrementally ("just-in-time") as they are encountered and needed for documents.
+Parts are ingested incrementally ("just-in-time") as they are encountered and needed for documents.
 
 ## User Workflow & Parsing
-* When a part is needed but not found in the database, the user enters a search term into the utility.
-* The utility automatically generates and provides a link to the Tesla Parts Catalog (e.g., `https://parts.tesla.com/en-US/find-part?searchTerm=[search_term]`).
-* The user navigates to this link, copies the tabulated part information directly from the catalog, and pastes it into a dedicated ingestion field in the utility.
-* **Automated Parsing:** The utility must parse the pasted text (typically tab-delimited). A standard row of input looks like:
-  `1974875-00-C    COMPONENT - FRONT END CARRIER        Model Y Feb 2025    10 - BODY    1001 - Bumper and Fascia    Front Bumper Carrier`
-* The parser will extract and map: Base Part Number, Revision, Description, Localized Description, Model Compatibility, Category, Subcategory, and Group.
-* **Multi-Model Deduplication Logic:** Frequently, pasted inputs will contain multiple rows for the exact same part number that differ only by the compatible vehicle model (e.g., one row for `Model Y`, one for `Model 3`). The ingestion logic must intelligently aggregate these rows. Instead of throwing a duplication error or creating redundant items, it will append all distinct models into the `Model Compatibility` child table of that single Base Part record.
-* Once parsed and aggregated, the user confirms the details, selects the Condition and OEM Status, and the system saves the new part (Item and Batch) to the database.
+* When a part is needed, the user enters a search term into the utility.
+* The utility automatically generates a link to the Tesla Parts Catalog.
+* The user navigates to the catalog, copies the tabulated part information, and pastes it into a dedicated ingestion field in the utility.
+* **Automated Parsing:** The utility parses the pasted text (typically tab-delimited) to extract and map: Base Part Number, Revision, Description, Localized Description, Model Compatibility, Category, Subcategory, and Group.
+* **Multi-Model Deduplication Logic:** Intelligently aggregates rows that differ only by compatible vehicle models, appending distinct models to the `Model Compatibility` child table without creating redundant items.
 
 # Service Ingestion Workflow
 
-To handle the ingestion and selection of service operations (labor), the utility relies on parsing links directly from the Tesla Service Manual.
+Service operations (labor) are ingested by parsing links directly from the Tesla Service Manual.
 
 ## User Workflow & Extraction
 1. **Contextual Manual Link:** The utility provides a quick-access link to the specific Tesla Service Manual corresponding to the vehicle model and year linked to the active document.
-2. **URL Input Field:** The user navigates the online manual, copies the URL for the desired service, and pastes it into an input field within the selector utility.
-3. **Automated Parsing:** The backend parses the provided link to extract three crucial pieces of information:
-   * **Title:** (e.g., `Bracket - Active Hood Strut - LH (Remove and Replace)`)
-   * **Correction Code:** (e.g., `11330012`)
-   * **FRT Value:** (e.g., `0.42`)
-   * **Compatible Model:** unlike parts this can be accurate to the year
-   * **Categorization Mapping:** The system automatically derives the service hierarchy from the Correction Code:
-     * **Category:** Identified by the first 2 digits of the code.
-     * **Subcategory:** Identified by the first 4 digits of the code.
+2. **URL Input Field:** The user navigates the manual, copies the URL for the desired service, and pastes it into the utility.
+3. **Automated Parsing:** The backend parses the link to extract: Title, Correction Code, FRT Value, Compatible Model, and derives the Categorization Mapping based on the Correction Code structure.
 
 ## Data Schema & Deduplication
-* **Correction Code as Identifier:** A single correction code may apply to multiple vehicle models. To prevent database bloat and cluttered records, the `Correction Code` acts as a unique identifier for services.
-* **Smart Insertion/Retrieval:** When a URL is submitted:
-  * The system searches the database for an existing service record with that `Correction Code`.
-  * If a match is found, the existing record is returned and added to the sales document.
-  * If no match is found, a new service record is created using the extracted Title, Correction Code, FRT, and derived Category/Subcategory, and is then added to the document.
-* **Model Context:** Just like parts, services must track model compatibility. The service record should be capable of tracking the specific vehicle models it applies to, dynamically expanding this list as the service is ingested from different model manuals over time.
+* **Correction Code as Identifier:** The `Correction Code` acts as a unique identifier for services.
+* **Smart Insertion/Retrieval:** When a URL is submitted, the system retrieves the existing service record or creates a new one.
+* **Model Context:** The service record tracks the specific vehicle models it applies to, dynamically expanding as it is ingested from different model manuals over time.
 
 # Service & Parts Association
 
-To streamline repetitive workflows, the utility must intelligently learn and associate services with the parts they require.
+To streamline workflows, the utility learns and associates services with the parts they require.
 
 ## Relational Linking
-* Most services (e.g., removing and replacing a component) inherently require one or more physical parts.
-* The system must capture these relationships. When a user groups a service and part(s) together on a document for the first time, the system should record an association between that Service (Correction Code) and those Part(s).
-* **One-to-Many Logic:** The association schema must be robust enough to link one service to multiple distinct parts, as complex repairs often require a primary component alongside various clips, brackets, or bolts.
+* When a user groups a service and part(s) together on a document, the system records an association between that Service and those Part(s).
+* **One-to-Many Logic:** The association schema links one service to multiple distinct parts.
 
 ## Smart Suggestions
-* Once an association is established in the database, future selections of that service within the utility should proactively suggest the linked parts to the user.
-* This dramatically accelerates data entry and ensures technicians or sales reps do not forget necessary ancillary components when quoting or billing a job.
+* Once an association is established, future selections of that service within the utility proactively suggest the linked parts to the user, accelerating data entry.
 
 ## Document Row Grouping (Print Provision)
-While the utility manages searching and associating parts, it must also provision data on the transaction document to support future nested printing features (where parts visually nest under the specific labor operation).
-* **Service as a Parent:** When a user selects parts that are associated with a specific service via the utility, those part rows inserted into the ERPNext document must contain a relational link to that specific service row.
-* **Data Provision:** A custom field (e.g., `Parent Service Reference` or `Job Group ID`) must be injected into the standard transaction child tables (e.g., `Sales Order Item`, `Sales Invoice Item`). The utility will populate this field automatically when adding associated parts, ensuring future custom print formats can seamlessly group and nest parts under their respective correction codes.
+* **Data Provision:** A custom field (`custom_parent_service_reference`) on standard transaction child tables (`Sales Order Item`, etc.) is populated automatically when adding associated parts, ensuring future custom print formats can seamlessly group and nest parts under their respective correction codes.
