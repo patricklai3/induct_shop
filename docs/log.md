@@ -1,5 +1,11 @@
 # Directory Update Log
 
+## 2026-07-07
+* **Update**: Updated `service-parts-selector.md` in `systems` to reflect the architectural shift from Batches to Item Variants for part variance tracking.
+
+## 2026-07-06
+* **Update**: Updated `service-parts-selector.md` in `systems` to reflect its completed implementation as a feature reference.
+
 ## 2026-07-02
 * **Update**: Updated `vehicle-check-in.md` to reflect the completed implementation of the Vehicle Check-in DocType and Inspection Templates.
 

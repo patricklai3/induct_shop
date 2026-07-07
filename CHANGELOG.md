@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Provisioned Frappe UI for Vue 3 frontend development.
+- Service and Parts Selector feature providing a unified modal for searching, parsing, and associating services and parts within standard transaction documents.
+- Provisioned Frappe UI for Vue 3 frontend development (superseded by native implementation).
 - Added Frappe UI playbooks to OKF documentation.
 - Standardized OKF documentation frontmatter across all knowledge documents and relocated specifications to the standards directory.
 - Vehicle Check-in workflow including `Vehicle Check-in`, `Inspection Template`, and respective child tables.
@@ -23,11 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom costing logic for Project DocType to calculate `custom_sales_stock_cost` and `custom_incoming_material_value` from stock ledger entries, and dynamically update `expense_amount`.
 
 ### Changed
+- Refactored the Service & Parts Selector to utilize ERPNext's native Item Variants system instead of Batches for tracking and managing part variations (revisions, conditions, and OEM statuses).
 - Moved Stock Entry from Purchase section to Project section in Project DocType dashboard.
 ### Deprecated
 ### Removed
 - Removed entire legacy frontend directory and associated build configuration files in favor of Frappe UI scaffold.
 ### Fixed
+- Recreated the `Service Part Association` and `Service Part Association Item` DocTypes as Standard DocTypes to ensure their schema persists across app reinstallations.
 - Enforced the hiding of the Progress tab in Project DocType by explicitly hiding its individual field components via client script.
 
 ### Security

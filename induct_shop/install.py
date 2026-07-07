@@ -2,6 +2,12 @@ import frappe
 
 def after_install():
     create_standard_inspection_template()
+    enable_batch_wise_valuation()
+
+def enable_batch_wise_valuation():
+    if frappe.db.exists("DocType", "Stock Settings"):
+        frappe.db.set_value("Stock Settings", None, "enable_serial_and_batch_no_for_item", 1)
+        frappe.db.set_value("Stock Settings", None, "do_not_use_batchwise_valuation", 0)
 
 def create_standard_inspection_template():
     if not frappe.db.exists("Inspection Template", "Standard"):
