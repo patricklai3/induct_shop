@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom costing logic for Project DocType to calculate `custom_sales_stock_cost` and `custom_incoming_material_value` from stock ledger entries, and dynamically update `expense_amount`.
 
 ### Changed
+- Refactored the Service & Parts Selector to utilize ERPNext's native Item Variants system instead of Batches for tracking and managing part variations (revisions, conditions, and OEM statuses).
 - Moved Stock Entry from Purchase section to Project section in Project DocType dashboard.
 ### Deprecated
 ### Removed

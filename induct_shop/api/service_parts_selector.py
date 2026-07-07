@@ -26,7 +26,8 @@ def search_catalog(query, doc_type=None, project=None):
     
     items = frappe.get_all("Item", 
         or_filters=filters,
-        fields=["item_code", "item_name", "description", "item_group", "is_stock_item", "custom_frt"],
+        filters={"variant_of": ["is", "not set"]},
+        fields=["item_code", "item_name", "description", "item_group", "is_stock_item", "custom_frt", "has_variants"],
         limit=100
     )
     
@@ -43,11 +44,21 @@ def search_catalog(query, doc_type=None, project=None):
                 if not any(c.model == vehicle_model for c in item_compats):
                     continue
             
-        # Get stock and pricing based on batches if it's a part
-        batches = []
-        if item.is_stock_item:
-            batch_records = frappe.get_all("Batch", filters={"item": item.item_code}, fields=["name", "custom_condition", "custom_oem_status", "custom_revision_suffix"])
-            batches = batch_records
+        # Get stock and pricing based on variants if it's a part
+        variants = []
+        if item.is_stock_item and item.get("has_variants"):
+            variant_records = frappe.get_all("Item", filters={"variant_of": item.item_code}, fields=["name", "item_code"])
+            for v in variant_records:
+                attrs = frappe.get_all("Item Variant Attribute", filters={"parent": v.name}, fields=["attribute", "attribute_value"])
+                attr_dict = {a.attribute: a.attribute_value for a in attrs}
+                v["custom_condition"] = attr_dict.get("Condition")
+                v["custom_oem_status"] = attr_dict.get("OEM Status")
+                v["custom_revision_suffix"] = attr_dict.get("Revision")
+                
+                bins = frappe.get_all("Bin", filters={"item_code": v.name}, fields=["actual_qty"])
+                v["qty"] = sum([b.actual_qty for b in bins]) if bins else 0
+                
+            variants = sorted(variant_records, key=lambda x: x.get("qty") or 0, reverse=True)
             
         results.append({
             "item_code": item.item_code,
@@ -55,7 +66,7 @@ def search_catalog(query, doc_type=None, project=None):
             "description": item.description,
             "is_stock_item": item.is_stock_item,
             "custom_frt": item.custom_frt,
-            "batches": batches
+            "variants": variants
         })
         
         if len(results) >= 20:
@@ -117,9 +128,14 @@ def ingest_part(payload):
                 "description": description or name,
                 "item_group": parent_group,
                 "is_stock_item": 1,
-                "has_batch_no": 1,
+                "has_variants": 1,
                 "stock_uom": "Unit",
-                "custom_model_compatibility": []
+                "custom_model_compatibility": [],
+                "attributes": [
+                    {"attribute": "Revision"},
+                    {"attribute": "Condition"},
+                    {"attribute": "OEM Status"}
+                ]
             })
             item.insert(ignore_permissions=True)
         else:
@@ -136,26 +152,44 @@ def ingest_part(payload):
                 })
                 item.save(ignore_permissions=True)
                 
-        # Create Batch
+        # Create Item Variant
         # Note: Condition and OEM Status should ideally be provided by the user in the UI before calling ingest, but for now we default to 'New' and 'OEM'.
         condition = "New"
         oem_status = "OEM"
-        batch_id = f"{base_part_no}{revision}-{oem_status[:3].upper()}-{condition[:3].upper()}"
         
-        if not frappe.db.exists("Batch", batch_id):
-            batch = frappe.get_doc({
-                "doctype": "Batch",
-                "batch_id": batch_id,
-                "item": base_part_no,
-                "custom_revision_suffix": revision,
-                "custom_condition": condition,
-                "custom_oem_status": oem_status
+        # Ensure Revision value exists in Item Attribute
+        revision_attr = frappe.get_doc("Item Attribute", "Revision")
+        if not any(v.attribute_value == revision for v in revision_attr.item_attribute_values):
+            abbr = re.sub(r'[^a-zA-Z0-9]', '', revision)[:5].upper() or "REV"
+            revision_attr.append("item_attribute_values", {
+                "attribute_value": revision,
+                "abbr": abbr
             })
-            batch.insert(ignore_permissions=True)
+            revision_attr.save(ignore_permissions=True)
+            
+        variant_id = f"{base_part_no}{revision}-{oem_status[:3].upper()}-{condition[:3].upper()}"
+        
+        if not frappe.db.exists("Item", variant_id):
+            variant = frappe.get_doc({
+                "doctype": "Item",
+                "item_code": variant_id,
+                "variant_of": base_part_no,
+                "item_name": name,
+                "description": description or name,
+                "item_group": parent_group,
+                "is_stock_item": 1,
+                "stock_uom": "Unit",
+                "attributes": [
+                    {"attribute": "Revision", "attribute_value": revision},
+                    {"attribute": "Condition", "attribute_value": condition},
+                    {"attribute": "OEM Status", "attribute_value": oem_status}
+                ]
+            })
+            variant.insert(ignore_permissions=True)
             
         results.append({
             "item_code": base_part_no,
-            "batch_id": batch_id,
+            "variant_id": variant_id,
             "revision": revision
         })
         

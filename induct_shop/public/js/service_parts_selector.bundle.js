@@ -188,10 +188,11 @@ class ServicePartsSelectorDialog {
                     <div>
             `;
             
-            if(item.is_stock_item && item.batches && item.batches.length > 0) {
-                html += `<select class="form-control form-control-sm mb-1 batch-selector" data-item="${item.item_code}">`;
-                item.batches.forEach(b => {
-                    html += `<option value="${b.name}">${b.name} (${b.custom_condition}, ${b.custom_oem_status})</option>`;
+            if(item.is_stock_item && item.variants && item.variants.length > 0) {
+                html += `<select class="form-control form-control-sm mb-1 variant-selector" data-item="${item.item_code}">`;
+                item.variants.forEach(v => {
+                    let qty_str = (v.qty !== undefined && v.qty > 0) ? ` - ${v.qty} in stock` : ' - Out of Stock';
+                    html += `<option value="${v.name}">${v.name} (${v.custom_condition}, ${v.custom_oem_status}${qty_str})</option>`;
                 });
                 html += `</select>`;
             }
@@ -218,24 +219,21 @@ class ServicePartsSelectorDialog {
             let is_stock = btn.attr('data-is-stock') === "1";
             let frt = parseFloat(btn.attr('data-frt'));
             
-            let batch_no = null;
+            let variant_code = null;
             if(is_stock) {
-                batch_no = btn.closest('.list-group-item').find('.batch-selector').val();
+                variant_code = btn.closest('.list-group-item').find('.variant-selector').val();
             }
             
-            this.add_item_to_doc(item_code, is_stock, frt, batch_no);
+            this.add_item_to_doc(variant_code || item_code, is_stock, frt);
         });
     }
     
-    add_item_to_doc(item_code, is_stock, frt, batch_no, parent_service = null) {
+    add_item_to_doc(item_code, is_stock, frt, parent_service = null) {
         let row = this.frm.add_child('items');
         
         // Set basic values
         frappe.model.set_value(row.doctype, row.name, 'item_code', item_code).then(() => {
             if(is_stock) {
-                if(batch_no) {
-                    frappe.model.set_value(row.doctype, row.name, 'batch_no', batch_no);
-                }
                 if(parent_service) {
                     frappe.model.set_value(row.doctype, row.name, 'custom_parent_service_reference', parent_service);
                 }
@@ -289,9 +287,8 @@ class ServicePartsSelectorDialog {
                         let parent_service = btn.attr('data-service');
                         
                         // We need to fetch item details or just blindly add it and let set_value do the work
-                        // If we blindly add it, we don't have batch_no right away, but standard ERPNext will fetch default batch if set, 
-                        // or user can select it on the grid.
-                        this.add_item_to_doc(part_code, true, 0, null, parent_service);
+                        // If we blindly add it, user will need to select the right variant via grid if they didn't get a specific one
+                        this.add_item_to_doc(part_code, true, 0, parent_service);
                     });
                 }
             }

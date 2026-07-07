@@ -52,14 +52,14 @@ The implementation utilizes a Frappe-native Vanilla JS / jQuery architecture to 
 
 # Data Schema & Part Categorization
 
-To support accurate searching, filtering, and documentation without cluttering the ERPNext database, the system utilizes the native **ERPNext Batch System** to manage part variances.
+To support accurate searching, filtering, and documentation without cluttering the ERPNext database, the system utilizes the native **ERPNext Item Variants System** to manage part variances.
 
-## Item vs. Batch Architecture
-* **Item Master (Base Part):** The standard `Item` doctype represents the base part. It stores:
+## Item Template vs. Variant Architecture
+* **Item Master (Template Part):** The standard `Item` doctype configured as a template (`has_variants = 1`) represents the base part. It stores:
   * **Base Part Number:** The first 7 digits (e.g., `1974875`), acting as the `item_code`.
   * **Description & Categorization:** (Category, Subcategory, Group).
   * **Model Compatibility:** A custom child table mapping the base part to vehicle models and exact date ranges.
-  * **Batch Configuration:** The native `has_batch_no` property is checked by default for ingested parts.
+  * **Item Attributes:** Standard ERPNext Item Attributes (`Revision`, `Condition`, `OEM Status`) are attached to the template.
 
 ### Item Master Field Mapping
 To ensure maximum scalability and speed within standard ERPNext workflows, the utility explicitly maps ingested data to the core `Item` fields as follows:
@@ -67,11 +67,11 @@ To ensure maximum scalability and speed within standard ERPNext workflows, the u
 * **`item_name`:** The short Part Name / Title (e.g., `COMPONENT - FRONT END CARRIER`).
 * **`description`:** The detailed or localized description for printing on sales and inventory documents.
 
-* **Batch Master (Specific Variance):** The `Batch` doctype tracks the specific physical variants of that base part via injected custom fields, while automatically generating a descriptive Batch ID:
-  * **Revision / Suffix:** Custom field (e.g., `-00-C`).
-  * **Condition:** Custom field with standard options (`New`, `Reconditioned`, `Used`).
-  * **OEM Status:** Custom field with standard options (`OEM`, `Aftermarket`).
-  * **Smart Batch ID Generation:** A hook automatically combines these fields into a structured Batch ID format: `#######-##-X-XXX-XXX` (e.g., `1234567-00-D-AFT-NEW`).
+* **Item Variant (Specific Variance):** An `Item` doctype where `variant_of` is the template part. It tracks the specific physical variants of that base part via standard `Item Variant Attribute` rows:
+  * **Revision:** Attribute value (e.g., `-00-C`).
+  * **Condition:** Attribute value with standard options (`New`, `Reconditioned`, `Used`).
+  * **OEM Status:** Attribute value with standard options (`OEM`, `Aftermarket`).
+  * **Smart Variant ID Generation:** The ingestion system automatically generates a structured Variant ID format for the `item_code`: `#######-##-X-XXX-XXX` (e.g., `1234567-00-D-AFT-NEW`).
 
 ## Installation & Configuration Requirements
 To ensure the accounting engine correctly differentiates the cost and valuation, **Batch-wise Valuation** must be enforced globally.
