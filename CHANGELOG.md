@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 ### Removed
 ### Fixed
+- Recreated the `Service Part Association` and `Service Part Association Item` DocTypes as Standard DocTypes to ensure their schema persists across app reinstallations.
 - Enforced the hiding of the Progress tab in Project DocType by explicitly hiding its individual field components via client script.
 
 ### Security
