@@ -47,7 +47,10 @@ fixtures = ["Custom Field", "Property Setter"]
 # include js in doctype views
 doctype_js = {
     "Project": "public/js/project.js",
-    "Quotation": "public/js/service_parts_selector.bundle.js",
+    "Quotation": [
+        "public/js/service_parts_selector.bundle.js",
+        "public/js/quotation.js"
+    ],
     "Sales Order": "public/js/service_parts_selector.bundle.js",
     "Sales Invoice": "public/js/service_parts_selector.bundle.js",
     "Purchase Receipt": "public/js/service_parts_selector.bundle.js",
