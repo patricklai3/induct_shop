@@ -1,5 +1,8 @@
 # Directory Update Log
 
+## 2026-07-13
+* **Creation**: Added `scheduling-algorithm.md` to `systems` to document the architecture and module structure for the decoupled pure Python scheduling algorithm.
+
 ## 2026-07-09
 * **Update**: Updated `quotation.md` to document the dynamic customer fetching client script.
 
