@@ -1,0 +1,37 @@
+[
+    {
+        "time": 0,
+        "type": "Simulation_Start",
+        "details": "Initializing shop environment."
+    },
+    {
+        "time": 0,
+        "type": "Scheduling",
+        "details": "Generating initial morning schedule."
+    },
+    {
+        "time": 0,
+        "type": "Schedule_Generated",
+        "details": "Initial Schedule Makespan: 200 minutes."
+    },
+    {
+        "time": 60,
+        "type": "Time_Advance",
+        "details": "Time advanced to 60 minutes."
+    },
+    {
+        "time": 60,
+        "type": "Disruption",
+        "details": "Tech_B calls in sick and is removed from the roster."
+    },
+    {
+        "time": 60,
+        "type": "Rescheduling",
+        "details": "Re-optimizing schedule for remaining work."
+    },
+    {
+        "time": 60,
+        "type": "Schedule_Generated",
+        "details": "Adjusted Schedule Makespan: 340 minutes."
+    }
+]

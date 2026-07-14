@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Implemented Predictive-Reactive Bipartite Scheduling algorithm combining Bayesian Linear Regression for duration estimation and OR-Tools CP-SAT for deterministic allocation.
+- Added Work Order contiguity constraints to prevent unnecessary vehicle routing.
+- Built interactive TUI simulation runner using `blessed` to validate shop events.
 - Scaffolding for a pure Python decoupled automotive scheduling algorithm module (`models.py`, `core.py`).
 - Added client script to dynamically fetch customer details on Quotation when created from Project dashboard.
 - Service and Parts Selector feature providing a unified modal for searching, parsing, and associating services and parts within standard transaction documents.

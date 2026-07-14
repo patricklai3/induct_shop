@@ -1,5 +1,7 @@
 # Directory Update Log
 
+## 2026-07-14
+* **Update**: Updated `scheduling-algorithm.md` in `systems` to reflect the Predictive-Reactive Bipartite architecture, including Bayesian estimation, CP-SAT optimization, Work Order contiguity constraints, and the interactive simulation runner, aligning with OKF standards.
 ## 2026-07-13
 * **Creation**: Added `scheduling-algorithm.md` to `systems` to document the architecture and module structure for the decoupled pure Python scheduling algorithm.
 

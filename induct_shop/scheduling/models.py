@@ -1,25 +1,49 @@
-from dataclasses import dataclass
-from typing import List, Optional
+from dataclasses import dataclass, field
+from typing import List, Optional, Dict
 from datetime import datetime
 
 @dataclass
-class Job:
-    """Pure domain model representing a job to be scheduled."""
+class BayesianState:
+    """Holds the mathematical state matrices for the Bayesian model."""
+    state_dict: dict
+
+@dataclass
+class Operation:
+    """A specific repair task within a Work Order."""
     id: str
-    duration_minutes: int
-    required_skills: List[str]
-    # Add other relevant attributes (e.g., promised_time, dependencies)
+    job_id: str
+    name: str
+    flat_rate_minutes: int
+    required_capabilities: List[str]
+    bayesian_state: BayesianState
+    # Preceding operation IDs within the same job (topological order)
+    predecessors: List[str] = field(default_factory=list)
+
+@dataclass
+class Job:
+    """Represents a Work Order containing one or more operations."""
+    id: str
+    vehicle_make: str
+    vehicle_model: str
+    vehicle_year: int
+    vehicle_mileage: int
+    promised_delivery_time: datetime
+    operations: List[Operation] = field(default_factory=list)
 
 @dataclass
 class Technician:
-    """Pure domain model representing a technician's availability."""
+    """Technician resource profile."""
     id: str
-    skills: List[str]
-    available_from: datetime
-    available_until: datetime
+    name: str
+    capabilities: List[str]
+    efficiency_multiplier: float = 1.0  # HBM could update this over time
+    shift_start: Optional[datetime] = None
+    shift_end: Optional[datetime] = None
+    is_absent: bool = False
 
 @dataclass
 class Station:
-    """Pure domain model representing a physical workstation."""
+    """Physical service bay profile."""
     id: str
+    name: str
     capabilities: List[str]
