@@ -1,6 +1,5 @@
 import random
 from typing import List
-from datetime import datetime
 from ..models import Job, Technician, Station, Operation, BayesianState
 from ..estimation import BayesianEstimator
 
@@ -30,8 +29,7 @@ def generate_jobs() -> List[Job]:
         bayesian_state=BayesianState(state_dict=brakes_state)
     )
     j1 = Job(
-        id="J1", vehicle_make="Toyota", vehicle_model="Camry", vehicle_year=2015, vehicle_mileage=85000,
-        promised_delivery_time=datetime(2026, 7, 14, 12, 0), operations=[op1]
+        id="J1", operations=[op1]
     )
     
     alignment_state = BayesianEstimator.init_prior(flat_rate_minutes=45)
@@ -48,8 +46,7 @@ def generate_jobs() -> List[Job]:
         predecessors=["OP_2A"]
     )
     j2 = Job(
-        id="J2", vehicle_make="Honda", vehicle_model="Civic", vehicle_year=2018, vehicle_mileage=60000,
-        promised_delivery_time=datetime(2026, 7, 14, 17, 0), operations=[op2_a, op2_b]
+        id="J2", operations=[op2_a, op2_b]
     )
     
     return [j1, j2]

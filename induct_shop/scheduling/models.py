@@ -23,11 +23,6 @@ class Operation:
 class Job:
     """Represents a Work Order containing one or more operations."""
     id: str
-    vehicle_make: str
-    vehicle_model: str
-    vehicle_year: int
-    vehicle_mileage: int
-    promised_delivery_time: datetime
     operations: List[Operation] = field(default_factory=list)
 
 @dataclass

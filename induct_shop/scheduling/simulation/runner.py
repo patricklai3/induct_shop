@@ -124,7 +124,7 @@ def run_interactive_simulation():
                     job1 = next((j for j in jobs if j.id == "J1"), None)
                     if job1:
                         op1 = job1.operations[0]
-                        x = np.array([1, 11, 85000, 1.2]) 
+                        x = BayesianEstimator.build_feature_vector(vehicle_year=2015, vehicle_mileage=85000, tech_efficiency_multiplier=1.2)
                         y_actual = 40.0
                         new_state = BayesianEstimator.update(op1.bayesian_state.state_dict, x, y_actual)
                         op1.bayesian_state.state_dict = new_state

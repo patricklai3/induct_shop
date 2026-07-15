@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.stats import t
+from datetime import datetime
 
 class BayesianEstimator:
     """
@@ -7,6 +8,16 @@ class BayesianEstimator:
     conjugate priors for predicting automotive repair processing times.
     """
     
+    @staticmethod
+    def build_feature_vector(vehicle_year: int, vehicle_mileage: int, tech_efficiency_multiplier: float = 1.0) -> np.ndarray:
+        """
+        Builds the standard feature vector x for the estimator.
+        Features: [1 (bias), vehicle_age, vehicle_mileage, tech_efficiency_multiplier]
+        """
+        current_year = datetime.now().year
+        vehicle_age = max(0, current_year - vehicle_year)
+        return np.array([1.0, float(vehicle_age), float(vehicle_mileage), float(tech_efficiency_multiplier)]).reshape(-1, 1)
+
     @staticmethod
     def init_prior(flat_rate_minutes: float, num_features: int = 4, variance_ratio: float = 0.15) -> dict:
         """
