@@ -9,6 +9,7 @@ Welcome to the central repository for metadata, context, and operational playboo
 # Systems
 
 * [Frappe Bench](/systems/frappe-bench.md) - The local Frappe and ERPNext development environment.
+* [Scheduling System](/development/scheduling-system.md) - Duration estimation engine and scheduling architecture.
 
 # Scripts
 

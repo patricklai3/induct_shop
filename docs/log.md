@@ -1,5 +1,11 @@
 # Directory Update Log
 
+## 2026-07-21
+* **Update**: Updated `scheduling-system.md` in `development` to reflect the architectural shift to the Phase 1 lightweight FRT log-normal estimation algorithm.
+
+## 2026-07-09
+* **Update**: Updated `quotation.md` to document the dynamic customer fetching client script.
+
 ## 2026-07-07
 * **Update**: Updated `service-parts-selector.md` in `systems` to reflect the architectural shift from Batches to Item Variants for part variance tracking.
 
