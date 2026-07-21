@@ -1,6 +1,7 @@
 # Directory Update Log
 
 ## 2026-07-21
+* **Update**: Updated `service-parts-selector.md` in `systems` to document dynamic Tesla Service Manual Mobile Capable extraction using Playwright Chromium.
 * **Update**: Updated `scheduling-system.md` in `development` to reflect the architectural shift to the Phase 1 lightweight FRT log-normal estimation algorithm.
 
 ## 2026-07-09

@@ -3,6 +3,7 @@ from frappe import _
 import requests
 from bs4 import BeautifulSoup
 import re
+from induct_shop.utilities.mobile_capability_extractor import extract_mobile_capability
 
 @frappe.whitelist()
 def search_catalog(query, doc_type=None, project=None):
@@ -27,7 +28,7 @@ def search_catalog(query, doc_type=None, project=None):
     items = frappe.get_all("Item", 
         or_filters=filters,
         filters={"variant_of": ["is", "not set"]},
-        fields=["item_code", "item_name", "description", "item_group", "is_stock_item", "custom_frt", "has_variants"],
+        fields=["item_code", "item_name", "description", "item_group", "is_stock_item", "custom_frt", "custom_is_mobile_capable", "has_variants"],
         limit=100
     )
     
@@ -66,6 +67,7 @@ def search_catalog(query, doc_type=None, project=None):
             "description": item.description,
             "is_stock_item": item.is_stock_item,
             "custom_frt": item.custom_frt,
+            "custom_is_mobile_capable": item.get("custom_is_mobile_capable") or 0,
             "variants": variants
         })
         
@@ -340,6 +342,10 @@ def ingest_service(url):
     
     item_group = subcat_name
     
+    # Extract dynamic Mobile Capable indicator
+    is_mobile_capable = extract_mobile_capability(url, timeout_ms=5000)
+    is_mobile_capable_val = 1 if is_mobile_capable else 0
+
     if not frappe.db.exists("Item", correction_code):
         item = frappe.get_doc({
             "doctype": "Item",
@@ -351,6 +357,7 @@ def ingest_service(url):
             "is_sales_item": 1,
             "stock_uom": "Hour",
             "custom_frt": frt_value,
+            "custom_is_mobile_capable": is_mobile_capable_val,
             "custom_model_compatibility": []
         })
         for gen in generations:
@@ -363,6 +370,7 @@ def ingest_service(url):
     else:
         item = frappe.get_doc("Item", correction_code)
         item.custom_frt = frt_value
+        item.custom_is_mobile_capable = is_mobile_capable_val
         item.item_group = item_group
         for gen in generations:
             model, date_range = _parse_model_string(gen)
@@ -378,6 +386,8 @@ def ingest_service(url):
         "item_code": correction_code,
         "title": title,
         "frt_value": frt_value,
+        "is_mobile_capable": is_mobile_capable,
+        "custom_is_mobile_capable": is_mobile_capable_val,
         "generations": generations
     }
 
