@@ -1,5 +1,5 @@
 ---
-trigger: model_decision
+trigger: always_on
 description: Apply this rule when creating or modifying features to ensure all feature requests are handled within the induct shop directory.
 ---
 
