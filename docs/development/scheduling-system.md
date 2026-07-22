@@ -70,31 +70,22 @@ The scheduling system provides duration estimation for automotive repair operati
 The engine uses a simple right-skewed (log-normal) distribution anchored at the FRT, extracting the 80th percentile as the risk-adjusted estimate.
 
 - **Median**: The FRT (from the Tesla Service Manual) is treated as the median (P50) of the distribution.
-- **Shape Parameter (σ)**: A fixed shape parameter controls the skewness. Different operation categories have different variance profiles (e.g., Brake vs. Electrical).
+- **Shape Parameter (σ)**: A single fixed shape parameter (σ=0.30) controls the skewness. This value provides a reasonable buffer across all operation types without per-category tuning.
 - **Extraction**: The P80 is extracted analytically.
 
 For a 60-minute FRT with σ=0.30:
+
 - P80 ≈ 77.2 minutes (+29% buffer)
 - P50 (median) = 60 min
 - P95 ≈ 99.5 min
 
-### 2.2 Per-Category Variance Overrides
-
-Rather than a single global σ=0.30, the system allows per-category variance tuning via a simple lookup based on the `Item Group`:
-
-| Category | σ Override | Rationale |
-|---|---|---|
-| Brake / Tire | 0.15 - 0.20 | Low variance — well-defined procedural scope |
-| Suspension / HVAC | 0.35 | Moderate variance — dependent on corrosion/wear |
-| Electrical / Body | 0.40 - 0.50 | High variance — exploratory, diagnosis-heavy, hidden damage |
-
-### 2.3 Multi-Operation Summation
+### 2.2 Multi-Operation Summation
 
 When a vehicle has multiple operations on a single visit, the total estimated duration accounts for the fact that individual variances partially cancel when summed (diversification effect). Naively summing individual P80s is overly conservative.
 
 The engine uses the **Fenton-Wilkinson approximation** to fit a single log-normal to the sum of independent log-normal distributions, providing a tighter and more accurate P80 for the total visit.
 
-### 2.4 Future Bayesian Engine (Phase 2)
+### 2.3 Future Bayesian Engine (Phase 2)
 
 The lightweight estimator is a strong Day-1 strategy, but it lacks learning capabilities. 
 In Phase 2, once a task-completion tracking mechanism is built in Frappe, the system will migrate to a **Sequential Bayesian Linear Regression** engine. This future engine will learn from historical completions and adapt to specific vehicle ages, mileages, and technicians.
@@ -112,7 +103,6 @@ All estimator inputs map to fields that already exist in the Induct Shop schema:
 | Estimator Input | Frappe Source | Field |
 |---|---|---|
 | `flat_rate_minutes` | Item | `custom_frt` (custom field, populated during service ingestion) |
-| `item_group` | Item | `item_group` (used for σ overrides) |
 | `item_code` | Item | `item_code` (Tesla Correction Code) |
 
 ### 3.2 Estimation Service API
@@ -120,12 +110,12 @@ All estimator inputs map to fields that already exist in the Induct Shop schema:
 A Python module (`induct_shop.api.estimation_service`) providing core functions for external callers (scheduling, quoting):
 
 **`get_estimate(item_code: str, **kwargs) -> int`**
-- Retrieves the FRT and Item Group.
-- Resolves the appropriate σ.
+- Retrieves the FRT for the item.
+- Applies the fixed σ=0.30.
 - Returns the P80 duration in minutes.
 
 **`get_total_estimate(item_codes: list[str], **kwargs) -> int`**
-- Gathers FRT and σ for all provided item codes.
+- Gathers FRT for all provided item codes (all using fixed σ=0.30).
 - Implements Fenton-Wilkinson summation.
 - Returns the total P80 duration in minutes.
 
@@ -288,7 +278,7 @@ List view customization with:
 
 | File | Purpose |
 |---|---|
-| `induct_shop/scheduling/estimation_light.py` | Pure-Python log-normal estimator — `estimate_duration`, `estimate_total_duration`, `get_sigma_for_item` |
+| `induct_shop/scheduling/estimation_light.py` | Pure-Python log-normal estimator — `estimate_duration`, `estimate_total_duration` |
 | `induct_shop/api/estimation_service.py` | Frappe integration service exposing `get_estimate` and `get_total_estimate` |
 | `induct_shop/api/scheduling.py` | Per-bay capacity checking APIs — `check_bay_availability`, `get_available_bays`, `get_available_slots` |
 | `induct_shop/induct_shop/doctype/service_bay/` | Service Bay DocType (JSON schema + Python controller) |

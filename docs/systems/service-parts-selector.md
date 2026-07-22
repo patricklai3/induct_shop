@@ -55,6 +55,7 @@ The implementation utilizes a Frappe-native Vanilla JS / jQuery architecture to 
 To support accurate searching, filtering, and documentation without cluttering the ERPNext database, the system utilizes the native **ERPNext Item Variants System** to manage part variances.
 
 ## Item Template vs. Variant Architecture
+
 * **Item Master (Template Part):** The standard `Item` doctype configured as a template (`has_variants = 1`) represents the base part. It stores:
   * **Base Part Number:** The first 7 digits (e.g., `1974875`), acting as the `item_code`.
   * **Description & Categorization:** (Category, Subcategory, Group).
@@ -62,7 +63,9 @@ To support accurate searching, filtering, and documentation without cluttering t
   * **Item Attributes:** Standard ERPNext Item Attributes (`Revision`, `Condition`, `OEM Status`) are attached to the template.
 
 ### Item Master Field Mapping
+
 To ensure maximum scalability and speed within standard ERPNext workflows, the utility explicitly maps ingested data to the core `Item` fields as follows:
+
 * **`item_code`:** The 7-digit OEM Base Part Number (for parts) or the Correction Code (for services). This ensures rapid native search, barcode scanning, and inherently prevents duplicate records.
 * **`item_name`:** The short Part Name / Title (e.g., `COMPONENT - FRONT END CARRIER`).
 * **`description`:** The detailed or localized description for printing on sales and inventory documents.
@@ -74,11 +77,15 @@ To ensure maximum scalability and speed within standard ERPNext workflows, the u
   * **Smart Variant ID Generation:** The ingestion system automatically generates a structured Variant ID format for the `item_code`: `#######-##-X-XXX-XXX` (e.g., `1234567-00-D-AFT-NEW`).
 
 ## Installation & Configuration Requirements
+
 To ensure the accounting engine correctly differentiates the cost and valuation, **Batch-wise Valuation** must be enforced globally.
+
 * The `induct_shop` app programmatically enables the "Use batch-wise valuation" toggle within ERPNext's `Stock Settings` upon app installation.
 
 ## Categorization Hierarchy & Item Group Generation
-The utility automatically configures ERPNext's standard `Item Group` hierarchy during ingestion. 
+
+The utility automatically configures ERPNext's standard `Item Group` hierarchy during ingestion.
+
 * **Dynamic Tree Generation:** Verifies and dynamically generates an `Item Group` tree structured as: `Make` -> `Category` -> `Subcategory` -> `Group`.
 * **Model Exclusion:** Vehicle models are explicitly excluded from this Item Group tree to prevent massive structural duplication. Model compatibility remains exclusively managed by the custom child table on the Item.
 
@@ -87,6 +94,7 @@ The utility automatically configures ERPNext's standard `Item Group` hierarchy d
 Parts are ingested incrementally ("just-in-time") as they are encountered and needed for documents.
 
 ## User Workflow & Parsing
+
 * When a part is needed, the user enters a search term into the utility.
 * The utility automatically generates a link to the Tesla Parts Catalog.
 * The user navigates to the catalog, copies the tabulated part information, and pastes it into a dedicated ingestion field in the utility.
@@ -98,12 +106,14 @@ Parts are ingested incrementally ("just-in-time") as they are encountered and ne
 Service operations (labor) are ingested by parsing links directly from the Tesla Service Manual.
 
 ## User Workflow & Extraction
+
 1. **Contextual Manual Link:** The utility provides a quick-access link to the specific Tesla Service Manual corresponding to the vehicle model and year linked to the active document.
 2. **URL Input Field:** The user navigates the manual, copies the URL for the desired service, and pastes it into the utility.
 3. **Automated Parsing:** The backend parses the link to extract: Title, Correction Code, FRT Value, Compatible Model, and derives the Categorization Mapping based on the Correction Code structure.
 4. **Dynamic Mobile Capability Extraction:** Uses Playwright browser automation with a "Wait and Locate" strategy on `p.shortdesc .mobile-capable-indicator` to verify dynamic client-side DOM injection. The boolean status is saved to the `Item` custom field `custom_is_mobile_capable`.
 
 ## Data Schema & Deduplication
+
 * **Correction Code as Identifier:** The `Correction Code` acts as a unique identifier for services.
 * **Smart Insertion/Retrieval:** When a URL is submitted, the system retrieves the existing service record or creates a new one.
 * **Model Context:** The service record tracks the specific vehicle models it applies to, dynamically expanding as it is ingested from different model manuals over time.
@@ -114,11 +124,14 @@ Service operations (labor) are ingested by parsing links directly from the Tesla
 To streamline workflows, the utility learns and associates services with the parts they require.
 
 ## Relational Linking
+
 * When a user groups a service and part(s) together on a document, the system records an association between that Service and those Part(s).
 * **One-to-Many Logic:** The association schema links one service to multiple distinct parts.
 
 ## Smart Suggestions
+
 * Once an association is established, future selections of that service within the utility proactively suggest the linked parts to the user, accelerating data entry.
 
 ## Document Row Grouping (Print Provision)
+
 * **Data Provision:** A custom field (`custom_parent_service_reference`) on standard transaction child tables (`Sales Order Item`, etc.) is populated automatically when adding associated parts, ensuring future custom print formats can seamlessly group and nest parts under their respective correction codes.
