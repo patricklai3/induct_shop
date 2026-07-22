@@ -1,5 +1,9 @@
 # Directory Update Log
 
+## 2026-07-22
+* **Update**: Updated `scheduling-system.md` in `development` to specify the tag-based Equipment Tag system (`Service Bay Equipment` child table) and set-superset capability matching.
+* **Update**: Updated `service-parts-selector.md` in `systems` to document equipment requirement tag extraction, interactive staff tag editing, and derived mobile capability.
+
 ## 2026-07-21
 * **Update**: Updated `service-parts-selector.md` in `systems` to document dynamic Tesla Service Manual Mobile Capable extraction using Playwright Chromium.
 * **Update**: Updated `scheduling-system.md` in `development` to reflect the architectural shift to the Phase 1 lightweight FRT log-normal estimation algorithm.

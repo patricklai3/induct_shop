@@ -66,17 +66,24 @@ class ServicePartsSelectorDialog {
         this.dialog.fields_dict.results_html.$wrapper.find('#btn-ingest-service').on('click', () => {
             let url = this.dialog.fields_dict.results_html.$wrapper.find('#ingest-service-url').val();
             if(!url) return;
+            
             frappe.call({
-                method: 'induct_shop.api.service_parts_selector.ingest_service',
-                args: { url: url },
-                freeze: true,
-                freeze_message: __('Ingesting Service...'),
-                callback: (r) => {
-                    if(r.message) {
-                        frappe.show_alert({message: __('Service Ingested Successfully'), indicator: 'green'});
-                        this.dialog.fields_dict.search_query.set_value(r.message.item_code);
-                        this.search();
-                    }
+                method: 'induct_shop.api.service_parts_selector.get_all_equipment_tags',
+                callback: (tag_res) => {
+                    let available_tags = tag_res.message || [];
+                    
+                    frappe.call({
+                        method: 'induct_shop.api.service_parts_selector.ingest_service',
+                        args: { url: url },
+                        freeze: true,
+                        freeze_message: __('Ingesting Service...'),
+                        callback: (r) => {
+                            if(r.message) {
+                                let service_info = r.message;
+                                this.show_equipment_tag_modal(service_info, available_tags);
+                            }
+                        }
+                    });
                 }
             });
         });
@@ -99,7 +106,104 @@ class ServicePartsSelectorDialog {
             });
         });
     }
-    
+
+    show_equipment_tag_modal(service_info, available_tags, is_edit_mode = false) {
+        let current_tags = Array.from(service_info.equipment_requirements || []);
+        
+        let d = new frappe.ui.Dialog({
+            title: is_edit_mode ? __('Edit Equipment Requirements') : __('Service Ingested - Equipment Requirements'),
+            fields: [
+                {
+                    fieldtype: 'HTML',
+                    fieldname: 'summary_html'
+                },
+                {
+                    fieldtype: 'Section Break',
+                    label: __('Equipment Requirements')
+                },
+                {
+                    fieldtype: 'HTML',
+                    fieldname: 'tags_container_html'
+                },
+                {
+                    fieldname: 'new_tag_select',
+                    fieldtype: 'Autocomplete',
+                    label: __('Add Equipment Tag'),
+                    options: available_tags.map(t => t.tag_name)
+                }
+            ],
+            primary_action_label: __('Save Requirements'),
+            primary_action: () => {
+                frappe.call({
+                    method: 'induct_shop.api.service_parts_selector.update_service_equipment_requirements',
+                    args: {
+                        item_code: service_info.item_code,
+                        equipment_requirements: current_tags
+                    },
+                    freeze: true,
+                    callback: (res) => {
+                        frappe.show_alert({
+                            message: __('Updated equipment requirements for {0}', [service_info.item_code]), 
+                            indicator: 'green'
+                        });
+                        d.hide();
+                        this.dialog.fields_dict.search_query.set_value(service_info.item_code);
+                        this.search();
+                    }
+                });
+            }
+        });
+
+        let render_tags = () => {
+            let html = `
+                <div class="mb-3">
+                    <p class="text-muted small mb-2">${__('Tags required for this service. If empty, service is considered Mobile Capable.')}</p>
+                    <div id="equipment-tag-chips">
+            `;
+            if (current_tags.length === 0) {
+                html += `<span class="badge badge-info p-2 mr-1"><i class="fa fa-truck mr-1"></i> Mobile Capable (No Equipment Required)</span>`;
+            } else {
+                current_tags.forEach((tag, idx) => {
+                    html += `
+                        <span class="badge badge-warning p-2 mr-2 mb-1" style="font-size: 13px;">
+                            <i class="fa fa-wrench mr-1"></i> ${tag}
+                            <a class="text-danger ml-2 remove-tag-btn" data-index="${idx}" style="cursor:pointer; text-decoration:none;">&times;</a>
+                        </span>
+                    `;
+                });
+            }
+            html += `</div></div>`;
+            d.fields_dict.tags_container_html.$wrapper.html(html);
+
+            d.fields_dict.tags_container_html.$wrapper.find('.remove-tag-btn').on('click', (e) => {
+                let idx = $(e.currentTarget).data('index');
+                current_tags.splice(idx, 1);
+                render_tags();
+            });
+        };
+
+        let summary_html = `
+            <div class="alert alert-secondary mb-2">
+                <strong>${service_info.item_code}</strong> - ${service_info.title || service_info.item_name || ''}
+                ${service_info.frt_value ? `<div><small class="text-muted">${__('FRT')}: ${service_info.frt_value} ${__('hours')}</small></div>` : ''}
+            </div>
+        `;
+        d.fields_dict.summary_html.$wrapper.html(summary_html);
+
+        render_tags();
+
+        d.fields_dict.new_tag_select.$input.on('change', () => {
+            let val = d.get_value('new_tag_select');
+            if (val && !current_tags.includes(val)) {
+                current_tags.push(val);
+                d.set_value('new_tag_select', '');
+                render_tags();
+            }
+        });
+
+        d.show();
+    }
+
     setup_part_ingestion_only() {
         let html = `
             <div class="mt-4 border-top pt-4">
@@ -178,12 +282,24 @@ class ServicePartsSelectorDialog {
             let badge = item.is_stock_item ? '<span class="badge badge-primary">Part</span>' : '<span class="badge badge-success">Service</span>';
             let frt_info = item.custom_frt ? ` - FRT: ${item.custom_frt}` : '';
             
+            let tag_badges = '';
+            if (!item.is_stock_item) {
+                if (item.equipment_requirements && item.equipment_requirements.length > 0) {
+                    item.equipment_requirements.forEach(t => {
+                        tag_badges += `<span class="badge badge-warning mr-1" style="font-size: 11px;"><i class="fa fa-wrench mr-1"></i> ${t}</span>`;
+                    });
+                } else {
+                    tag_badges += `<span class="badge badge-info mr-1" style="font-size: 11px;"><i class="fa fa-truck mr-1"></i> Mobile Capable</span>`;
+                }
+                tag_badges += `<button class="btn btn-xs btn-link text-muted btn-edit-equipment-tags p-0 ml-1" data-item-code="${item.item_code}" title="${__('Edit Equipment Tags')}"><i class="fa fa-pencil"></i></button>`;
+            }
+
             html += `
                 <div class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
                         <strong>${item.item_code}</strong> - ${item.item_name}
                         <div><small class="text-muted">${item.description || ''}${frt_info}</small></div>
-                        ${badge}
+                        <div class="mt-1">${badge} ${tag_badges}</div>
                     </div>
                     <div>
             `;
@@ -211,6 +327,24 @@ class ServicePartsSelectorDialog {
         
         html += '</div>';
         container.html(html);
+
+        // Bind edit equipment tags event
+        container.find('.btn-edit-equipment-tags').on('click', (e) => {
+            let item_code = $(e.currentTarget).data('item-code');
+            let item_obj = results.find(i => i.item_code === item_code);
+            frappe.call({
+                method: 'induct_shop.api.service_parts_selector.get_all_equipment_tags',
+                callback: (tag_res) => {
+                    let available_tags = tag_res.message || [];
+                    this.show_equipment_tag_modal({
+                        item_code: item_obj.item_code,
+                        title: item_obj.item_name,
+                        frt_value: item_obj.custom_frt,
+                        equipment_requirements: item_obj.equipment_requirements || []
+                    }, available_tags, true);
+                }
+            });
+        });
         
         // Bind click events
         container.find('.btn-add-item').on('click', (e) => {

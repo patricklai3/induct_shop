@@ -133,14 +133,14 @@ A standard DocType (`custom=0, module="Induct Shop"`) representing a physical se
 | Field | Type | Description |
 |---|---|---|
 | `bay_name` | Data | Human-readable name (e.g., "Bay 1", "Bay 2 - Lift"). **Required.** Used as the DocType's `title_field`. |
-| `has_lift` | Check | Whether this bay has an automotive lift installed. |
+| `equipment` | Table (Service Bay Equipment) | Child table listing the equipment tags provided by this bay (e.g. "Lift", "Alignment Rack"). |
 | `is_active` | Check | Whether this bay is currently available for scheduling (default: checked). |
 | `description` | Small Text | Optional notes about the bay (e.g., "Rated for Cybertruck weight"). |
 
 ### 4.2 Design Notes
 
 - The `bay_name` is the naming field — bays are identified by their human-readable names.
-- `has_lift` is the primary capability flag. Additional capability flags can be added as the shop grows (e.g., `has_alignment_rack`, `is_paint_booth`), but `has_lift` is sufficient for the MVP.
+- Bay capabilities are managed dynamically using the tag-based **Equipment Tag** system (`Service Bay Equipment` child table) rather than hardcoded booleans.
 - Only bays with `is_active = 1` appear in the scheduling UI and capacity checks.
 
 ---
@@ -211,7 +211,7 @@ The system uses a **per-bay capacity model**: each Schedule Entry is assigned to
 
 - Each Schedule Entry occupies its assigned bay for the full `estimated_duration` window (`scheduled_time` to `scheduled_time + estimated_duration`).
 - Two Schedule Entries on the **same bay** cannot overlap in time. If they would, the system rejects the later one.
-- Different bays have different capabilities (e.g., `has_lift`). Staff selects an appropriate bay for the job — the system does not auto-assign but can filter available bays by capability.
+- Different bays provide different equipment tags (e.g., "Lift", "Alignment Rack"). Staff selects an appropriate bay for the job, and the system filters available bays by ensuring the bay's tag set is a superset of the service's equipment requirements.
 - Technician assignment remains advisory and does not affect capacity calculations.
 
 ### 7.2 Capacity Check API (`induct_shop/api/scheduling.py`)
@@ -223,11 +223,12 @@ The system uses a **per-bay capacity model**: each Schedule Entry is assigned to
 - The `exclude_entry` parameter allows the current entry to be excluded during re-validation (e.g., when rescheduling).
 - Used by Schedule Entry's `validate` hook to prevent double-booking a bay.
 
-**`get_available_bays(date, start_time, duration_minutes) → list[dict]`**
+**`get_available_bays(date, start_time, duration_minutes, required_tags=None) → list[dict]`**
 - Queries all active Service Bays.
-- For each bay, checks if the proposed time window is free.
-- Returns a list of available bays with their capabilities (e.g., `{"bay_name": "Bay 1", "has_lift": true}`).
-- Used by the "Schedule Service" dialog to show the staff which bays are open.
+- Filters bays based on equipment tags: verifies each candidate bay provides all `required_tags` (set-superset check).
+- For each matching bay, checks if the proposed time window is free.
+- Returns a list of available bays with their equipment tags (e.g., `{"bay_name": "Bay 1", "equipment_tags": ["Lift"]}`).
+- Used by the "Schedule Service" dialog to show the staff which bays are open and capable.
 
 **`get_available_slots(date, duration_minutes, service_bay=None) → list[dict]`**
 - Loads operating hours from Shop Settings.

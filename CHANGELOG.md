@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Tag-based Equipment Tag system (`Equipment Tag`, `Service Bay Equipment`, and `Service Equipment Requirement`) for scalable bay capability and service requirements tracking.
+- Interactive equipment requirement tag chips editor in the Service & Parts Selector ingestion dialog.
 - Dynamic extraction of Mobile Capable indicators from Tesla Service Manual URLs via Playwright browser automation and custom Item field `custom_is_mobile_capable`.
 - Lightweight FRT-based scheduling estimation system utilizing log-normal distribution for duration predictions (Phase 1).
 - Added client script to dynamically fetch customer details on Quotation when created from Project dashboard.
@@ -27,13 +29,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom costing logic for Project DocType to calculate `custom_sales_stock_cost` and `custom_incoming_material_value` from stock ledger entries, and dynamically update `expense_amount`.
 
 ### Changed
+
+- Replaced binary `custom_is_mobile_capable` checkbox on Item with derived mobile capability calculated from the `custom_equipment_requirements` child table.
 - Refactored the Service & Parts Selector to utilize ERPNext's native Item Variants system instead of Batches for tracking and managing part variations (revisions, conditions, and OEM statuses).
 - Moved Stock Entry from Purchase section to Project section in Project DocType dashboard.
+
 ### Deprecated
+
 ### Removed
+
+- Removed hardcoded `custom_is_mobile_capable` Check field on Item fixture.
 - Removed entire legacy frontend directory and associated build configuration files in favor of Frappe UI scaffold.
+
 ### Fixed
+
 - Recreated the `Service Part Association` and `Service Part Association Item` DocTypes as Standard DocTypes to ensure their schema persists across app reinstallations.
 - Enforced the hiding of the Progress tab in Project DocType by explicitly hiding its individual field components via client script.
 
 ### Security
+

@@ -28,7 +28,7 @@ def search_catalog(query, doc_type=None, project=None):
     items = frappe.get_all("Item", 
         or_filters=filters,
         filters={"variant_of": ["is", "not set"]},
-        fields=["item_code", "item_name", "description", "item_group", "is_stock_item", "custom_frt", "custom_is_mobile_capable", "has_variants"],
+        fields=["item_code", "item_name", "description", "item_group", "is_stock_item", "custom_frt", "has_variants"],
         limit=100
     )
     
@@ -61,13 +61,22 @@ def search_catalog(query, doc_type=None, project=None):
                 
             variants = sorted(variant_records, key=lambda x: x.get("qty") or 0, reverse=True)
             
+        equipment_reqs = []
+        if not item.is_stock_item:
+            if frappe.db.exists("DocType", "Service Equipment Requirement"):
+                req_rows = frappe.get_all("Service Equipment Requirement", filters={"parent": item.item_code, "parenttype": "Item"}, fields=["equipment_tag"])
+                equipment_reqs = [r.equipment_tag for r in req_rows if r.equipment_tag]
+
+        is_mobile_capable = (len(equipment_reqs) == 0)
+
         results.append({
             "item_code": item.item_code,
             "item_name": item.item_name,
             "description": item.description,
             "is_stock_item": item.is_stock_item,
             "custom_frt": item.custom_frt,
-            "custom_is_mobile_capable": item.get("custom_is_mobile_capable") or 0,
+            "equipment_requirements": equipment_reqs,
+            "custom_is_mobile_capable": 1 if is_mobile_capable else 0,
             "variants": variants
         })
         
@@ -260,7 +269,61 @@ def _get_generations_for_service_url(url):
     return generations
 
 @frappe.whitelist()
-def ingest_service(url):
+def get_all_equipment_tags():
+    """
+    Returns a list of all active Equipment Tags for dropdown/tag choices in the UI.
+    """
+    if not frappe.db.exists("DocType", "Equipment Tag"):
+        return []
+    return frappe.get_all("Equipment Tag", fields=["name", "tag_name", "description"], order_by="tag_name asc")
+
+@frappe.whitelist()
+def update_service_equipment_requirements(item_code, equipment_requirements=None):
+    """
+    Updates the equipment requirements for a given service Item.
+    equipment_requirements can be a list of tag strings or a JSON string.
+    """
+    if isinstance(equipment_requirements, str):
+        import json
+        try:
+            equipment_requirements = json.loads(equipment_requirements)
+        except Exception:
+            equipment_requirements = []
+
+    if equipment_requirements is None:
+        equipment_requirements = []
+
+    # Ensure all equipment tags exist in master list
+    for tag in equipment_requirements:
+        if tag and not frappe.db.exists("Equipment Tag", tag):
+            tag_doc = frappe.get_doc({"doctype": "Equipment Tag", "tag_name": tag})
+            tag_doc.insert(ignore_permissions=True)
+
+    # Delete existing requirements for this Item
+    if frappe.db.exists("DocType", "Service Equipment Requirement"):
+        frappe.db.delete("Service Equipment Requirement", {"parent": item_code, "parenttype": "Item"})
+
+        # Insert new requirement rows directly into Service Equipment Requirement child table
+        for idx, tag in enumerate(equipment_requirements, 1):
+            if tag:
+                req_doc = frappe.get_doc({
+                    "doctype": "Service Equipment Requirement",
+                    "parent": item_code,
+                    "parenttype": "Item",
+                    "parentfield": "custom_equipment_requirements",
+                    "idx": idx,
+                    "equipment_tag": tag
+                })
+                req_doc.insert(ignore_permissions=True)
+
+    return {
+        "item_code": item_code,
+        "equipment_requirements": equipment_requirements,
+        "is_mobile_capable": len(equipment_requirements) == 0
+    }
+
+@frappe.whitelist()
+def ingest_service(url, equipment_requirements=None):
     """
     Ingests a service from a Tesla Service Manual URL.
     Example URL: https://service.tesla.com/docs/Model3/ServiceManual/en-us/GUID-DE61971B-D5F1-4C5C-9050-DE313445276D.html
@@ -343,8 +406,17 @@ def ingest_service(url):
     item_group = subcat_name
     
     # Extract dynamic Mobile Capable indicator
-    is_mobile_capable = extract_mobile_capability(url, timeout_ms=5000)
-    is_mobile_capable_val = 1 if is_mobile_capable else 0
+    auto_is_mobile_capable = extract_mobile_capability(url, timeout_ms=5000)
+
+    if isinstance(equipment_requirements, str):
+        try:
+            equipment_requirements = json.loads(equipment_requirements)
+        except Exception:
+            equipment_requirements = None
+
+    if equipment_requirements is None:
+        # Default: if auto_is_mobile_capable is False, default to requiring "Lift"
+        equipment_requirements = [] if auto_is_mobile_capable else ["Lift"]
 
     if not frappe.db.exists("Item", correction_code):
         item = frappe.get_doc({
@@ -357,7 +429,6 @@ def ingest_service(url):
             "is_sales_item": 1,
             "stock_uom": "Hour",
             "custom_frt": frt_value,
-            "custom_is_mobile_capable": is_mobile_capable_val,
             "custom_model_compatibility": []
         })
         for gen in generations:
@@ -370,7 +441,6 @@ def ingest_service(url):
     else:
         item = frappe.get_doc("Item", correction_code)
         item.custom_frt = frt_value
-        item.custom_is_mobile_capable = is_mobile_capable_val
         item.item_group = item_group
         for gen in generations:
             model, date_range = _parse_model_string(gen)
@@ -381,13 +451,18 @@ def ingest_service(url):
                     "date_range": date_range
                 })
         item.save(ignore_permissions=True)
+
+    # Save equipment requirements using update_service_equipment_requirements helper
+    update_service_equipment_requirements(correction_code, equipment_requirements)
+
+    is_mobile_capable = (len(equipment_requirements) == 0)
         
     return {
         "item_code": correction_code,
         "title": title,
         "frt_value": frt_value,
+        "equipment_requirements": equipment_requirements,
         "is_mobile_capable": is_mobile_capable,
-        "custom_is_mobile_capable": is_mobile_capable_val,
         "generations": generations
     }
 

@@ -3,6 +3,16 @@ import frappe
 def after_install():
     create_standard_inspection_template()
     enable_batch_wise_valuation()
+    seed_equipment_tags()
+
+def seed_equipment_tags():
+    if frappe.db.exists("DocType", "Equipment Tag") and not frappe.db.exists("Equipment Tag", "Lift"):
+        doc = frappe.get_doc({
+            "doctype": "Equipment Tag",
+            "tag_name": "Lift",
+            "description": "Standard automotive lift"
+        })
+        doc.insert(ignore_permissions=True)
 
 def enable_batch_wise_valuation():
     if frappe.db.exists("DocType", "Stock Settings"):

@@ -110,14 +110,14 @@ Service operations (labor) are ingested by parsing links directly from the Tesla
 1. **Contextual Manual Link:** The utility provides a quick-access link to the specific Tesla Service Manual corresponding to the vehicle model and year linked to the active document.
 2. **URL Input Field:** The user navigates the manual, copies the URL for the desired service, and pastes it into the utility.
 3. **Automated Parsing:** The backend parses the link to extract: Title, Correction Code, FRT Value, Compatible Model, and derives the Categorization Mapping based on the Correction Code structure.
-4. **Dynamic Mobile Capability Extraction:** Uses Playwright browser automation with a "Wait and Locate" strategy on `p.shortdesc .mobile-capable-indicator` to verify dynamic client-side DOM injection. The boolean status is saved to the `Item` custom field `custom_is_mobile_capable`.
+4. **Equipment Requirement Extraction & Interactive Staff Overrides:** Uses Playwright browser automation with a "Wait and Locate" strategy on `p.shortdesc .mobile-capable-indicator` to verify dynamic client-side DOM injection. If the manual indicates "Not Mobile Capable", the system defaults to populating a "Lift" equipment requirement tag. Staff are presented with an interactive tag modal during ingestion to add, edit, or remove required equipment tags (e.g. "Lift", "Alignment Rack") before saving.
 
 ## Data Schema & Deduplication
 
 * **Correction Code as Identifier:** The `Correction Code` acts as a unique identifier for services.
 * **Smart Insertion/Retrieval:** When a URL is submitted, the system retrieves the existing service record or creates a new one.
 * **Model Context:** The service record tracks the specific vehicle models it applies to, dynamically expanding as it is ingested from different model manuals over time.
-* **Mobile Capability Status:** Tracks `custom_is_mobile_capable` (Check field, 1 or 0) for each ingested service procedure.
+* **Equipment Requirements & Derived Mobile Capability:** Equipment requirements are tracked in the `custom_equipment_requirements` child table (`Service Equipment Requirement`). A service with no equipment requirements is inherently mobile capable.
 
 # Service & Parts Association
 
