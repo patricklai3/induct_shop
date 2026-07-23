@@ -1,5 +1,8 @@
 # Directory Update Log
 
+## 2026-07-23
+* **Creation**: Added `scheduling-implementation-checklist.md` in `development` to provide a 12-stage progressive build-and-verify checklist with acceptance criteria and a dependency map.
+
 ## 2026-07-22
 * **Update**: Updated `scheduling-system.md` in `development` to specify the tag-based Equipment Tag system (`Service Bay Equipment` child table) and set-superset capability matching.
 * **Update**: Updated `service-parts-selector.md` in `systems` to document equipment requirement tag extraction, interactive staff tag editing, and derived mobile capability.
