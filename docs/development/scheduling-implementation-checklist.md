@@ -103,20 +103,20 @@ references:
 
 **Files**: `induct_shop/induct_shop/doctype/schedule_entry/`
 
-- [ ] Create Schedule Entry DocType with all fields per §5.1 schema
-- [ ] Enforce unique constraint on `sales_order` (1:1 relationship)
-- [ ] `before_insert`: auto-fetch `project`, `customer`, `repair_vehicle` from the linked Sales Order and its Project
-- [ ] `before_insert`: auto-calculate `estimated_duration` by calling `get_total_estimate()` with all service item codes from the SO
-- [ ] `items_summary` auto-generated from SO items
-- [ ] Status field with the workflow: `Draft` → `Scheduled` → `Needs Review` → `In Progress` → `Completed` → `Cancelled`
+- [x] Create Schedule Entry DocType with all fields per §5.1 schema
+- [x] Enforce unique constraint on `sales_order` (1:1 relationship)
+- [x] `before_insert`: auto-fetch `project`, `customer`, `repair_vehicle` from the linked Sales Order and its Project
+- [x] `before_insert`: auto-calculate `estimated_duration` by calling `get_total_estimate()` with all service item codes from the SO
+- [x] `items_summary` auto-generated from SO items
+- [x] Status field with the workflow: `Draft` → `Scheduled` → `Needs Review` → `In Progress` → `Completed` → `Cancelled`
 
 ### Stage 4 — Acceptance Criteria
 
-- [ ] Can create a Schedule Entry linked to a submitted Sales Order — `project`, `customer`, `repair_vehicle`, `estimated_duration`, and `items_summary` auto-populate correctly
-- [ ] Attempting to create a second Schedule Entry for the same Sales Order is blocked (unique constraint)
-- [ ] `estimated_duration` value matches the expected P80 for the SO's service items
-- [ ] Status transitions work (manual changes for now)
-- [ ] `bench migrate` succeeds; DocType survives reinstall
+- [x] Can create a Schedule Entry linked to a submitted Sales Order — `project`, `customer`, `repair_vehicle`, `estimated_duration`, and `items_summary` auto-populate correctly
+- [x] Attempting to create a second Schedule Entry for the same Sales Order is blocked (unique constraint)
+- [x] `estimated_duration` value matches the expected P80 for the SO's service items
+- [x] Status transitions work (manual changes for now)
+- [x] `bench migrate` succeeds; DocType survives reinstall
 
 ---
 
