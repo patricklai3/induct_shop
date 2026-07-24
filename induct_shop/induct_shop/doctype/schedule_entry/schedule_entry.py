@@ -54,11 +54,49 @@ class ScheduleEntry(Document):
 
             self.repair_vehicle = vehicle
 
-        # 4. Auto-calculate estimated_duration using get_total_estimate()
+        # 4. Auto-calculate estimated_duration using get_total_estimate() with Sales Order items
         if not self.estimated_duration:
-            item_codes = [d.item_code for d in getattr(so_doc, "items", []) if getattr(d, "item_code", None)]
-            if item_codes:
-                self.estimated_duration = get_total_estimate(item_codes)
+            operations = []
+            for item in getattr(so_doc, "items", []):
+                code = getattr(item, "item_code", None)
+                if not code:
+                    continue
+
+                frt_hours = None
+                # Priority 1: Line item custom_frt override
+                if hasattr(item, "custom_frt") and item.custom_frt:
+                    try:
+                        val = float(item.custom_frt)
+                        if val > 0:
+                            frt_hours = val
+                    except (ValueError, TypeError):
+                        pass
+
+                # Priority 2: Line item qty (when specified in Hours or for service/non-stock items)
+                if frt_hours is None and hasattr(item, "qty") and item.qty:
+                    try:
+                        qty_val = float(item.qty)
+                        uom = getattr(item, "uom", "") or getattr(item, "stock_uom", "")
+                        is_hour_uom = str(uom).lower() in ("hour", "hours", "hr", "hrs")
+                        is_non_stock = False
+                        if frappe.db.exists("Item", code):
+                            is_non_stock = not frappe.db.get_value("Item", code, "is_stock_item")
+
+                        if (is_hour_uom or is_non_stock) and qty_val > 0:
+                            frt_hours = qty_val
+                    except (ValueError, TypeError):
+                        pass
+
+                if frt_hours is not None:
+                    operations.append({
+                        "item_code": code,
+                        "flat_rate_hours": frt_hours
+                    })
+                else:
+                    operations.append(code)
+
+            if operations:
+                self.estimated_duration = get_total_estimate(operations)
             else:
                 self.estimated_duration = 0
 

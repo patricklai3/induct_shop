@@ -23,7 +23,7 @@ class TestScheduleEntry(unittest.TestCase):
                 "territory": "All Territories"
             }).insert(ignore_permissions=True)
 
-        # 3. Ensure test Item exists with custom_frt
+        # 3. Ensure test Item exists with custom_frt (1.0 hour) and stock_uom="Hour"
         if not frappe.db.exists("Item", "_Test Service Item 01"):
             item = frappe.get_doc({
                 "doctype": "Item",
@@ -31,10 +31,15 @@ class TestScheduleEntry(unittest.TestCase):
                 "item_name": "Test Service Operation",
                 "item_group": "Services",
                 "is_stock_item": 0,
+                "stock_uom": "Hour",
             })
             if frappe.db.has_column("Item", "custom_frt"):
-                item.custom_frt = 60.0
+                item.custom_frt = 1.0
             item.insert(ignore_permissions=True)
+        else:
+            frappe.db.set_value("Item", "_Test Service Item 01", "stock_uom", "Hour")
+            if frappe.db.has_column("Item", "custom_frt"):
+                frappe.db.set_value("Item", "_Test Service Item 01", "custom_frt", 1.0)
 
         # 4. Ensure test Repair Vehicle exists
         if not frappe.db.exists("Repair Vehicle", "TEST-VIN-SCHED-01"):
@@ -75,6 +80,8 @@ class TestScheduleEntry(unittest.TestCase):
                     {
                         "item_code": "_Test Service Item 01",
                         "qty": 1,
+                        "uom": "Hour",
+                        "stock_uom": "Hour",
                         "rate": 100
                     }
                 ]
@@ -104,9 +111,54 @@ class TestScheduleEntry(unittest.TestCase):
         self.assertTrue(bool(se.project))
         self.assertEqual(se.repair_vehicle, "TEST-VIN-SCHED-01")
         self.assertGreater(se.estimated_duration, 0)
-        expected_p80 = get_total_estimate(["_Test Service Item 01"])
+        expected_p80 = get_total_estimate([{"item_code": "_Test Service Item 01", "flat_rate_hours": 1.0}])
         self.assertEqual(se.estimated_duration, expected_p80)
         self.assertIn("_Test Service Item 01", se.items_summary)
+
+    def test_so_line_frt_override(self):
+        # Test on-the-fly adjustment of FRT/qty (0.18 hours) on Sales Order line
+        if not frappe.db.exists("Item", "_Test Service Item 02"):
+            frappe.get_doc({
+                "doctype": "Item",
+                "item_code": "_Test Service Item 02",
+                "item_name": "Test Stabilizer Bar",
+                "item_group": "Services",
+                "is_stock_item": 0,
+                "stock_uom": "Hour",
+            }).insert(ignore_permissions=True)
+        else:
+            frappe.db.set_value("Item", "_Test Service Item 02", "stock_uom", "Hour")
+
+        so = frappe.get_doc({
+            "doctype": "Sales Order",
+            "company": "_Test Company" if frappe.db.exists("Company", "_Test Company") else frappe.db.get_single_value("Global Defaults", "default_company") or "Wind Power LLC",
+            "customer": "_Test Schedule Customer",
+            "delivery_date": frappe.utils.add_days(frappe.utils.today(), 1),
+            "items": [
+                {
+                    "item_code": "_Test Service Item 02",
+                    "qty": 0.18,
+                    "uom": "Hour",
+                    "stock_uom": "Hour",
+                    "conversion_factor": 1.0,
+                    "rate": 100
+                }
+            ]
+        }).insert(ignore_permissions=True)
+
+        se = frappe.get_doc({
+            "doctype": "Schedule Entry",
+            "sales_order": so.name,
+            "scheduled_date": frappe.utils.today(),
+            "scheduled_time": "10:00:00",
+            "service_bay": "Test Schedule Bay",
+            "status": "Scheduled"
+        }).insert(ignore_permissions=True)
+
+        # 0.18 hours = 10.8 mins -> P80 (sigma=0.30) is 14 minutes
+        self.assertEqual(se.estimated_duration, 14)
+        frappe.delete_doc("Schedule Entry", se.name, force=True, ignore_permissions=True)
+        frappe.delete_doc("Sales Order", so.name, force=True, ignore_permissions=True)
 
     def test_duplicate_sales_order_blocked(self):
         se1 = frappe.get_doc({

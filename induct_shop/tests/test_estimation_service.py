@@ -21,7 +21,7 @@ class TestEstimationService(unittest.TestCase):
             })
             ig.insert(ignore_permissions=True)
 
-        # Create test items with custom_frt
+        # Create test items with custom_frt in hours (1.0 hr = 60 mins, 1.5 hr = 90 mins)
         if not frappe.db.exists("Item", "EST_TEST_ITEM_001"):
             item1 = frappe.get_doc({
                 "doctype": "Item",
@@ -31,11 +31,11 @@ class TestEstimationService(unittest.TestCase):
                 "is_stock_item": 0,
                 "is_sales_item": 1,
                 "stock_uom": "Hour",
-                "custom_frt": 60.0
+                "custom_frt": 1.0
             })
             item1.insert(ignore_permissions=True)
         else:
-            frappe.db.set_value("Item", "EST_TEST_ITEM_001", "custom_frt", 60.0)
+            frappe.db.set_value("Item", "EST_TEST_ITEM_001", "custom_frt", 1.0)
 
         if not frappe.db.exists("Item", "EST_TEST_ITEM_002"):
             item2 = frappe.get_doc({
@@ -46,11 +46,11 @@ class TestEstimationService(unittest.TestCase):
                 "is_stock_item": 0,
                 "is_sales_item": 1,
                 "stock_uom": "Hour",
-                "custom_frt": 90.0
+                "custom_frt": 1.5
             })
             item2.insert(ignore_permissions=True)
         else:
-            frappe.db.set_value("Item", "EST_TEST_ITEM_002", "custom_frt", 90.0)
+            frappe.db.set_value("Item", "EST_TEST_ITEM_002", "custom_frt", 1.5)
 
     def test_get_estimate_with_custom_frt(self):
         # Item 1 has custom_frt=60.0 and item_group="Brake" (sigma=0.20)

@@ -11,7 +11,7 @@ from induct_shop.scheduling.estimation_light import (
 @frappe.whitelist()
 def get_estimate(item_code: str, **kwargs) -> int:
     """
-    Get the P80 duration estimate for a single operation.
+    Get the P80 duration estimate in minutes for a single operation.
 
     Args:
         item_code: Item code to look up in Frappe database.
@@ -43,10 +43,13 @@ def get_estimate(item_code: str, **kwargs) -> int:
 @frappe.whitelist()
 def get_total_estimate(item_codes: Union[str, List[Union[str, Dict[str, Any]]]], **kwargs) -> int:
     """
-    Get the P80 total duration estimate for multiple operations using Fenton-Wilkinson summation.
+    Get the P80 total duration estimate in minutes for multiple operations using Fenton-Wilkinson summation.
 
     Args:
         item_codes: JSON string list, Python list of item codes, or list of operation dicts.
+                    Operation dicts can specify:
+                    - 'flat_rate_minutes': FRT in minutes
+                    - 'flat_rate_hours' / 'custom_frt' / 'qty': FRT in hours (converted to minutes via * 60)
         **kwargs:
             - fallback_frt: Default FRT in minutes for missing items (default 60.0).
             - skip_missing: If True, omit items without valid FRT.
@@ -79,8 +82,22 @@ def get_total_estimate(item_codes: Union[str, List[Union[str, Dict[str, Any]]]],
     for item in item_codes:
         if isinstance(item, dict):
             code = item.get("item_code")
-            item_frt = item.get("flat_rate_minutes") or item.get("frt_minutes")
+            item_frt_min = item.get("flat_rate_minutes")
+            item_frt_hr = item.get("flat_rate_hours") or item.get("frt_hours") or item.get("custom_frt") or item.get("qty")
             item_sig = item.get("sigma")
+
+            if item_frt_min is not None:
+                try:
+                    item_frt = float(item_frt_min)
+                except (ValueError, TypeError):
+                    item_frt = None
+            elif item_frt_hr is not None:
+                try:
+                    item_frt = float(item_frt_hr) * 60.0
+                except (ValueError, TypeError):
+                    item_frt = None
+            else:
+                item_frt = None
         else:
             code = str(item)
             item_frt = None
@@ -116,7 +133,11 @@ def get_total_estimate(item_codes: Union[str, List[Union[str, Dict[str, Any]]]],
 
 
 def _get_frt(item_code: str, fallback: Optional[float] = 60.0) -> Optional[float]:
-    """Safely retrieve FRT from Item DocType, checking column existence defensively."""
+    """
+    Safely retrieve FRT in MINUTES from Item DocType, checking column existence defensively.
+    Item.custom_frt is stored in HOURS (e.g. 0.18 hours, 1.5 hours).
+    Returns FRT in MINUTES (e.g. 10.8 minutes, 90.0 minutes).
+    """
     if not item_code:
         return fallback
 
@@ -127,7 +148,7 @@ def _get_frt(item_code: str, fallback: Optional[float] = 60.0) -> Optional[float
                 try:
                     val = float(frt)
                     if val > 0:
-                        return val
+                        return val * 60.0
                 except (ValueError, TypeError):
                     pass
 

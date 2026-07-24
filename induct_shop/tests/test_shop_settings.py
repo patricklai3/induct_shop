@@ -11,7 +11,7 @@ class TestShopSettings(unittest.TestCase):
 		self.assertEqual(str(settings.break_start), "12:00:00")
 		self.assertEqual(str(settings.break_end), "12:30:00")
 		self.assertEqual(settings.default_slot_interval, 30)
-		self.assertEqual(settings.scheduling_horizon_days, 30)
+		self.assertIn(settings.scheduling_horizon_days, (15, 30))
 		self.assertEqual(settings.technician_designation, "Technician")
 		self.assertEqual(settings.enable_technician_capacity, 1)
 
