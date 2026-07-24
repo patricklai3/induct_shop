@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Interactive equipment requirement tag chips editor in the Service & Parts Selector ingestion dialog.
 - Dynamic extraction of Mobile Capable indicators from Tesla Service Manual URLs via Playwright browser automation and custom Item field `custom_is_mobile_capable`.
 - Lightweight FRT-based scheduling estimation system utilizing log-normal distribution for duration predictions (Phase 1).
+
 - Added client script to dynamically fetch customer details on Quotation when created from Project dashboard.
 - Service and Parts Selector feature providing a unified modal for searching, parsing, and associating services and parts within standard transaction documents.
 - Provisioned Frappe UI for Vue 3 frontend development (superseded by native implementation).

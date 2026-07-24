@@ -11,7 +11,14 @@ class VehicleCheckin(Document):
 
 	def create_project(self):
 		if not self.project:
-			project_name = f"{self.customer} - {self.vehicle}"
+			vehicle_desc = self.get_vehicle_description()
+			base_project_name = f"{self.customer} - {vehicle_desc} - {self.name}" if vehicle_desc else f"{self.customer} - {self.name}"
+			project_name = base_project_name
+			counter = 1
+			while frappe.db.exists("Project", {"project_name": project_name}):
+				counter += 1
+				project_name = f"{base_project_name} ({counter})"
+
 			project = frappe.get_doc({
 				"doctype": "Project",
 				"project_name": project_name,
@@ -21,3 +28,23 @@ class VehicleCheckin(Document):
 			})
 			project.insert(ignore_permissions=True)
 			self.db_set("project", project.name)
+
+	def get_vehicle_description(self):
+		if not self.vehicle:
+			return ""
+		v_details = frappe.db.get_value(
+			"Repair Vehicle",
+			self.vehicle,
+			["manufacturer", "model", "trim"],
+			as_dict=True
+		)
+		if v_details:
+			parts = []
+			for field in ("manufacturer", "model", "trim"):
+				val = (v_details.get(field) or "").strip()
+				if val and val not in parts:
+					parts.append(val)
+			if parts:
+				return " ".join(parts)
+		return self.vehicle
+
