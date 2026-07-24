@@ -51,7 +51,7 @@ class IntegrationTestVehicleCheckin(unittest.TestCase):
 
 		self.assertTrue(vci.project)
 		project = frappe.get_doc("Project", vci.project)
-		expected_project_name = f"_Test Checkin Customer - Tesla Model S Plaid - {vci.name}"
+		expected_project_name = f"_Test Checkin Customer - Model S Plaid - {vci.name}"
 		self.assertEqual(project.project_name, expected_project_name)
 		self.assertEqual(project.customer, "_Test Checkin Customer")
 		self.assertEqual(project.custom_repair_vehicle, "TEST-VIN-VCI-01")
@@ -81,8 +81,9 @@ class IntegrationTestVehicleCheckin(unittest.TestCase):
 		project1 = frappe.get_doc("Project", vci1.project)
 		project2 = frappe.get_doc("Project", vci2.project)
 
-		self.assertEqual(project1.project_name, f"_Test Checkin Customer - Tesla Model S Plaid - {vci1.name}")
-		self.assertEqual(project2.project_name, f"_Test Checkin Customer - Tesla Model S Plaid - {vci2.name}")
+		self.assertEqual(project1.project_name, f"_Test Checkin Customer - Model S Plaid - {vci1.name}")
+		self.assertEqual(project2.project_name, f"_Test Checkin Customer - Model S Plaid - {vci2.name}")
+
 
 
 def run_tests():
