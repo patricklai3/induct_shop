@@ -8,7 +8,5 @@ description: Apply this rule after implementing a feature, modifying DocTypes, o
 Immediately after you complete the implementation of a feature, modify a DocType, or make backend schema changes within the `induct_shop` app, you MUST run the following command to sync the changes so the user can test them manually:
 
 ```bash
-bench execute induct_shop.utilities.fast_sync.run
+docker exec -i devcontainer-frappe-1 bash -c "cd /workspace/development/frappe-bench && bench execute induct_shop.utilities.fast_sync.run"
 ```
-
-Ensure this command is executed from the `/workspace/development/frappe-bench` directory.
