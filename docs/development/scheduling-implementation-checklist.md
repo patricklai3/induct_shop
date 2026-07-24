@@ -27,17 +27,17 @@ references:
 
 **Files**: `induct_shop/scheduling/estimation_light.py`
 
-- [ ] Implement `estimate_duration(flat_rate_minutes, sigma=0.30)` → returns P80 in minutes (integer, rounded up)
-- [ ] Implement `estimate_total_duration(flat_rate_list, sigma=0.30)` → Fenton-Wilkinson multi-operation summation, returns total P80 in minutes
-- [ ] Handle edge cases: empty list returns 0, single-item list bypasses summation, zero/negative FRT raises ValueError
+- [x] Implement `estimate_duration(flat_rate_minutes, sigma=0.30)` → returns P80 in minutes (integer, rounded up)
+- [x] Implement `estimate_total_duration(flat_rate_list, sigma=0.30)` → Fenton-Wilkinson multi-operation summation, returns total P80 in minutes
+- [x] Handle edge cases: empty list returns 0, single-item list bypasses summation, zero/negative FRT raises ValueError
 
 ### Stage 1 — Acceptance Criteria
 
-- [ ] **Unit tests pass** — pure-Python tests (no Frappe test runner needed) covering:
+- [x] **Unit tests pass** — pure-Python tests (no Frappe test runner needed) covering:
   - Single FRT: 60 min → ~77 min P80
   - Multi-FRT summation produces a tighter total than naively summing individual P80s
   - Edge cases (empty list, single item, zero FRT)
-- [ ] Module is importable independently (`python -c "from induct_shop.scheduling.estimation_light import estimate_duration"`)
+- [x] Module is importable independently (`python -c "from induct_shop.scheduling.estimation_light import estimate_duration"`)
 
 ---
 
@@ -49,17 +49,17 @@ references:
 
 **Files**: `induct_shop/api/estimation_service.py`
 
-- [ ] Implement `get_estimate(item_code, **kwargs)` — fetches `custom_frt` from Item, calls `estimate_duration()`, returns P80
-- [ ] Implement `get_total_estimate(item_codes, **kwargs)` — fetches FRT for all items, calls `estimate_total_duration()`, returns total P80
-- [ ] Defensive check: `frappe.db.has_column("Item", "custom_frt")` before querying `custom_frt`
-- [ ] Graceful handling of missing FRT: items with no `custom_frt` are skipped (or use a configurable fallback)
-- [ ] Expose as whitelisted methods if needed for client-side calls
+- [x] Implement `get_estimate(item_code, **kwargs)` — fetches `custom_frt` from Item, calls `estimate_duration()`, returns P80
+- [x] Implement `get_total_estimate(item_codes, **kwargs)` — fetches FRT for all items, calls `estimate_total_duration()`, returns total P80
+- [x] Defensive check: `frappe.db.has_column("Item", "custom_frt")` before querying `custom_frt`
+- [x] Graceful handling of missing FRT: items with no `custom_frt` are skipped (or use a configurable fallback)
+- [x] Expose as whitelisted methods if needed for client-side calls
 
 ### Stage 2 — Acceptance Criteria
 
-- [ ] **Frappe test** — call `get_estimate()` with a known item code that has `custom_frt` set and verify the returned P80
-- [ ] **Frappe test** — call `get_total_estimate()` with multiple item codes and verify summation result
-- [ ] **Defensive check test** — verify no crash when `custom_frt` column doesn't exist
+- [x] **Frappe test** — call `get_estimate()` with a known item code that has `custom_frt` set and verify the returned P80
+- [x] **Frappe test** — call `get_total_estimate()` with multiple item codes and verify summation result
+- [x] **Defensive check test** — verify no crash when `custom_frt` column doesn't exist
 
 ---
 
