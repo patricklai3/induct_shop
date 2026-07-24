@@ -76,22 +76,22 @@ references:
 
 ### Shop Settings (Singleton)
 
-- [ ] Create singleton DocType with fields: `operating_hours_start`, `operating_hours_end`, `break_start`, `break_end`, `default_slot_interval`, `holiday_list`, `scheduling_horizon_days`, `technician_designation`, `enable_technician_capacity`
-- [ ] Set sensible defaults (see §8 for values)
+- [x] Create singleton DocType with fields: `operating_hours_start`, `operating_hours_end`, `break_start`, `break_end`, `default_slot_interval`, `holiday_list`, `scheduling_horizon_days`, `technician_designation`, `enable_technician_capacity`
+- [x] Set sensible defaults (see §8 for values)
 
 ### Service Bay + Equipment Tags
 
-- [ ] Create Service Bay DocType with fields: `bay_name` (naming/title field), `equipment` (child table), `is_active`, `description`
-- [ ] Create `Service Bay Equipment` child table DocType with an equipment tag field
-- [ ] Verify `bay_name` is the naming field and title field
+- [x] Create Service Bay DocType with fields: `bay_name` (naming/title field), `equipment` (child table), `is_active`, `description`
+- [x] Create `Service Bay Equipment` child table DocType with an equipment tag field
+- [x] Verify `bay_name` is the naming field and title field
 
 ### Stage 3 — Acceptance Criteria
 
-- [ ] `bench migrate` succeeds without errors
-- [ ] Shop Settings singleton can be created and saved via the UI
-- [ ] Multiple Service Bays can be created with different equipment tags
-- [ ] Filtering `Service Bay` by `is_active` works correctly
-- [ ] **Reinstall test** — `bench reinstall` (or install on fresh site) creates both DocTypes without manual intervention
+- [x] `bench migrate` succeeds without errors
+- [x] Shop Settings singleton can be created and saved via the UI
+- [x] Multiple Service Bays can be created with different equipment tags
+- [x] Filtering `Service Bay` by `is_active` works correctly
+- [x] **Reinstall test** — `bench reinstall` (or install on fresh site) creates both DocTypes without manual intervention
 
 ---
 

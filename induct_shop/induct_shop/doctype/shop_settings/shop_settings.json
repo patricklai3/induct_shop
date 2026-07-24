@@ -1,0 +1,112 @@
+{
+ "actions": [],
+ "creation": "2026-07-24 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "operating_hours_start",
+  "operating_hours_end",
+  "break_start",
+  "break_end",
+  "cb_slots",
+  "default_slot_interval",
+  "scheduling_horizon_days",
+  "holiday_list",
+  "sb_capacity",
+  "technician_designation",
+  "enable_technician_capacity"
+ ],
+ "fields": [
+  {
+   "default": "08:00:00",
+   "fieldname": "operating_hours_start",
+   "fieldtype": "Time",
+   "label": "Operating Hours Start",
+   "reqd": 1
+  },
+  {
+   "default": "17:00:00",
+   "fieldname": "operating_hours_end",
+   "fieldtype": "Time",
+   "label": "Operating Hours End",
+   "reqd": 1
+  },
+  {
+   "default": "12:00:00",
+   "fieldname": "break_start",
+   "fieldtype": "Time",
+   "label": "Break Start"
+  },
+  {
+   "default": "12:30:00",
+   "fieldname": "break_end",
+   "fieldtype": "Time",
+   "label": "Break End"
+  },
+  {
+   "fieldname": "cb_slots",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "30",
+   "fieldname": "default_slot_interval",
+   "fieldtype": "Int",
+   "label": "Default Slot Interval (Minutes)",
+   "reqd": 1
+  },
+  {
+   "default": "30",
+   "fieldname": "scheduling_horizon_days",
+   "fieldtype": "Int",
+   "label": "Scheduling Horizon (Days)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "holiday_list",
+   "fieldtype": "Link",
+   "label": "Holiday List",
+   "options": "Holiday List"
+  },
+  {
+   "fieldname": "sb_capacity",
+   "fieldtype": "Section Break",
+   "label": "Capacity Settings"
+  },
+  {
+   "default": "Technician",
+   "fieldname": "technician_designation",
+   "fieldtype": "Data",
+   "label": "Technician Designation"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable_technician_capacity",
+   "fieldtype": "Check",
+   "label": "Enable Technician Capacity"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-07-24 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Induct Shop",
+ "name": "Shop Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
