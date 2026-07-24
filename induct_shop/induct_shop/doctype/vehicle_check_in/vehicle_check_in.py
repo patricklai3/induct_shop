@@ -35,16 +35,24 @@ class VehicleCheckin(Document):
 		v_details = frappe.db.get_value(
 			"Repair Vehicle",
 			self.vehicle,
-			["manufacturer", "model", "trim"],
+			["model", "trim"],
 			as_dict=True
 		)
-		if v_details:
+		if v_details and v_details.get("model"):
 			parts = []
-			for field in ("manufacturer", "model", "trim"):
-				val = (v_details.get(field) or "").strip()
-				if val and val not in parts:
-					parts.append(val)
+			model = (v_details.get("model") or "").strip()
+			trim = (v_details.get("trim") or "").strip()
+
+			if model and not model.lower().startswith("tesla"):
+				parts.append("Tesla")
+			if model:
+				parts.append(model)
+			if trim and trim.lower() != "unknown" and trim not in parts:
+				parts.append(trim)
+
 			if parts:
 				return " ".join(parts)
+
 		return self.vehicle
+
 
