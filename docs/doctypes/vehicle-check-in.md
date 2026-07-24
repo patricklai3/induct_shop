@@ -37,7 +37,8 @@ A simple table to document the vehicle's condition upon arrival. This helps prot
 - **Visual Documentation & Media:** Users can attach general photos or evidence directly to specific line items inside the child table to visually document pre-existing issues.
 
 ### 3. Integration & Connections
-- **Automated Project Creation:** Automatically creates a new Project upon saving the check-in record. The Check-in document is linked back directly to this new Project via the `after_insert` server script in the DocType controller. Generated projects use the human-readable naming scheme `"{Customer} - {Make Model Trim} - {Check-in ID}"` (e.g. `"John Doe - Tesla Model Y Performance - CHK-IN-2026-00001"`), ensuring unique naming across multiple check-ins for the same customer and vehicle.
+- **Automated Project Creation:** Automatically creates a new Project upon saving the check-in record. The Check-in document is linked back directly to this new Project via the `after_insert` server script in the DocType controller. Generated projects use the human-readable naming scheme `"{Customer} - {Model Trim} - {Check-in ID}"` (e.g. `"John Doe - Model Y Performance - CHK-IN-2026-00001"`), ensuring unique naming across multiple check-ins for the same customer and vehicle.
+
 
 ## Data Structure / Schema Draft
 
