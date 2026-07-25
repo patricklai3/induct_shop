@@ -10,6 +10,94 @@ class ScheduleEntry(Document):
 
     def validate(self):
         self.validate_unique_sales_order()
+        self.validate_bay_availability()
+        self.validate_technician_pool()
+        self.validate_technician_assignment()
+
+    def validate_bay_availability(self):
+        if not self.service_bay or not self.scheduled_date or not self.scheduled_time:
+            return
+
+        if self.status == "Cancelled":
+            return
+
+        from induct_shop.api.scheduling import check_bay_availability
+
+        duration = self.estimated_duration or 0
+        is_available = check_bay_availability(
+            service_bay=self.service_bay,
+            date=str(self.scheduled_date),
+            start_time=self.scheduled_time,
+            duration_minutes=duration,
+            exclude_entry=self.name,
+        )
+
+        if not is_available:
+            frappe.throw(
+                _("Service Bay '{0}' is already occupied during the requested time window on {1}.").format(
+                    self.service_bay, self.scheduled_date
+                ),
+                frappe.ValidationError,
+            )
+
+    def validate_technician_pool(self):
+        if not self.scheduled_date or not self.scheduled_time or self.status == "Cancelled":
+            return
+
+        from induct_shop.api.scheduling import get_shop_settings
+        settings = get_shop_settings()
+        if not settings.get("enable_technician_capacity"):
+            return
+
+        from induct_shop.api.technician_availability import get_technician_pool_availability
+
+        pool = get_technician_pool_availability(
+            date=str(self.scheduled_date),
+            start_time=self.scheduled_time,
+            duration_minutes=self.estimated_duration or 0,
+            exclude_entry=self.name,
+        )
+
+        if not pool.get("is_available"):
+            frappe.throw(
+                _("Technician pool capacity exhausted for the requested time window on {0}.").format(
+                    self.scheduled_date
+                ),
+                frappe.ValidationError,
+            )
+
+    def validate_technician_assignment(self):
+        if not self.assigned_technician or not self.scheduled_date or not self.scheduled_time or self.status == "Cancelled":
+            return
+
+        from induct_shop.api.technician_availability import check_technician_availability
+
+        check = check_technician_availability(
+            employee=self.assigned_technician,
+            date=str(self.scheduled_date),
+            start_time=self.scheduled_time,
+            duration_minutes=self.estimated_duration or 0,
+            exclude_entry=self.name,
+        )
+
+        if check.get("on_leave"):
+            frappe.msgprint(
+                _("Warning: Assigned technician '{0}' is on approved leave on {1}.").format(
+                    self.assigned_technician, self.scheduled_date
+                ),
+                alert=True,
+                indicator="red",
+            )
+        elif check.get("conflicts"):
+            frappe.msgprint(
+                _("Warning: Assigned technician '{0}' has an overlapping Schedule Entry during this time window.").format(
+                    self.assigned_technician
+                ),
+                alert=True,
+                indicator="orange",
+            )
+
+
 
     def populate_from_sales_order(self):
         if not self.sales_order:

@@ -128,35 +128,36 @@ references:
 
 **Files**: `induct_shop/api/scheduling.py`
 
-- [ ] Implement `effective_end_time(start_time, duration_minutes, break_start, break_end)` per §7.3
-- [ ] Implement `check_bay_availability(service_bay, date, start_time, duration_minutes, exclude_entry)` → returns `True`/`False`
-- [ ] Implement `auto_assign_bay(date, start_time, duration_minutes, required_tags)` → returns `bay_name` or raises ValidationError (technician pool check deferred to Stage 6)
-- [ ] Implement `get_available_bays(date, start_time, duration_minutes, required_tags)` → list of available bays with equipment tags
-- [ ] Implement `get_available_slots(date, duration_minutes, required_tags, service_bay)` → list of enriched slot dicts (bay data only for now; technician fields can be stubbed)
-- [ ] Wire `check_bay_availability()` into Schedule Entry's `validate` hook — raise `frappe.ValidationError` on bay overlap
+- [x] Implement `effective_end_time(start_time, duration_minutes, break_start, break_end)` per §7.3
+- [x] Implement `check_bay_availability(service_bay, date, start_time, duration_minutes, exclude_entry)` → returns `True`/`False`
+- [x] Implement `auto_assign_bay(date, start_time, duration_minutes, required_tags)` → returns `bay_name` or raises ValidationError (technician pool check deferred to Stage 6)
+- [x] Implement `get_available_bays(date, start_time, duration_minutes, required_tags)` → list of available bays with equipment tags
+- [x] Implement `get_available_slots(date, duration_minutes, required_tags, service_bay)` → list of enriched slot dicts (bay data only for now; technician fields can be stubbed)
+- [x] Wire `check_bay_availability()` into Schedule Entry's `validate` hook — raise `frappe.ValidationError` on bay overlap
 
 ### Stage 5 — Acceptance Criteria
 
-- [ ] **Lunch-aware time tests**:
+- [x] **Lunch-aware time tests**:
   - Job ending before lunch → no adjustment
   - Job spanning lunch → break duration added to effective end
   - Job starting after lunch → no adjustment
-- [ ] **Bay overlap tests**:
+- [x] **Bay overlap tests**:
   - Two entries on the same bay at the same time → blocked
   - Two entries on the same bay at non-overlapping times → allowed
   - Two entries on different bays at the same time → allowed
   - Rescheduling an existing entry (exclude_entry) → does not conflict with itself
-- [ ] **Auto-assign tests**:
+- [x] **Auto-assign tests**:
   - Assigns first available capable bay
   - Raises error when no capable bays are available
   - Equipment tag filtering works (bay without required tag is skipped)
-- [ ] **Available slots**:
+- [x] **Available slots**:
   - Slots during lunch break are excluded
   - Fully booked slots are excluded
   - Returned slot data includes `available_bays` count
-- [ ] Schedule Entry `validate` rejects save on bay conflict
+- [x] Schedule Entry `validate` rejects save on bay conflict
 
 ---
+
 
 ## Stage 6 — Technician Capacity APIs
 
@@ -166,29 +167,30 @@ references:
 
 **Files**: `induct_shop/api/technician_availability.py`
 
-- [ ] Implement `get_active_technicians(date)` — Employee designation filter + leave flagging
-- [ ] Implement `get_technician_pool_availability(date, start_time, duration_minutes)` — pool-level gating (counts total, on-leave, on-duty, occupied, available)
-- [ ] Implement `check_technician_availability(employee, date, start_time, duration_minutes, exclude_entry)` — individual overlap + leave check
-- [ ] Implement `get_technician_queue(employee, date)` — personal work queue with utilization
-- [ ] Implement `get_daily_technician_overview(date)` — shop-wide technician dashboard data
-- [ ] Wire technician pool gating into `auto_assign_bay()` (from Stage 5) when `enable_technician_capacity` is on
-- [ ] Wire technician pool check into Schedule Entry `validate` hook (hard block when pool is exhausted)
-- [ ] Wire individual technician check into Schedule Entry `validate` hook (soft warning on overlap/leave)
-- [ ] Update `get_available_slots()` to include technician availability data in returned slots (`available_technicians`, `effective_capacity`, `bottleneck`)
+- [x] Implement `get_active_technicians(date)` — Employee designation filter + leave flagging
+- [x] Implement `get_technician_pool_availability(date, start_time, duration_minutes)` — pool-level gating (counts total, on-leave, on-duty, occupied, available)
+- [x] Implement `check_technician_availability(employee, date, start_time, duration_minutes, exclude_entry)` — individual overlap + leave check
+- [x] Implement `get_technician_queue(employee, date)` — personal work queue with utilization
+- [x] Implement `get_daily_technician_overview(date)` — shop-wide technician dashboard data
+- [x] Wire technician pool gating into `auto_assign_bay()` (from Stage 5) when `enable_technician_capacity` is on
+- [x] Wire technician pool check into Schedule Entry `validate` hook (hard block when pool is exhausted)
+- [x] Wire individual technician check into Schedule Entry `validate` hook (soft warning on overlap/leave)
+- [x] Update `get_available_slots()` to include technician availability data in returned slots (`available_technicians`, `effective_capacity`, `bottleneck`)
 
 ### Stage 6 — Acceptance Criteria
 
-- [ ] **Roster test** — only employees with matching designation and `Active` status are returned
-- [ ] **Leave integration test** — employee with approved Leave Application for a date is flagged as on-leave; half-day leave correctly handled
-- [ ] **Pool gating test**:
+- [x] **Roster test** — only employees with matching designation and `Active` status are returned
+- [x] **Leave integration test** — employee with approved Leave Application for a date is flagged as on-leave; half-day leave correctly handled
+- [x] **Pool gating test**:
   - With 2 technicians on duty and 2 already occupied at time T → pool exhausted, slot unavailable
   - With `enable_technician_capacity` unchecked → technician checks are skipped entirely
-- [ ] **Individual overlap test** — assigning a technician who already has an overlapping Schedule Entry produces a soft warning (not a hard block)
-- [ ] **Dual-resource slots** — `get_available_slots()` returns correct `effective_capacity = min(free_bays, available_techs)` and identifies the bottleneck
-- [ ] **Work queue test** — `get_technician_queue()` returns entries in chronological order with utilization percentage
-- [ ] Schedule Entry `validate` with `enable_technician_capacity=1` blocks save when tech pool is exhausted
+- [x] **Individual overlap test** — assigning a technician who already has an overlapping Schedule Entry produces a soft warning (not a hard block)
+- [x] **Dual-resource slots** — `get_available_slots()` returns correct `effective_capacity = min(free_bays, available_techs)` and identifies the bottleneck
+- [x] **Work queue test** — `get_technician_queue()` returns entries in chronological order with utilization percentage
+- [x] Schedule Entry `validate` with `enable_technician_capacity=1` blocks save when tech pool is exhausted
 
 ---
+
 
 ## Stage 7 — Sales Order Integration
 
