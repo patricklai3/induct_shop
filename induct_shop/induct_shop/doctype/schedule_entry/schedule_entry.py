@@ -205,7 +205,11 @@ class ScheduleEntry(Document):
 
         existing = frappe.db.get_value(
             "Schedule Entry",
-            {"sales_order": self.sales_order, "name": ["!=", self.name or ""]},
+            {
+                "sales_order": self.sales_order,
+                "name": ["!=", self.name or ""],
+                "docstatus": ["!=", 2],
+            },
         )
         if existing:
             frappe.throw(
