@@ -204,31 +204,31 @@ references:
 
 ### Schedule Service Button
 
-- [ ] Add client script via `doctype_js` hook
-- [ ] Button appears only when SO is submitted (`docstatus == 1`) and no Schedule Entry exists for it
-- [ ] On click, opens the Schedule Service dialog (basic version — full UI polish in Stage 8):
+- [x] Add client script via `doctype_js` hook
+- [x] Button appears only when SO is submitted (`docstatus == 1`) and no Schedule Entry exists for it
+- [x] On click, opens the Schedule Service dialog (basic version — full UI polish in Stage 8):
   - Date picker (defaults to today or next business day)
   - Estimated duration badge (calls `get_total_estimate()`)
   - Available slots display (calls `get_available_slots()`)
   - Optional technician selector
   - Notes field
-- [ ] On submit: calls `auto_assign_bay()`, creates Schedule Entry, navigates to it
-- [ ] Button hidden after a Schedule Entry is created
+- [x] On submit: calls `auto_assign_bay()`, creates Schedule Entry, navigates to it
+- [x] Button hidden after a Schedule Entry is created
 
 ### Amendment Handling
 
-- [ ] `doc_events` hook on Sales Order `on_submit` — when the SO is an amendment, update linked Schedule Entry status to `Needs Review`
-- [ ] Recalculate `estimated_duration` on the Schedule Entry from amended SO items
-- [ ] If new duration causes bay overlap, add a comment to the Schedule Entry alerting staff
+- [x] `doc_events` hook on Sales Order `on_submit` — when the SO is an amendment, update linked Schedule Entry status to `Needs Review`
+- [x] Recalculate `estimated_duration` on the Schedule Entry from amended SO items
+- [x] If new duration causes bay overlap, add a comment to the Schedule Entry alerting staff
 
 ### Stage 7 — Acceptance Criteria
 
-- [ ] Button visible on submitted SO, hidden otherwise
-- [ ] Button hidden when a Schedule Entry already exists for the SO
-- [ ] Full round-trip: click button → select date/slot → Schedule Entry created with correct bay, duration, SO link
-- [ ] Amendment flow: amend SO → linked Schedule Entry status changes to `Needs Review`, duration recalculated
-- [ ] Amendment overlap detection adds a comment when applicable
-- [ ] `hooks.py` entries survive `bench migrate`
+- [x] Button visible on submitted SO, hidden otherwise
+- [x] Button hidden when a Schedule Entry already exists for the SO
+- [x] Full round-trip: click button → select date/slot → Schedule Entry created with correct bay, duration, SO link
+- [x] Amendment flow: amend SO → linked Schedule Entry status changes to `Needs Review`, duration recalculated
+- [x] Amendment overlap detection adds a comment when applicable
+- [x] `hooks.py` entries survive `bench migrate`
 
 ---
 
@@ -247,6 +247,7 @@ references:
 - [ ] Technician utilization preview when a technician is selected (name, job count, total time, utilization %)
 - [ ] Yellow warning banner when selected technician has an overlap at the chosen slot
 - [ ] Holiday awareness — no slots shown on holidays (from Shop Settings → Holiday List)
+- [ ] Auto-detect required equipment tags from SO items and pass to `get_available_slots()` / `auto_assign_bay()` — deferred from Stage 7
 
 ### Stage 8 — Acceptance Criteria
 

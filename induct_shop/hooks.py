@@ -51,7 +51,10 @@ doctype_js = {
         "public/js/service_parts_selector.bundle.js",
         "public/js/quotation.js"
     ],
-    "Sales Order": "public/js/service_parts_selector.bundle.js",
+    "Sales Order": [
+        "public/js/service_parts_selector.bundle.js",
+        "public/js/sales_order.js"
+    ],
     "Sales Invoice": "public/js/service_parts_selector.bundle.js",
     "Purchase Receipt": "public/js/service_parts_selector.bundle.js",
     "Stock Entry": "public/js/service_parts_selector.bundle.js"
@@ -178,7 +181,10 @@ doc_events = {
 	},
 	"Sales Order": {
 		"validate": "induct_shop.api.service_parts_selector.auto_assign_parent_services",
-		"on_submit": "induct_shop.api.service_parts_selector.update_associations"
+		"on_submit": [
+			"induct_shop.api.service_parts_selector.update_associations",
+			"induct_shop.api.sales_order_hooks.handle_amendment"
+		]
 	}
 }
 
