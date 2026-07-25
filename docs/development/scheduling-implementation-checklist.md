@@ -240,23 +240,23 @@ references:
 
 **Files**: `induct_shop/public/js/sales_order.js` (extend dialog)
 
-- [ ] Slot grid with clickable time slot buttons showing per-slot `available_bays` and `available_technicians`
-- [ ] Dual-resource capacity indicator in the header (slot count + bottleneck text)
-- [ ] Lunch break slots excluded; label showing the excluded window
-- [ ] Date navigation (prev/next day arrows)
-- [ ] Technician utilization preview when a technician is selected (name, job count, total time, utilization %)
-- [ ] Yellow warning banner when selected technician has an overlap at the chosen slot
-- [ ] Holiday awareness — no slots shown on holidays (from Shop Settings → Holiday List)
-- [ ] Auto-detect required equipment tags from SO items and pass to `get_available_slots()` / `auto_assign_bay()` — deferred from Stage 7
+- [x] Slot grid with clickable time slot buttons showing per-slot `available_bays` and `available_technicians`
+- [x] Dual-resource capacity indicator in the header (slot count + bottleneck text)
+- [x] Lunch break slots excluded; label showing the excluded window
+- [x] Date navigation (prev/next day arrows)
+- [x] Technician utilization preview when a technician is selected (name, job count, total time, utilization %)
+- [x] Yellow warning banner when selected technician has an overlap at the chosen slot
+- [x] Holiday awareness — no slots shown on holidays (from Shop Settings → Holiday List)
+- [x] Auto-detect required equipment tags from SO items and pass to `get_available_slots()` / `auto_assign_bay()` — deferred from Stage 7
 
 ### Stage 8 — Acceptance Criteria
 
-- [ ] Visual match with the wireframe in §9.1
-- [ ] Slot grid updates dynamically when date is changed
-- [ ] Selecting a slot + submitting creates a valid Schedule Entry (end-to-end)
-- [ ] Technician utilization preview displays correct data
-- [ ] Overlap warning appears for conflicting technician assignment
-- [ ] No slots rendered during lunch window or on holidays
+- [x] Visual match with the wireframe in §9.1
+- [x] Slot grid updates dynamically when date is changed
+- [x] Selecting a slot + submitting creates a valid Schedule Entry (end-to-end)
+- [x] Technician utilization preview displays correct data
+- [x] Overlap warning appears for conflicting technician assignment
+- [x] No slots rendered during lunch window or on holidays
 
 ---
 

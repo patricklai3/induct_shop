@@ -48,6 +48,7 @@ def get_shop_settings() -> Dict[str, Any]:
         "break_end": timedelta(hours=12, minutes=30),
         "default_slot_interval": 30,
         "enable_technician_capacity": 1,
+        "holiday_list": None,
     }
 
     if frappe.db.exists("DocType", "Shop Settings"):
@@ -69,6 +70,8 @@ def get_shop_settings() -> Dict[str, Any]:
                 settings["default_slot_interval"] = int(doc.default_slot_interval)
             if hasattr(doc, "enable_technician_capacity"):
                 settings["enable_technician_capacity"] = doc.enable_technician_capacity
+            if hasattr(doc, "holiday_list") and doc.holiday_list:
+                settings["holiday_list"] = doc.holiday_list
         except Exception:
             pass
 
@@ -317,4 +320,64 @@ def get_available_slots(
         curr_time += timedelta(minutes=interval)
 
     return slots
+
+
+@frappe.whitelist()
+def get_required_equipment_tags(sales_order: str) -> List[str]:
+    """
+    Returns deduplicated list of equipment tags required for all service items in the Sales Order.
+    """
+    if not sales_order or not frappe.db.exists("Sales Order", sales_order):
+        return []
+
+    items = frappe.get_all(
+        "Sales Order Item",
+        filters={"parent": sales_order},
+        pluck="item_code",
+    )
+
+    if not items:
+        return []
+
+    unique_item_codes = list(set(filter(None, items)))
+    tags = set()
+
+    if frappe.db.exists("DocType", "Service Equipment Requirement"):
+        reqs = frappe.get_all(
+            "Service Equipment Requirement",
+            filters={"parent": ["in", unique_item_codes], "parenttype": "Item"},
+            pluck="equipment_tag",
+        )
+        for tag in reqs:
+            if tag:
+                tags.add(tag)
+
+    return sorted(list(tags))
+
+
+@frappe.whitelist()
+def is_holiday(date: str) -> Dict[str, Any]:
+    """
+    Checks if a given date is a holiday according to Shop Settings -> holiday_list.
+    Returns dict: {"is_holiday": bool, "description": str or None}
+    """
+    settings = get_shop_settings()
+    holiday_list = settings.get("holiday_list")
+    if not holiday_list or not date:
+        return {"is_holiday": False, "description": None}
+
+    if frappe.db.exists("DocType", "Holiday"):
+        holiday = frappe.db.get_value(
+            "Holiday",
+            {"parent": holiday_list, "holiday_date": date},
+            ["description"],
+            as_dict=True,
+        )
+        if holiday:
+            return {
+                "is_holiday": True,
+                "description": holiday.get("description") or _("Holiday"),
+            }
+
+    return {"is_holiday": False, "description": None}
 

@@ -269,6 +269,18 @@ class TestSchedulingApi(unittest.TestCase):
         self.assertNotIn("09:30", bay1_times)
         self.assertIn("10:00", bay1_times)
 
+    # --- 5. Equipment Tag & Holiday API Tests ---
+    def test_get_required_equipment_tags(self):
+        from induct_shop.api.scheduling import get_required_equipment_tags
+        tags = get_required_equipment_tags(self.test_so1)
+        self.assertIsInstance(tags, list)
+
+    def test_is_holiday(self):
+        from induct_shop.api.scheduling import is_holiday
+        res = is_holiday(frappe.utils.today())
+        self.assertIn("is_holiday", res)
+        self.assertIn("description", res)
+
 
 if __name__ == "__main__":
     unittest.main()
