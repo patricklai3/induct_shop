@@ -14,147 +14,26 @@ from induct_shop.api.technician_availability import (
     get_technician_queue,
     get_daily_technician_overview,
 )
+from induct_shop.tests.test_fixtures import setup_all, teardown_transactional, create_test_sales_order, PREFIX
 
 
 class TestTechnicianAvailabilityApi(unittest.TestCase):
     def setUp(self):
-        # 1. Ensure Shop Settings exists and has default values
-        if frappe.db.exists("DocType", "Shop Settings"):
-            doc = frappe.get_single("Shop Settings")
-            doc.technician_designation = "Technician"
-            doc.enable_technician_capacity = 1
-            doc.save(ignore_permissions=True)
+        self.emp_map = setup_all()
+        self.tech1_id = self.emp_map["tech_active_1"]
+        self.tech2_id = self.emp_map["tech_active_2"]
+        self.tech3_id = self.emp_map["tech_inactive"]
 
-        # 2. Ensure Designation "Technician" exists
-        if not frappe.db.exists("Designation", "Technician"):
-            frappe.get_doc({
-                "doctype": "Designation",
-                "designation_name": "Technician",
-            }).insert(ignore_permissions=True)
+        self.bay1 = f"{PREFIX}Bay 1"
+        self.bay2 = f"{PREFIX}Bay 2"
 
-        company = frappe.db.get_single_value("Global Defaults", "default_company") or "Wind Power LLC"
-
-        # 3. Create test Employees
-        # Tech 1: Active
-        self.tech1_id = frappe.db.get_value("Employee", {"first_name": "Tech", "last_name": "One", "status": "Active"})
-        if not self.tech1_id:
-            doc = frappe.get_doc({
-                "doctype": "Employee",
-                "first_name": "Tech",
-                "last_name": "One",
-                "employee_name": "Tech One",
-                "gender": "Male",
-                "date_of_birth": "1990-01-01",
-                "date_of_joining": "2020-01-01",
-                "status": "Active",
-                "designation": "Technician",
-                "company": company,
-            }).insert(ignore_permissions=True)
-            self.tech1_id = doc.name
-
-        # Tech 2: Active
-        self.tech2_id = frappe.db.get_value("Employee", {"first_name": "Tech", "last_name": "Two", "status": "Active"})
-        if not self.tech2_id:
-            doc = frappe.get_doc({
-                "doctype": "Employee",
-                "first_name": "Tech",
-                "last_name": "Two",
-                "employee_name": "Tech Two",
-                "gender": "Female",
-                "date_of_birth": "1992-02-02",
-                "date_of_joining": "2021-01-01",
-                "status": "Active",
-                "designation": "Technician",
-                "company": company,
-            }).insert(ignore_permissions=True)
-            self.tech2_id = doc.name
-
-        # Tech 3: Inactive
-        self.tech3_id = frappe.db.get_value("Employee", {"first_name": "Tech", "last_name": "Three", "status": "Left"})
-        if not self.tech3_id:
-            doc = frappe.get_doc({
-                "doctype": "Employee",
-                "first_name": "Tech",
-                "last_name": "Three",
-                "employee_name": "Tech Three",
-                "gender": "Male",
-                "date_of_birth": "1988-03-03",
-                "date_of_joining": "2019-01-01",
-                "relieving_date": "2022-01-01",
-                "status": "Left",
-                "designation": "Technician",
-                "company": company,
-            }).insert(ignore_permissions=True)
-            self.tech3_id = doc.name
-
-        # 4. Ensure test Service Bays exist
-        if not frappe.db.exists("Service Bay", "Test Tech Bay 1"):
-            frappe.get_doc({
-                "doctype": "Service Bay",
-                "bay_name": "Test Tech Bay 1",
-                "is_active": 1,
-            }).insert(ignore_permissions=True)
-        else:
-            frappe.db.set_value("Service Bay", "Test Tech Bay 1", "is_active", 1)
-
-        if not frappe.db.exists("Service Bay", "Test Tech Bay 2"):
-            frappe.get_doc({
-                "doctype": "Service Bay",
-                "bay_name": "Test Tech Bay 2",
-                "is_active": 1,
-            }).insert(ignore_permissions=True)
-        else:
-            frappe.db.set_value("Service Bay", "Test Tech Bay 2", "is_active", 1)
-
-        if not frappe.db.exists("Service Bay", "Test Tech Bay 3"):
-            frappe.get_doc({
-                "doctype": "Service Bay",
-                "bay_name": "Test Tech Bay 3",
-                "is_active": 1,
-            }).insert(ignore_permissions=True)
-        else:
-            frappe.db.set_value("Service Bay", "Test Tech Bay 3", "is_active", 1)
-
-        # Clean up test Schedule Entries and Leave Applications
-        frappe.db.sql("DELETE FROM `tabSchedule Entry` WHERE service_bay LIKE 'Test Tech Bay%'")
-        frappe.db.sql("DELETE FROM `tabLeave Application` WHERE employee IN (%s, %s, %s)", (self.tech1_id, self.tech2_id, self.tech3_id))
-        frappe.db.commit()
-
-        # 5. Ensure test Sales Orders exist
-        if not frappe.db.exists("Customer", "_Test Tech Customer"):
-            frappe.get_doc({
-                "doctype": "Customer",
-                "customer_name": "_Test Tech Customer",
-                "customer_group": "Commercial",
-                "territory": "All Territories"
-            }).insert(ignore_permissions=True)
-
-        self.test_so1 = self._get_or_create_sales_order("_Test Tech Customer", "SO-TECH-01")
-        self.test_so2 = self._get_or_create_sales_order("_Test Tech Customer", "SO-TECH-02")
-        self.test_so3 = self._get_or_create_sales_order("_Test Tech Customer", "SO-TECH-03")
-
-    def _get_or_create_sales_order(self, customer, po_no):
-        so_name = frappe.db.get_value("Sales Order", {"customer": customer, "po_no": po_no})
-        if not so_name:
-            so = frappe.get_doc({
-                "doctype": "Sales Order",
-                "company": frappe.db.get_single_value("Global Defaults", "default_company") or "Wind Power LLC",
-                "customer": customer,
-                "po_no": po_no,
-                "delivery_date": frappe.utils.add_days(frappe.utils.today(), 1),
-                "items": [{
-                    "item_code": frappe.db.get_value("Item", {}, "name"),
-                    "qty": 1,
-                    "rate": 100
-                }]
-            }).insert(ignore_permissions=True)
-            so_name = so.name
-        return so_name
+        # On-demand Sales Orders
+        self.test_so1 = create_test_sales_order(f"{PREFIX}SO-TECH-01")
+        self.test_so2 = create_test_sales_order(f"{PREFIX}SO-TECH-02")
+        self.test_so3 = create_test_sales_order(f"{PREFIX}SO-TECH-03")
 
     def tearDown(self):
-        frappe.db.sql("DELETE FROM `tabSchedule Entry` WHERE service_bay LIKE 'Test Tech Bay%'")
-        frappe.db.sql("DELETE FROM `tabLeave Application` WHERE employee IN (%s, %s, %s)", (self.tech1_id, self.tech2_id, self.tech3_id))
-        frappe.db.commit()
+        teardown_transactional([self.tech1_id, self.tech2_id, self.tech3_id])
 
     # --- 1. Roster Test ---
     def test_get_active_technicians(self):
@@ -197,7 +76,6 @@ class TestTechnicianAvailabilityApi(unittest.TestCase):
         self.assertFalse(chk["is_available"])
         self.assertEqual(chk["reason"], "on_leave")
 
-
     # --- 3. Pool Gating Test ---
     def test_pool_gating_capacity(self):
         date = frappe.utils.today()
@@ -210,50 +88,55 @@ class TestTechnicianAvailabilityApi(unittest.TestCase):
         active_techs = get_active_technicians(date=date)
         on_duty_techs = [t["employee"] for t in active_techs if not t["on_leave"]]
 
-        # Fill all on-duty technicians
-        for idx, tech_id in enumerate(on_duty_techs):
-            bay_name = f"Test Tech Bay Pool {idx + 1}"
-            if not frappe.db.exists("Service Bay", bay_name):
+        available_bays = frappe.get_all("Service Bay", filters={"is_active": 1}, pluck="name")
+        extra_bays_created = []
+        try:
+            while len(available_bays) < len(on_duty_techs):
+                new_bay = f"{PREFIX}Extra_Bay_{len(available_bays)+1}"
                 frappe.get_doc({
                     "doctype": "Service Bay",
-                    "bay_name": bay_name,
-                    "is_active": 1,
+                    "bay_name": new_bay,
+                    "is_active": 1
                 }).insert(ignore_permissions=True)
-            else:
-                frappe.db.set_value("Service Bay", bay_name, "is_active", 1)
-            so_name = self._get_or_create_sales_order("_Test Tech Customer", f"SO-TECH-POOL-{idx}")
-            frappe.get_doc({
+                available_bays.append(new_bay)
+                extra_bays_created.append(new_bay)
+
+            for idx, tech_id in enumerate(on_duty_techs):
+                bay_name = available_bays[idx]
+                so_name = create_test_sales_order(f"{PREFIX}SO-TECH-POOL-{idx}")
+                frappe.get_doc({
+                    "doctype": "Schedule Entry",
+                    "sales_order": so_name,
+                    "scheduled_date": date,
+                    "scheduled_time": "08:00:00",
+                    "estimated_duration": 120,
+                    "service_bay": bay_name,
+                    "assigned_technician": tech_id,
+                    "status": "Scheduled",
+                }).insert(ignore_permissions=True)
+
+            # Now all active techs are occupied at 08:00
+            pool = get_technician_pool_availability(date, "08:00:00", 120)
+            self.assertFalse(pool["is_available"])
+            self.assertEqual(pool["available"], 0)
+
+            # Creating another Schedule Entry without a technician when pool is full should be blocked
+            extra_so = create_test_sales_order(f"{PREFIX}SO-TECH-EXTRA")
+            se_extra = frappe.get_doc({
                 "doctype": "Schedule Entry",
-                "sales_order": so_name,
+                "sales_order": extra_so,
                 "scheduled_date": date,
                 "scheduled_time": "08:00:00",
                 "estimated_duration": 120,
-                "service_bay": bay_name,
-                "assigned_technician": tech_id,
+                "service_bay": available_bays[0],
                 "status": "Scheduled",
-            }).insert(ignore_permissions=True)
-
-
-
-        # Now all active techs are occupied at 08:00
-        pool = get_technician_pool_availability(date, "08:00:00", 120)
-        self.assertFalse(pool["is_available"])
-        self.assertEqual(pool["available"], 0)
-
-        # Creating another Schedule Entry without a technician when pool is full should be blocked
-        # Need a fresh sales order so unique constraint on sales_order doesn't fail
-        extra_so = self._get_or_create_sales_order("_Test Tech Customer", "SO-TECH-EXTRA")
-        se_extra = frappe.get_doc({
-            "doctype": "Schedule Entry",
-            "sales_order": extra_so,
-            "scheduled_date": date,
-            "scheduled_time": "08:00:00",
-            "estimated_duration": 120,
-            "service_bay": "Test Tech Bay 1",
-            "status": "Scheduled",
-        })
-        with self.assertRaises(frappe.ValidationError):
-            se_extra.insert(ignore_permissions=True)
+            })
+            with self.assertRaises(frappe.ValidationError):
+                se_extra.insert(ignore_permissions=True)
+        finally:
+            for b in extra_bays_created:
+                if frappe.db.exists("Service Bay", b):
+                    frappe.delete_doc("Service Bay", b, force=True, ignore_permissions=True)
 
     def test_pool_gating_disabled_toggle(self):
         date = frappe.utils.today()
@@ -283,7 +166,7 @@ class TestTechnicianAvailabilityApi(unittest.TestCase):
             "scheduled_date": date,
             "scheduled_time": "08:00:00",
             "estimated_duration": 120,
-            "service_bay": "Test Tech Bay 1",
+            "service_bay": self.bay1,
             "assigned_technician": self.tech1_id,
             "status": "Scheduled",
         }).insert(ignore_permissions=True)
@@ -319,7 +202,7 @@ class TestTechnicianAvailabilityApi(unittest.TestCase):
             "scheduled_date": date,
             "scheduled_time": "08:00:00",
             "estimated_duration": 60,
-            "service_bay": "Test Tech Bay 1",
+            "service_bay": self.bay1,
             "assigned_technician": self.tech1_id,
             "status": "Scheduled",
         }).insert(ignore_permissions=True)

@@ -1,8 +1,12 @@
 import unittest
 import frappe
+from induct_shop.tests.test_fixtures import setup_all
 
 
 class TestShopSettings(unittest.TestCase):
+	def setUp(self):
+		setup_all()
+
 	def test_shop_settings_defaults(self):
 		settings = frappe.get_single("Shop Settings")
 		self.assertIsNotNone(settings)

@@ -5,40 +5,12 @@ from induct_shop.api.service_parts_selector import (
     update_service_equipment_requirements,
     search_catalog
 )
+from induct_shop.tests.test_fixtures import setup_all, PREFIX
 
 class TestEquipmentTags(unittest.TestCase):
     def setUp(self):
-        # Ensure 'Lift' equipment tag exists
-        if not frappe.db.exists("Equipment Tag", "Lift"):
-            doc = frappe.get_doc({
-                "doctype": "Equipment Tag",
-                "tag_name": "Lift",
-                "description": "Automotive lift"
-            })
-            doc.insert(ignore_permissions=True)
-            
-        if not frappe.db.exists("Equipment Tag", "Alignment Rack"):
-            doc = frappe.get_doc({
-                "doctype": "Equipment Tag",
-                "tag_name": "Alignment Rack",
-                "description": "Wheel alignment rack"
-            })
-            doc.insert(ignore_permissions=True)
-
-        # Create dummy service item for testing
-        if not frappe.db.exists("Item", "TEST_SERVICE_001"):
-            item = frappe.get_doc({
-                "doctype": "Item",
-                "item_code": "TEST_SERVICE_001",
-                "item_name": "Test Brake Service",
-                "description": "Test brake service description",
-                "item_group": "Services",
-                "is_stock_item": 0,
-                "is_sales_item": 1,
-                "stock_uom": "Hour",
-                "custom_frt": 1.5
-            })
-            item.insert(ignore_permissions=True)
+        setup_all()
+        self.item_code = f"{PREFIX}SERVICE_001"
 
     def test_get_all_equipment_tags(self):
         tags = get_all_equipment_tags()
@@ -48,24 +20,24 @@ class TestEquipmentTags(unittest.TestCase):
 
     def test_update_service_equipment_requirements(self):
         # Update test service with Lift and Alignment Rack
-        res = update_service_equipment_requirements("TEST_SERVICE_001", ["Lift", "Alignment Rack"])
-        self.assertEqual(res["item_code"], "TEST_SERVICE_001")
+        res = update_service_equipment_requirements(self.item_code, ["Lift", "Alignment Rack"])
+        self.assertEqual(res["item_code"], self.item_code)
         self.assertEqual(res["equipment_requirements"], ["Lift", "Alignment Rack"])
         self.assertFalse(res["is_mobile_capable"])
 
         # Search catalog and verify response
-        search_results = search_catalog("TEST_SERVICE_001")
-        matched = next((r for r in search_results if r["item_code"] == "TEST_SERVICE_001"), None)
+        search_results = search_catalog(self.item_code)
+        matched = next((r for r in search_results if r["item_code"] == self.item_code), None)
         self.assertIsNotNone(matched)
         self.assertCountEqual(matched["equipment_requirements"], ["Lift", "Alignment Rack"])
         self.assertEqual(matched["custom_is_mobile_capable"], 0)
 
         # Clear requirements and verify derived mobile capability
-        res_clear = update_service_equipment_requirements("TEST_SERVICE_001", [])
+        res_clear = update_service_equipment_requirements(self.item_code, [])
         self.assertTrue(res_clear["is_mobile_capable"])
 
-        search_results_cleared = search_catalog("TEST_SERVICE_001")
-        matched_cleared = next((r for r in search_results_cleared if r["item_code"] == "TEST_SERVICE_001"), None)
+        search_results_cleared = search_catalog(self.item_code)
+        matched_cleared = next((r for r in search_results_cleared if r["item_code"] == self.item_code), None)
         self.assertEqual(matched_cleared["equipment_requirements"], [])
         self.assertEqual(matched_cleared["custom_is_mobile_capable"], 1)
 

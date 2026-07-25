@@ -1,59 +1,53 @@
 import unittest
 import frappe
+from induct_shop.tests.test_fixtures import setup_all, PREFIX
 
 
 class TestServiceBay(unittest.TestCase):
 	def setUp(self):
-		# Ensure Equipment Tag 'Lift' exists for testing child table
-		if not frappe.db.exists("Equipment Tag", "Test Lift"):
-			doc = frappe.get_doc({
-				"doctype": "Equipment Tag",
-				"tag_name": "Test Lift",
-				"description": "Test Automotive lift"
-			})
-			doc.insert(ignore_permissions=True)
+		setup_all()
+		self.bay_alpha = f"{PREFIX}Test Bay Alpha"
+		self.bay_beta = f"{PREFIX}Test Bay Beta"
 
 	def tearDown(self):
-		if frappe.db.exists("Service Bay", "Test Bay Alpha"):
-			frappe.delete_doc("Service Bay", "Test Bay Alpha", force=True, ignore_permissions=True)
-		if frappe.db.exists("Service Bay", "Test Bay Beta"):
-			frappe.delete_doc("Service Bay", "Test Bay Beta", force=True, ignore_permissions=True)
-		if frappe.db.exists("Equipment Tag", "Test Lift"):
-			frappe.delete_doc("Equipment Tag", "Test Lift", force=True, ignore_permissions=True)
+		if frappe.db.exists("Service Bay", self.bay_alpha):
+			frappe.delete_doc("Service Bay", self.bay_alpha, force=True, ignore_permissions=True)
+		if frappe.db.exists("Service Bay", self.bay_beta):
+			frappe.delete_doc("Service Bay", self.bay_beta, force=True, ignore_permissions=True)
 
 	def test_service_bay_creation_and_equipment(self):
 		bay = frappe.get_doc({
 			"doctype": "Service Bay",
-			"bay_name": "Test Bay Alpha",
+			"bay_name": self.bay_alpha,
 			"is_active": 1,
 			"description": "Primary test bay with lift",
 			"equipment": [
-				{"equipment_tag": "Test Lift"}
+				{"equipment_tag": "Lift"}
 			]
 		})
 		bay.insert(ignore_permissions=True)
 
-		self.assertTrue(frappe.db.exists("Service Bay", "Test Bay Alpha"))
-		saved_bay = frappe.get_doc("Service Bay", "Test Bay Alpha")
+		self.assertTrue(frappe.db.exists("Service Bay", self.bay_alpha))
+		saved_bay = frappe.get_doc("Service Bay", self.bay_alpha)
 		self.assertEqual(len(saved_bay.equipment), 1)
-		self.assertEqual(saved_bay.equipment[0].equipment_tag, "Test Lift")
+		self.assertEqual(saved_bay.equipment[0].equipment_tag, "Lift")
 
 	def test_service_bay_active_filtering(self):
 		bay_active = frappe.get_doc({
 			"doctype": "Service Bay",
-			"bay_name": "Test Bay Alpha",
+			"bay_name": self.bay_alpha,
 			"is_active": 1
 		}).insert(ignore_permissions=True)
 
 		bay_inactive = frappe.get_doc({
 			"doctype": "Service Bay",
-			"bay_name": "Test Bay Beta",
+			"bay_name": self.bay_beta,
 			"is_active": 0
 		}).insert(ignore_permissions=True)
 
 		active_bays = frappe.get_all("Service Bay", filters={"is_active": 1}, pluck="name")
-		self.assertIn("Test Bay Alpha", active_bays)
-		self.assertNotIn("Test Bay Beta", active_bays)
+		self.assertIn(self.bay_alpha, active_bays)
+		self.assertNotIn(self.bay_beta, active_bays)
 
 
 if __name__ == "__main__":
