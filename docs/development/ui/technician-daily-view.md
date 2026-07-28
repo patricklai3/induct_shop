@@ -6,7 +6,7 @@ status: Deferred
 tags: [scheduling, ui, technician, daily-view, front-end, specification, checklist]
 timestamp: 2026-07-28T15:10:00Z
 references:
-  - docs/development/scheduling-system.md
+  - docs/systems/scheduling-system.md
   - docs/development/scheduling-implementation-checklist.md
 ---
 

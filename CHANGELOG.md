@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Completed Stage 12 (Integration Testing & Edge Cases) of the Scheduling System: end-to-end verification covering full workflow, bay & technician pool capacity gating, Sales Order amendment recalculation & bay overlap warnings, leave application integration, holiday detection, lunch edge cases, equipment tag filtering, technician capacity toggling, multi-day capacity isolation, and reinstall resilience. Added comprehensive `test_stage12_integration.py` test suite (59 total tests passing).
 - Tag-based Equipment Tag system (`Equipment Tag`, `Service Bay Equipment`, and `Service Equipment Requirement`) for scalable bay capability and service requirements tracking.
 - Interactive equipment requirement tag chips editor in the Service & Parts Selector ingestion dialog.
 - Dynamic extraction of Mobile Capable indicators from Tesla Service Manual URLs via Playwright browser automation and custom Item field `custom_is_mobile_capable`.
@@ -31,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated Scheduling System documentation (`docs/development/scheduling-system.md`) from a proposed Specification to an implemented OKF Reference document (`status: Implemented`), and added OKF Reference docs for `Schedule Entry`, `Service Bay`, and `Shop Settings`.
 - Replaced binary `custom_is_mobile_capable` checkbox on Item with derived mobile capability calculated from the `custom_equipment_requirements` child table.
 - Refactored the Service & Parts Selector to utilize ERPNext's native Item Variants system instead of Batches for tracking and managing part variations (revisions, conditions, and OEM statuses).
 - Moved Stock Entry from Purchase section to Project section in Project DocType dashboard.

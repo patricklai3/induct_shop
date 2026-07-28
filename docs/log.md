@@ -1,5 +1,10 @@
 # Directory Update Log
 
+## 2026-07-28
+* **Relocation & Update**: Relocated [Scheduling System](/systems/scheduling-system.md) from `docs/development/` to `docs/systems/` and converted specification to an implemented OKF `Reference` document (`status: Implemented`).
+* **Creation**: Added OKF `Reference` documentation for [Schedule Entry DocType](/doctypes/schedule-entry.md), [Service Bay DocType](/doctypes/service-bay.md), and [Shop Settings DocType](/doctypes/shop-settings.md) in `doctypes/`.
+* **Update**: Completed Stage 12 of `scheduling-implementation-checklist.md` in `development`. Added `test_stage12_integration.py` covering end-to-end integration testing, capacity gating, Sales Order amendment hooks, leave integration, holiday detection, lunch edge cases, equipment tag filtering, technician capacity toggling, multi-day scheduling isolation, and reinstall resilience. All 59 tests pass.
+
 ## 2026-07-23
 * **Creation**: Added `scheduling-implementation-checklist.md` in `development` to provide a 12-stage progressive build-and-verify checklist with acceptance criteria and a dependency map.
 

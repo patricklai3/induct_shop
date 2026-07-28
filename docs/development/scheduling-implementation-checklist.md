@@ -6,13 +6,13 @@ status: Active
 tags: [scheduling, implementation, checklist, staged]
 timestamp: 2026-07-23T15:28:00Z
 references:
-  - docs/development/scheduling-system.md
+  - docs/systems/scheduling-system.md
 ---
 
 # Scheduling System – Staged Implementation Checklist
 
 > [!IMPORTANT]
-> This is a **build-and-verify** checklist. Complete and test each stage before starting the next. For detailed schemas, API signatures, and behavioral requirements, refer to [scheduling-system.md](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/scheduling-system.md).
+> This is a **build-and-verify** checklist. Complete and test each stage before starting the next. For detailed schemas, API signatures, and behavioral requirements, refer to [scheduling-system.md](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/systems/scheduling-system.md).
 
 > [!NOTE]
 > All DocTypes must be **Standard DocTypes** (`custom=0`) with JSON schemas and Python controllers exported to the codebase. Custom fields on existing DocTypes must be declared in `hooks.py` (via `custom_fields` or `fixtures`) and queries must defensively check column existence with `frappe.db.has_column()`.
@@ -337,16 +337,16 @@ references:
 
 **Spec Reference**: All sections
 
-- [ ] **Full workflow test**: Create Sales Order with services → Submit → Schedule Service → verify Schedule Entry with correct duration, bay, and all fetched fields
-- [ ] **Capacity limits**: Fill all bays and/or exhaust technician pool → verify scheduling is correctly blocked
-- [ ] **Amendment flow**: Amend a scheduled Sales Order → verify `Needs Review` status and duration recalculation
-- [ ] **Leave integration**: Put a technician on leave → verify they are excluded from pool and their work queue reflects it
-- [ ] **Holiday handling**: Attempt to schedule on a holiday → verify no slots are available
-- [ ] **Lunch edge cases**: Schedule jobs that start before, during, and after lunch → verify effective end times are correct across all views
-- [ ] **Equipment tag filtering**: Require a tag (e.g., "Lift") → verify only bays with that tag are considered
-- [ ] **`enable_technician_capacity` toggle**: Turn off → verify system operates in bay-only mode without errors
-- [ ] **Reinstall resilience**: `bench reinstall` + `bench migrate` → all DocTypes, settings, and hooks intact
-- [ ] **Multi-day scheduling**: Verify scheduling across different dates doesn't cross-contaminate capacity checks
+- [x] **Full workflow test**: Create Sales Order with services → Submit → Schedule Service → verify Schedule Entry with correct duration, bay, and all fetched fields
+- [x] **Capacity limits**: Fill all bays and/or exhaust technician pool → verify scheduling is correctly blocked
+- [x] **Amendment flow**: Amend a scheduled Sales Order → verify `Needs Review` status and duration recalculation
+- [x] **Leave integration**: Put a technician on leave → verify they are excluded from pool and their work queue reflects it
+- [x] **Holiday handling**: Attempt to schedule on a holiday → verify no slots are available
+- [x] **Lunch edge cases**: Schedule jobs that start before, during, and after lunch → verify effective end times are correct across all views
+- [x] **Equipment tag filtering**: Require a tag (e.g., "Lift") → verify only bays with that tag are considered
+- [x] **`enable_technician_capacity` toggle**: Turn off → verify system operates in bay-only mode without errors
+- [x] **Reinstall resilience**: `bench reinstall` + `bench migrate` → all DocTypes, settings, and hooks intact
+- [x] **Multi-day scheduling**: Verify scheduling across different dates doesn't cross-contaminate capacity checks
 
 ---
 

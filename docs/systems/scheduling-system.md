@@ -1,10 +1,10 @@
 ---
-type: Specification
+type: Reference
 title: "Scheduling System"
-description: "Comprehensive specification for the Induct Shop scheduling system, covering FRT-based lightweight estimation, Sales Order-driven scheduling, dual-resource (bay + technician) capacity management, lunch-aware time windows, and staff-facing UI."
-status: Proposed
-tags: [system, scheduling, estimation, specification, log-normal, capacity, technician]
-timestamp: 2026-07-23T21:48:00Z
+description: "Comprehensive technical reference for the Induct Shop scheduling system, covering FRT-based lightweight estimation, Sales Order-driven scheduling, dual-resource (bay + technician) capacity management, lunch-aware time windows, and staff-facing UI."
+status: Implemented
+tags: [system, scheduling, estimation, reference, log-normal, capacity, technician]
+timestamp: 2026-07-28T15:50:00Z
 ---
 
 # Scheduling System
@@ -12,7 +12,7 @@ timestamp: 2026-07-23T21:48:00Z
 The scheduling system provides duration estimation for automotive repair operations and manages shop capacity to prevent overbooking. It is built in three layers: a **pure-Python estimation engine**, a **Frappe integration layer** that exposes estimates through the existing ERPNext workflow, and a **scheduling layer** that generates and manages Schedule Entries from confirmed Sales Orders.
 
 > [!NOTE]
-> This specification describes a **Lightweight FRT-Based Estimator (Phase 1)** paired with a **dual-resource capacity model** (bays + technicians). Customer-facing appointment booking is deferred to a future customer portal integration — this system focuses exclusively on backend logic and the staff-facing UI.
+> This reference document details the implemented **Lightweight FRT-Based Estimator (Phase 1)** paired with a **dual-resource capacity model** (bays + technicians). Customer-facing appointment booking is deferred to a future customer portal integration — this system focuses on backend logic, APIs, and the staff-facing UI.
 
 ---
 

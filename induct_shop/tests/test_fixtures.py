@@ -134,7 +134,9 @@ def ensure_service_bays():
             })
             doc.insert(ignore_permissions=True)
         else:
-            frappe.db.set_value("Service Bay", bay_name, "is_active", data["is_active"])
+            curr_val = frappe.db.get_value("Service Bay", bay_name, "is_active")
+            if curr_val != data["is_active"]:
+                frappe.db.set_value("Service Bay", bay_name, "is_active", data["is_active"])
 
 def ensure_customer():
     if not frappe.db.exists("Customer", CUSTOMER):
@@ -175,7 +177,9 @@ def ensure_employees():
             emp = frappe.get_doc(doc_dict).insert(ignore_permissions=True)
             emp_id = emp.name
         else:
-            frappe.db.set_value("Employee", emp_id, "status", spec["status"])
+            curr_status = frappe.db.get_value("Employee", emp_id, "status")
+            if curr_status != spec["status"]:
+                frappe.db.set_value("Employee", emp_id, "status", spec["status"])
         emp_map[key] = emp_id
     return emp_map
 
@@ -196,7 +200,9 @@ def ensure_items():
             })
             doc.insert(ignore_permissions=True)
         else:
-            frappe.db.set_value("Item", item_code, "custom_frt", data["custom_frt"])
+            curr_frt = frappe.db.get_value("Item", item_code, "custom_frt")
+            if curr_frt != data["custom_frt"]:
+                frappe.db.set_value("Item", item_code, "custom_frt", data["custom_frt"])
             item_doc = frappe.get_doc("Item", item_code)
             if not any(u.uom == "Hour" for u in item_doc.uoms):
                 item_doc.append("uoms", {"uom": "Hour", "conversion_factor": 1.0})
