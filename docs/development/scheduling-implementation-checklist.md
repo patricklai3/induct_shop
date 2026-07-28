@@ -287,69 +287,53 @@ references:
 
 ---
 
-## Stage 10 — Staff-Facing UI: Shop Floor Dashboard
+## Stage 10 — [Deferred] Staff-Facing UI: Shop Floor Dashboard
 
-**Goal**: Build the per-bay day-strip timeline with technician load panel for shop managers.
+> [!NOTE]
+> **Pushed to Future Unified Front-End Phase**: Implementation of the custom Shop Floor Dashboard page is stashed in [Shop Floor Dashboard UI](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/ui/shop-floor-dashboard.md). All underlying backend APIs (`get_daily_technician_overview()`) are ready.
 
-**Spec Reference**: §9.3 (Shop Floor Dashboard)
+**Spec Reference**: [Shop Floor Dashboard UI Specification](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/ui/shop-floor-dashboard.md)
 
-**Files**: `induct_shop/induct_shop/page/shop_floor/`
+**Stashed Files**: `induct_shop/induct_shop/page/shop_floor/`
 
-- [ ] Create Frappe page with bay swim lanes (Y-axis = bays, X-axis = operating hours)
-- [ ] Render Schedule Entry blocks on correct bay lanes with customer, vehicle, technician, status color
-- [ ] Lunch break column rendered as hatched/shaded across all lanes
-- [ ] Jobs spanning lunch show a visual gap with shifted effective end time
-- [ ] Capacity summary header: active bays, on-duty/on-leave techs, bottleneck indicator, unassigned count
-- [ ] Date navigation (prev/next day)
-- [ ] Technician load panel (collapsible bottom section): per-technician utilization bar, job count, ON LEAVE label
-- [ ] Unassigned entries highlighted in the technician panel
-- [ ] Clicking a job block navigates to the Schedule Entry form
-- [ ] Clicking a technician bar navigates to the Technician Daily View
-
-### Stage 10 — Acceptance Criteria
-
-- [ ] Dashboard renders correctly with test data (multiple bays, multiple entries, at least one on-leave technician)
-- [ ] Bay swim lanes accurately reflect non-overlapping entries per bay
-- [ ] Lunch column visually spans all lanes
-- [ ] Technician load percentages match expected values from `get_daily_technician_overview()`
-- [ ] Unassigned entries are visually distinct
-- [ ] Navigation links work (to Schedule Entry and Technician Daily View)
+- [ ] *(Deferred)* Create Frappe page with bay swim lanes (Y-axis = bays, X-axis = operating hours)
+- [ ] *(Deferred)* Render Schedule Entry blocks on correct bay lanes with customer, vehicle, technician, status color
+- [ ] *(Deferred)* Lunch break column rendered as hatched/shaded across all lanes
+- [ ] *(Deferred)* Jobs spanning lunch show a visual gap with shifted effective end time
+- [ ] *(Deferred)* Capacity summary header: active bays, on-duty/on-leave techs, bottleneck indicator, unassigned count
+- [ ] *(Deferred)* Date navigation (prev/next day)
+- [ ] *(Deferred)* Technician load panel (collapsible bottom section): per-technician utilization bar, job count, ON LEAVE label
+- [ ] *(Deferred)* Unassigned entries highlighted in the technician panel
+- [ ] *(Deferred)* Clicking a job block navigates to the Schedule Entry form
+- [ ] *(Deferred)* Clicking a technician bar navigates to the Technician Daily View
 
 ---
 
-## Stage 11 — Staff-Facing UI: Technician Daily View
+## Stage 11 — [Deferred] Staff-Facing UI: Technician Daily View
 
-**Goal**: Build the personal technician timeline page with "Next Up" functionality.
+> [!NOTE]
+> **Pushed to Future Unified Front-End Phase**: Implementation of the custom Technician Daily View page is stashed in [Technician Daily View UI](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/ui/technician-daily-view.md). All underlying backend APIs (`get_technician_queue()`) are ready.
 
-**Spec Reference**: §9.5 (Technician Daily View)
+**Spec Reference**: [Technician Daily View UI Specification](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/ui/technician-daily-view.md)
 
-**Files**: `induct_shop/induct_shop/page/technician_daily/`
+**Stashed Files**: `induct_shop/induct_shop/page/technician_daily/`
 
-- [ ] Create Frappe page with technician selector dropdown (defaults to logged-in employee)
-- [ ] Daily summary cards: job count, total time, primary bay, utilization %
-- [ ] Vertical timeline rendering: entries in chronological order with duration, bay, SO link, status
-- [ ] Gaps between jobs rendered explicitly with duration
-- [ ] Lunch break rendered as a distinct block in the timeline
-- [ ] Jobs spanning lunch show inserted pause with remaining duration after
-- [ ] "Next Up" bar highlighting the next non-completed/non-cancelled entry based on current time
-- [ ] "View Schedule Entry" button on Next Up → navigates to form
-- [ ] "Start Job" button on Next Up → transitions status `Scheduled` → `In Progress`
-- [ ] Date navigation (prev/next day)
-
-### Stage 11 — Acceptance Criteria
-
-- [ ] Auto-selects logged-in employee (requires Employee linked to user)
-- [ ] Manager can switch to any technician via dropdown
-- [ ] Timeline matches data from `get_technician_queue()` API
-- [ ] Gaps and lunch break are visually clear
-- [ ] "Start Job" transitions status correctly and updates the UI
-- [ ] "Next Up" highlights the correct entry based on current time
+- [ ] *(Deferred)* Create Frappe page with technician selector dropdown (defaults to logged-in employee)
+- [ ] *(Deferred)* Daily summary cards: job count, total time, primary bay, utilization %
+- [ ] *(Deferred)* Vertical timeline rendering: entries in chronological order with duration, bay, SO link, status
+- [ ] *(Deferred)* Gaps between jobs rendered explicitly with duration
+- [ ] *(Deferred)* Lunch break rendered as a distinct block in the timeline
+- [ ] *(Deferred)* Jobs spanning lunch show inserted pause with remaining duration after
+- [ ] *(Deferred)* "Next Up" bar highlighting the next non-completed/non-cancelled entry based on current time
+- [ ] *(Deferred)* "View Schedule Entry" button on Next Up → navigates to form
+- [ ] *(Deferred)* "Start Job" button on Next Up → transitions status `Scheduled` → `In Progress`
+- [ ] *(Deferred)* Date navigation (prev/next day)
 
 ---
 
 ## Stage 12 — Integration Testing & Edge Cases
 
-**Goal**: End-to-end verification of the complete system working together.
+**Goal**: End-to-end verification of backend core, API layers, Sales Order dialog, and standard Frappe calendar/list views.
 
 **Spec Reference**: All sections
 
@@ -379,9 +363,9 @@ graph TD
     S7["Stage 7: Sales Order Integration"]
     S8["Stage 8: Schedule Dialog Polish"]
     S9["Stage 9: Calendar & List Views"]
-    S10["Stage 10: Shop Floor Dashboard"]
-    S11["Stage 11: Technician Daily View"]
-    S12["Stage 12: Integration Testing"]
+    S10["Stage 10: Shop Floor Dashboard (Deferred to UI Phase)"]
+    S11["Stage 11: Technician Daily View (Deferred to UI Phase)"]
+    S12["Stage 12: Backend & Integration Verification"]
 
     S1 --> S2
     S2 --> S4
@@ -393,14 +377,13 @@ graph TD
     S6 --> S7
     S7 --> S8
     S4 --> S9
-    S6 --> S10
-    S5 --> S10
-    S6 --> S11
+    S6 -.-> S10
+    S5 -.-> S10
+    S6 -.-> S11
     S8 --> S12
     S9 --> S12
-    S10 --> S12
-    S11 --> S12
 ```
 
 > [!TIP]
-> **Parallel work is possible**: Stages 1 and 3 have no dependencies on each other and can be developed simultaneously. Similarly, Stages 9, 10, and 11 (the three UI views) can be developed in parallel once their API dependencies (Stages 5–6) are complete.
+> **Backend & UI Decoupling**: Backend APIs (Stages 1–6), Sales Order dialog (Stages 7–8), and standard Frappe calendar/list views (Stage 9) form the core operational milestone. Stages 10 & 11 custom page UIs are stashed in `docs/development/ui/` and will be implemented during the dedicated front-end development phase.
+

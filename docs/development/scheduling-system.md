@@ -579,6 +579,10 @@ A Frappe calendar view for the Schedule Entry DocType (`doctype_calendar_js` hoo
 
 ### 9.3 Shop Floor Dashboard (Manager View)
 
+> [!NOTE]
+> **Status: Deferred (Stashed for Unified UI Development)**
+> Implementation of this custom page (Stage 10) is deferred to a future dedicated front-end development phase. For the full specification, wireframes, and acceptance checklist, see [Shop Floor Dashboard UI](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/ui/shop-floor-dashboard.md). The backend APIs supporting this view (`get_daily_technician_overview()`) are fully implemented in Stage 6.
+
 A per-bay day-strip timeline view designed for shop floor managers:
 
 ```
@@ -630,6 +634,10 @@ List view customization with:
 - Quick filters: by date, by status, by bay, by technician.
 
 ### 9.5 Technician Daily View
+
+> [!NOTE]
+> **Status: Deferred (Stashed for Unified UI Development)**
+> Implementation of this custom page (Stage 11) is deferred to a future dedicated front-end development phase. For the full specification, wireframes, and acceptance checklist, see [Technician Daily View UI](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/ui/technician-daily-view.md). The backend APIs supporting this view (`get_technician_queue()`) are fully implemented in Stage 6.
 
 A dedicated page providing each technician with a personal, read-optimized timeline of their day:
 
