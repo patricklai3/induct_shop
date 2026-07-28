@@ -59,9 +59,14 @@ doctype_js = {
     "Purchase Receipt": "public/js/service_parts_selector.bundle.js",
     "Stock Entry": "public/js/service_parts_selector.bundle.js"
 }
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
-# doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
-# doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
+doctype_calendar_js = {
+    "Schedule Entry": "public/js/schedule_entry_calendar.js"
+}
+
+doctype_list_js = {
+    "Schedule Entry": "public/js/schedule_entry_list.js"
+}
+
 
 # Svg Icons
 # ------------------

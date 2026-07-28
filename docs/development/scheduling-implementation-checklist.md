@@ -271,19 +271,19 @@ references:
 - `induct_shop/public/js/schedule_entry_list.js`
 - `hooks.py` (add `doctype_calendar_js` hook)
 
-- [ ] Calendar view renders entries on day/week grid with customer, vehicle, bay, duration, and status
-- [ ] Color-coded status blocks (Scheduled=blue, In Progress=amber, Needs Review=red, Completed=green, Cancelled=grey)
-- [ ] Jobs spanning lunch show a visual break indicator
-- [ ] Clicking a block navigates to the Schedule Entry form
-- [ ] List view with status-based color indicators
-- [ ] List view quick filters: date, status, bay, technician
+- [x] Calendar view renders entries on day/week grid with customer, vehicle, bay, duration, and status
+- [x] Color-coded status blocks (Scheduled=blue, In Progress=amber, Needs Review=red, Completed=green, Cancelled=grey)
+- [x] Jobs spanning lunch show a visual break indicator
+- [x] Clicking a block navigates to the Schedule Entry form
+- [x] List view with status-based color indicators
+- [x] List view quick filters: date, status, bay, technician
 
 ### Stage 9 — Acceptance Criteria
 
-- [ ] Calendar view renders at least one Schedule Entry correctly with color coding
-- [ ] Lunch break visual indicator appears for spanning jobs
-- [ ] List view filters produce correct results
-- [ ] Both views survive `bench build` and page reload
+- [x] Calendar view renders at least one Schedule Entry correctly with color coding
+- [x] Lunch break visual indicator appears for spanning jobs
+- [x] List view filters produce correct results
+- [x] Both views survive `bench build` and page reload
 
 ---
 
