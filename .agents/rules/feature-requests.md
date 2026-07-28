@@ -1,6 +1,6 @@
 ---
 trigger: model_decision
-description: Apply this rule when creating or modifying features to ensure all feature requests are handled within the induct shop directory.
+description: Apply this rule when planning or executing implementation of any new feature or modification
 ---
 
 # Feature Requests Rule
