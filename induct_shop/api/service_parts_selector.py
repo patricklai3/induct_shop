@@ -94,6 +94,11 @@ def ingest_part(payload):
     lines = payload.strip().split('\n')
     results = []
     
+    # Ensure standard Item Attributes exist
+    _ensure_item_attribute("Revision")
+    _ensure_item_attribute("Condition", ["New", "Used", "Reconditioned"])
+    _ensure_item_attribute("OEM Status", ["OEM", "Aftermarket"])
+
     for line in lines:
         if not line.strip(): continue
         
@@ -169,7 +174,7 @@ def ingest_part(payload):
         oem_status = "OEM"
         
         # Ensure Revision value exists in Item Attribute
-        revision_attr = frappe.get_doc("Item Attribute", "Revision")
+        revision_attr = _ensure_item_attribute("Revision")
         if not any(v.attribute_value == revision for v in revision_attr.item_attribute_values):
             abbr = re.sub(r'[^a-zA-Z0-9]', '', revision)[:5].upper() or "REV"
             revision_attr.append("item_attribute_values", {
@@ -177,6 +182,26 @@ def ingest_part(payload):
                 "abbr": abbr
             })
             revision_attr.save(ignore_permissions=True)
+
+        # Ensure Condition value exists in Item Attribute
+        condition_attr = _ensure_item_attribute("Condition", ["New", "Used", "Reconditioned"])
+        if not any(v.attribute_value == condition for v in condition_attr.item_attribute_values):
+            abbr = re.sub(r'[^a-zA-Z0-9]', '', condition)[:5].upper() or "COND"
+            condition_attr.append("item_attribute_values", {
+                "attribute_value": condition,
+                "abbr": abbr
+            })
+            condition_attr.save(ignore_permissions=True)
+
+        # Ensure OEM Status value exists in Item Attribute
+        oem_attr = _ensure_item_attribute("OEM Status", ["OEM", "Aftermarket"])
+        if not any(v.attribute_value == oem_status for v in oem_attr.item_attribute_values):
+            abbr = re.sub(r'[^a-zA-Z0-9]', '', oem_status)[:5].upper() or "OEM"
+            oem_attr.append("item_attribute_values", {
+                "attribute_value": oem_status,
+                "abbr": abbr
+            })
+            oem_attr.save(ignore_permissions=True)
             
         variant_id = f"{base_part_no}{revision}-{oem_status[:3].upper()}-{condition[:3].upper()}"
         
@@ -205,6 +230,25 @@ def ingest_part(payload):
         })
         
     return results
+
+def _ensure_item_attribute(attribute_name, default_values=None):
+    if not frappe.db.exists("Item Attribute", attribute_name):
+        values = []
+        if default_values:
+            for val in default_values:
+                abbr = re.sub(r'[^a-zA-Z0-9]', '', val)[:5].upper() or "VAL"
+                values.append({
+                    "attribute_value": val,
+                    "abbr": abbr
+                })
+        attr_doc = frappe.get_doc({
+            "doctype": "Item Attribute",
+            "attribute_name": attribute_name,
+            "item_attribute_values": values
+        })
+        attr_doc.insert(ignore_permissions=True)
+        return attr_doc
+    return frappe.get_doc("Item Attribute", attribute_name)
 
 def _ensure_item_group(group_name, parent_name):
     match = re.match(r"^(\d+)\s*-\s*", group_name)

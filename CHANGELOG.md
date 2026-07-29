@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed `LinkValidationError` during part ingestion in Service & Parts Selector by auto-provisioning missing `Item Attribute` records (`Revision`, `Condition`, `OEM Status`) and attribute values before template and variant item insertion.
 - Recreated the `Service Part Association` and `Service Part Association Item` DocTypes as Standard DocTypes to ensure their schema persists across app reinstallations.
 - Enforced the hiding of the Progress tab in Project DocType by explicitly hiding its individual field components via client script.
 

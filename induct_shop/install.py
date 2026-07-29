@@ -4,6 +4,7 @@ def after_install():
     create_standard_inspection_template()
     enable_batch_wise_valuation()
     seed_equipment_tags()
+    seed_item_attributes()
 
 def seed_equipment_tags():
     if frappe.db.exists("DocType", "Equipment Tag") and not frappe.db.exists("Equipment Tag", "Lift"):
@@ -13,6 +14,12 @@ def seed_equipment_tags():
             "description": "Standard automotive lift"
         })
         doc.insert(ignore_permissions=True)
+
+def seed_item_attributes():
+    from induct_shop.api.service_parts_selector import _ensure_item_attribute
+    _ensure_item_attribute("Revision")
+    _ensure_item_attribute("Condition", ["New", "Used", "Reconditioned"])
+    _ensure_item_attribute("OEM Status", ["OEM", "Aftermarket"])
 
 def enable_batch_wise_valuation():
     if frappe.db.exists("DocType", "Stock Settings"):

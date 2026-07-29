@@ -1,5 +1,8 @@
 # Directory Update Log
 
+## 2026-07-29
+* **Fix**: Resolved `LinkValidationError` during part ingestion in [Service & Parts Selector](/systems/service-parts-selector.md) by dynamically auto-provisioning standard `Item Attribute` records (`Revision`, `Condition`, `OEM Status`) and their values prior to Item template/variant creation. Added `seed_item_attributes()` to app installation hooks in `install.py`.
+
 ## 2026-07-28
 * **Relocation & Update**: Relocated [Scheduling System](/systems/scheduling-system.md) from `docs/development/` to `docs/systems/` and converted specification to an implemented OKF `Reference` document (`status: Implemented`).
 * **Creation**: Added OKF `Reference` documentation for [Schedule Entry DocType](/doctypes/schedule-entry.md), [Service Bay DocType](/doctypes/service-bay.md), and [Shop Settings DocType](/doctypes/shop-settings.md) in `doctypes/`.
