@@ -363,7 +363,11 @@ class ServicePartsSelectorDialog {
     }
     
     add_item_to_doc(item_code, is_stock, frt, parent_service = null) {
-        let row = this.frm.add_child('items');
+        let items = this.frm.doc.items || [];
+        let row = items.find(r => !r.item_code || !r.item_code.trim());
+        if (!row) {
+            row = this.frm.add_child('items');
+        }
         
         // Set basic values
         frappe.model.set_value(row.doctype, row.name, 'item_code', item_code).then(() => {

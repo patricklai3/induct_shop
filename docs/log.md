@@ -1,6 +1,7 @@
 # Directory Update Log
 
 ## 2026-07-29
+* **Fix**: Updated row insertion logic in [Service & Parts Selector](/systems/service-parts-selector.md) to reuse the first empty row (`!item_code`) in the `items` child table before creating a new line.
 * **Fix**: Resolved `LinkValidationError` during part ingestion in [Service & Parts Selector](/systems/service-parts-selector.md) by dynamically auto-provisioning standard `Item Attribute` records (`Revision`, `Condition`, `OEM Status`) and their values prior to Item template/variant creation. Added `seed_item_attributes()` to app installation hooks in `install.py`.
 
 ## 2026-07-28

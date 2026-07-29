@@ -42,7 +42,7 @@ The implementation utilizes a Frappe-native Vanilla JS / jQuery architecture to 
    * Leverages jQuery and plain JavaScript to handle the complex state (searching, filtering, selecting items) and binds events to the DOM.
 4. **Item Insertion Method:**
    * Uses the standard Frappe Client API to insert selected parts and services into the target doctypes (`Quotation`, `Sales Order`, etc.).
-   * **Row Creation:** Calls `let row = frm.add_child("items");` to instantiate a new record.
+   * **Row Creation:** Reuses the first empty row in `frm.doc.items` if available, or calls `frm.add_child("items")` if all existing rows contain items.
    * **Triggering Native Logic:** Uses `frappe.model.set_value` to set the item code. This robust practice automatically triggers ERPNext's native field scripts (fetching prices, taxes, UOM, and descriptions).
    * **Batch Assignment:** For physical parts, explicitly links the correct condition and revision by setting `batch_no`.
    * **Service Logic:** For services, automatically sets the UOM to `Hour` and populates `qty` to ensure the correct Flat Rate Time is billed.
