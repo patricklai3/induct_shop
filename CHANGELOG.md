@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Integrated `frappe-ui` Vue 3 frontend stack in `frontend/` directory, including Vite 5, Tailwind CSS v3, Vue Router 4, `frappe-ui` components and semantic design tokens, with build pipeline generating static assets to `induct_shop/public/frontend` and web page route `/frontend`.
 - Completed Stage 12 (Integration Testing & Edge Cases) of the Scheduling System: end-to-end verification covering full workflow, bay & technician pool capacity gating, Sales Order amendment recalculation & bay overlap warnings, leave application integration, holiday detection, lunch edge cases, equipment tag filtering, technician capacity toggling, multi-day capacity isolation, and reinstall resilience. Added comprehensive `test_stage12_integration.py` test suite (59 total tests passing).
 - Tag-based Equipment Tag system (`Equipment Tag`, `Service Bay Equipment`, and `Service Equipment Requirement`) for scalable bay capability and service requirements tracking.
 - Interactive equipment requirement tag chips editor in the Service & Parts Selector ingestion dialog.

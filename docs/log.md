@@ -1,5 +1,8 @@
 # Directory Update Log
 
+## 2026-07-31
+* **Creation**: Added OKF `System` documentation for [frappe-ui Vue 3 Frontend Stack](/systems/frappe-ui-frontend.md) detailing directory structure, Vite/Tailwind v3 configuration, build pipelines, and route integration.
+
 ## 2026-07-29
 * **Fix**: Updated row insertion logic in [Service & Parts Selector](/systems/service-parts-selector.md) to reuse the first empty row (`!item_code`) in the `items` child table before creating a new line.
 * **Fix**: Resolved `LinkValidationError` during part ingestion in [Service & Parts Selector](/systems/service-parts-selector.md) by dynamically auto-provisioning standard `Item Attribute` records (`Revision`, `Condition`, `OEM Status`) and their values prior to Item template/variant creation. Added `seed_item_attributes()` to app installation hooks in `install.py`.
