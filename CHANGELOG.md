@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Dedicated Induct Shop Desk Workspace modeled after Frappe HR (`hrms`), featuring `add_to_apps_screen` app switcher launcher, custom `Desktop Icon`, structured `Workspace Sidebar` (Operations, Fleet & Equipment, Setup), and standard `Shop Floor` Workspace document.
 - Completed Stage 12 (Integration Testing & Edge Cases) of the Scheduling System: end-to-end verification covering full workflow, bay & technician pool capacity gating, Sales Order amendment recalculation & bay overlap warnings, leave application integration, holiday detection, lunch edge cases, equipment tag filtering, technician capacity toggling, multi-day capacity isolation, and reinstall resilience. Added comprehensive `test_stage12_integration.py` test suite (59 total tests passing).
 - Tag-based Equipment Tag system (`Equipment Tag`, `Service Bay Equipment`, and `Service Equipment Requirement`) for scalable bay capability and service requirements tracking.
 - Interactive equipment requirement tag chips editor in the Service & Parts Selector ingestion dialog.

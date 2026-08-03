@@ -7,21 +7,19 @@ app_license = "mit"
 
 fixtures = ["Custom Field", "Property Setter"]
 
-# Apps
-# ------------------
-
-# required_apps = []
+app_home = "/desk/shop-floor"
 
 # Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "induct_shop",
-# 		"logo": "/assets/induct_shop/logo.png",
-# 		"title": "Induct Shop",
-# 		"route": "/induct_shop",
-# 		"has_permission": "induct_shop.api.permission.has_app_permission"
-# 	}
-# ]
+add_to_apps_screen = [
+	{
+		"name": "induct_shop",
+		"logo": "/assets/induct_shop/images/induct-shop-logo.svg",
+		"title": "Induct Shop",
+		"route": "/desk/shop-floor",
+		"has_permission": "induct_shop.utilities.permission.check_app_permission"
+	}
+]
+
 
 # Includes in <head>
 # ------------------

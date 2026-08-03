@@ -1,6 +1,7 @@
 # Directory Update Log
 
 ## 2026-08-03
+* **Creation**: Added OKF `Reference` documentation for [Induct Shop Desk Workspace](/systems/desk-workspace.md) detailing the Frappe HR-style Desk app switcher, workspace sidebar navigation, and standard workspace setup.
 * **Update**: Refactored [Primary Vehicle Repair Workflow](/workflow.md) to position the Project as the top-level Service File container encompassing all steps (including initial diagnostic appointment scheduling) as a guided, checklist-style staff navigation experience.
 * **Archive**: Relocated `scheduling-implementation-checklist.md` from `docs/development/` to `docs/archive/` and updated frontmatter to OKF specification (`type: Specification`, `status: Archived`).
 

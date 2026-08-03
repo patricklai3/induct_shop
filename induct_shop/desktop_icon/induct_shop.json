@@ -1,0 +1,19 @@
+{
+ "app": "induct_shop",
+ "creation": "2026-08-03 15:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon_type": "App",
+ "idx": 1,
+ "label": "Induct Shop",
+ "link": "/desk/shop-floor",
+ "link_type": "External",
+ "logo_url": "/assets/induct_shop/images/induct-shop-logo.svg",
+ "modified": "2026-08-03 15:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "Induct Shop",
+ "owner": "Administrator",
+ "roles": [],
+ "standard": 1
+}
