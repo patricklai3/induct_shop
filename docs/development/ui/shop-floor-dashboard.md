@@ -7,7 +7,7 @@ tags: [scheduling, ui, dashboard, shop-floor, front-end, specification, checklis
 timestamp: 2026-07-28T15:10:00Z
 references:
   - docs/systems/scheduling-system.md
-  - docs/development/scheduling-implementation-checklist.md
+  - docs/archive/scheduling-implementation-checklist.md
 ---
 
 # Shop Floor Dashboard UI (Stage 10)

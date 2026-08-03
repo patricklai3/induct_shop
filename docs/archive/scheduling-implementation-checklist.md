@@ -1,10 +1,10 @@
 ---
-type: Checklist
+type: Specification
 title: "Scheduling System – Staged Implementation Checklist"
 description: "Progressive build-and-verify checklist for the scheduling system. Each stage must pass its acceptance criteria before proceeding to the next. For full specification details, see scheduling-system.md."
-status: Active
-tags: [scheduling, implementation, checklist, staged]
-timestamp: 2026-07-23T15:28:00Z
+status: Archived
+tags: [scheduling, implementation, checklist, staged, archived]
+timestamp: 2026-08-03T20:59:18Z
 references:
   - docs/systems/scheduling-system.md
 ---

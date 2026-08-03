@@ -7,7 +7,7 @@ tags: [scheduling, ui, technician, daily-view, front-end, specification, checkli
 timestamp: 2026-07-28T15:10:00Z
 references:
   - docs/systems/scheduling-system.md
-  - docs/development/scheduling-implementation-checklist.md
+  - docs/archive/scheduling-implementation-checklist.md
 ---
 
 # Technician Daily View UI (Stage 11)
