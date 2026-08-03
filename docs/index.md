@@ -6,6 +6,10 @@ okf_version: "0.1"
 
 Welcome to the central repository for metadata, context, and operational playbooks for the workspace.
 
+# Workflows
+
+* [Primary Vehicle Repair Workflow](/workflow.md) - Source of truth for the shop's 11-step diagnostic, repair, and billing workflow.
+
 # Systems
 
 * [Frappe Bench](/systems/frappe-bench.md) - The local Frappe and ERPNext development environment.
