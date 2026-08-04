@@ -112,6 +112,7 @@ website_route_rules = [
 
 # before_install = "induct_shop.install.before_install"
 after_install = "induct_shop.install.after_install"
+after_migrate = "induct_shop.install.after_migrate"
 
 # Uninstallation
 # ------------

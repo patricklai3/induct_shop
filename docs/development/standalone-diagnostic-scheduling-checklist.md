@@ -14,15 +14,16 @@ This checklist tracks the staged implementation of standalone capacity-blocking 
 ---
 
 ## Stage 1: `Schedule Entry Type` DocType & Seed Data
-- [ ] **1.1 Schema Definition**: Create standard `Schedule Entry Type` DocType in `induct_shop/induct_shop/doctype/schedule_entry_type/`:
+- [x] **1.1 Schema Definition**: Create standard `Schedule Entry Type` DocType in `induct_shop/induct_shop/doctype/schedule_entry_type/`:
   - `schedule_entry_type.json`: Define `type_name` (Data, reqd, unique, title_field), `color` (Data), `description` (Small Text), `requires_sales_order` (Check).
   - `schedule_entry_type.py`: Implement Python controller.
-- [ ] **1.2 Standard Seed Data**: Add seed data setup (or `after_install`/migration hook) for standard entry types:
+- [x] **1.2 Standard Seed Data**: Add seed data setup (or `after_install`/migration hook) for standard entry types:
   - `Diagnostic` (Requires SO: `0`, Color: `#1f538d`)
   - `Repair` (Requires SO: `1`, Color: `#2e7d32`)
   - `Meeting` (Requires SO: `0`, Color: `#7b1fa2`)
   - `Maintenance / Shop Cleaning` (Requires SO: `0`, Color: `#c62828`)
   - `Internal Service` (Requires SO: `0`, Color: `#ef6c00`)
+
 
 ### Stage 1 Acceptance Criteria
 - **Automated Testing Criteria**:

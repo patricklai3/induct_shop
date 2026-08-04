@@ -5,6 +5,58 @@ def after_install():
     enable_batch_wise_valuation()
     seed_equipment_tags()
     seed_item_attributes()
+    seed_schedule_entry_types()
+
+def after_migrate():
+    seed_schedule_entry_types()
+
+STANDARD_SCHEDULE_ENTRY_TYPES = [
+    {
+        "type_name": "Diagnostic",
+        "requires_sales_order": 0,
+        "color": "#1f538d",
+        "description": "Initial inspection and diagnostic slot"
+    },
+    {
+        "type_name": "Repair",
+        "requires_sales_order": 1,
+        "color": "#2e7d32",
+        "description": "Confirmed repair job"
+    },
+    {
+        "type_name": "Meeting",
+        "requires_sales_order": 0,
+        "color": "#7b1fa2",
+        "description": "Internal staff or shop meeting"
+    },
+    {
+        "type_name": "Maintenance / Shop Cleaning",
+        "requires_sales_order": 0,
+        "color": "#c62828",
+        "description": "Service bay or equipment maintenance"
+    },
+    {
+        "type_name": "Internal Service",
+        "requires_sales_order": 0,
+        "color": "#ef6c00",
+        "description": "Internal vehicle maintenance or fleet service"
+    }
+]
+
+def seed_schedule_entry_types():
+    if not frappe.db.exists("DocType", "Schedule Entry Type"):
+        return
+    for item in STANDARD_SCHEDULE_ENTRY_TYPES:
+        if not frappe.db.exists("Schedule Entry Type", item["type_name"]):
+            doc = frappe.get_doc({
+                "doctype": "Schedule Entry Type",
+                "type_name": item["type_name"],
+                "requires_sales_order": item["requires_sales_order"],
+                "color": item["color"],
+                "description": item["description"]
+            })
+            doc.insert(ignore_permissions=True)
+
 
 def seed_equipment_tags():
     if frappe.db.exists("DocType", "Equipment Tag") and not frappe.db.exists("Equipment Tag", "Lift"):
