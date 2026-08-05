@@ -2,9 +2,9 @@
 type: Specification
 title: "Standalone Diagnostic Scheduling Implementation Checklist"
 description: "Staged development checklist tracking implementation, schema updates, UI enhancements, automated tests, manual verification, and documentation."
-status: In Progress
-tags: [checklist, scheduling, development, tracking]
-timestamp: 2026-08-04T15:53:00Z
+status: Archived
+tags: [checklist, scheduling, development, tracking, archived]
+timestamp: 2026-08-05T14:11:41Z
 ---
 
 # Standalone Diagnostic Scheduling Implementation Checklist
@@ -110,9 +110,9 @@ This checklist tracks the staged implementation of standalone capacity-blocking 
 ---
 
 ## Stage 6: Documentation & Workflow Alignment
-- [ ] **6.1 Update Primary Workflow Doc (`docs/workflow.md`)**:
+- [x] **6.1 Update Primary Workflow Doc (`docs/workflow.md`)**:
   - Update business process text and Mermaid flow diagram to document flexible diagnostic intake.
-- [ ] **6.2 Update DocType Documentation**:
+- [x] **6.2 Update DocType Documentation**:
   - Update `docs/doctypes/schedule-entry.md`.
   - Update `docs/doctypes/vehicle-check-in.md`.
 

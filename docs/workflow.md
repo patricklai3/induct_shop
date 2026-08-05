@@ -4,7 +4,7 @@ title: "Primary Vehicle Repair Workflow"
 description: "Source of truth for the primary shop management vehicle diagnostic, repair, and billing workflow."
 status: In Progress
 tags: [workflow, business, vehicle, repair, project, sales, diagnostics, quotation, checklist]
-timestamp: 2026-08-03T14:30:55Z
+timestamp: 2026-08-05T14:10:00Z
 ---
 
 # Primary Vehicle Repair Workflow
@@ -30,14 +30,14 @@ In Induct Shop, the **Project** (`Project` DocType) is the **highest-level entit
 
 The primary vehicle diagnostic and repair checklist follows an 8-step progression managed inside the Project:
 
-1. **Schedule Entry (diagnostic)** — Initial appointment booked for diagnostic inspection.
-2. **Vehicle Check-in** — Intake of the vehicle, odometer recording, and condition documentation.
+1. **Schedule Entry (diagnostic)** — Initial appointment booked for diagnostic inspection (supports standalone quick entry with provisional customer and vehicle info, or linking to an existing Sales Order/Customer).
+2. **Vehicle Check-in** — Intake of the vehicle, odometer recording, and condition documentation. Auto-creates or links the parent **Project**, updating the originating diagnostic Schedule Entry with master `customer`, `repair_vehicle`, `project`, and `vehicle_check_in` references.
 3. **Quote** — Estimate generated listing labor, services, teardown/diagnostic findings, and parts.
 4. **Quote Approval / Rejection Loop** — Customer decision point:
    - **Approval**: Authorizes the quote and advances to a **Sales Order**.
    - **Rejection / Revision**: Customer requests scope or cost adjustments, triggering a **Quote Revision** loop back to the Quote.
 5. **Sales Order** — Confirmed sales order generated directly from the approved quote.
-6. **Schedule Entry (repair)** — Booking service bay and technician allocation for repair execution.
+6. **Schedule Entry (repair)** — Booking service bay and technician allocation for repair execution (enforces 1:1 binding with Sales Order).
 7. **Vehicle Check-out** — Final quality check, key handoff, and vehicle release (*Not Implemented*).
 8. **Sales Invoice** — Final customer billing and financial transaction posting.
 
@@ -51,7 +51,7 @@ The diagram below illustrates how the **Project (Service File)** acts as the top
 flowchart TD
     subgraph SF["Project (Service File Container & Staff Checklist)"]
         direction TB
-        S1["1. Schedule Entry (diagnostic)"] --> S2["2. Vehicle Check-in"]
+        S1["1. Schedule Entry (diagnostic)\n(Standalone Quick Entry or SO-linked)"] --> S2["2. Vehicle Check-in\n(Auto-links Project & master records to S1)"]
         S2 --> S3["3. Quote"]
         
         S3 --> S4{"4. Customer Decision"}
@@ -59,7 +59,7 @@ flowchart TD
         S4 -- "Rejected / Revision" --> S3R["Quote Revision"]
         S3R -- "Updated Scope" --> S3
 
-        S5 --> S6["6. Schedule Entry (repair)"]
+        S5 --> S6["6. Schedule Entry (repair)\n(1:1 Sales Order binding)"]
         S6 --> S7["7. Vehicle Check-out\n(⚠️ Not Implemented)"]
         S7 --> S8["8. Sales Invoice"]
     end
@@ -76,11 +76,11 @@ flowchart TD
 
 ### 1. Schedule Entry (diagnostic)
 * **DocType**: [Schedule Entry](/doctypes/schedule-entry.md)
-* **Description**: Captures the customer's initial appointment request for diagnosing vehicle issues. Initiated within the Project scope to set aside diagnostic bay time and assign an available technician.
+* **Description**: Captures the customer's initial appointment request for diagnostic inspection using the `Diagnostic` Schedule Entry Type. Can be created standalone prior to establishing formal Customer, Repair Vehicle, or Sales Order records via provisional quick-entry text fields (`provisional_customer_name`, `provisional_vehicle_info`). Reserves service bay capacity and checks technician pool availability.
 
 ### 2. Vehicle Check-in
 * **DocType**: [Vehicle Check-in](/doctypes/vehicle-check-in.md)
-* **Description**: Records physical arrival of the vehicle at the shop. The technician/advisor logs intake mileage, completes a multi-point intake inspection template, captures damage photos, and links the check-in to the Project case.
+* **Description**: Records physical arrival of the vehicle at the shop. Links to the originating diagnostic `Schedule Entry` (or can be initiated directly from its form via custom action button). The technician/advisor logs intake mileage, completes a multi-point intake inspection template, captures damage photos, auto-creates the master `Project`, and automatically updates the originating diagnostic `Schedule Entry` with formal `project`, `repair_vehicle`, `customer`, and `vehicle_check_in` references.
 
 ### 3. Quote
 * **DocType**: [Quotation](/doctypes/quotation.md)
@@ -98,7 +98,7 @@ flowchart TD
 
 ### 6. Schedule Entry (repair)
 * **DocType**: [Schedule Entry](/doctypes/schedule-entry.md)
-* **Description**: Scheduled appointment specifically for executing the approved repairs. Enforces 1:1 relationship with the Sales Order, calculates P80 FRT duration, and validates service bay and technician capacity.
+* **Description**: Scheduled appointment specifically for executing the approved repairs (`Repair` entry type). Enforces 1:1 relationship with the Sales Order, calculates P80 FRT duration, and validates service bay and technician capacity.
 
 ### 7. Vehicle Check-out (Pending Implementation)
 * **DocType**: `Vehicle Check-out` *(Unimplemented)*

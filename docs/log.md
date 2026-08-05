@@ -1,7 +1,9 @@
 # Directory Update Log
 
 ## 2026-08-05
-* **Update**: Completed Stage 5 of [Standalone Diagnostic Scheduling Implementation Checklist](/development/standalone-diagnostic-scheduling-checklist.md) in `development`. Expanded unit test suite in `test_schedule_entry.py` covering Schedule Entry Type records, standalone capacity gating, Vehicle Check-in cross-linking, and Sales Order repair entry auto-population. 69 unit tests passing with 100% success rate and clean `bench migrate` validation.
+* **Archive**: Relocated `standalone-diagnostic-scheduling-spec.md` and `standalone-diagnostic-scheduling-checklist.md` from `docs/development/` to `docs/archive/` and updated YAML frontmatter to OKF specification (`status: Archived`).
+* **Update**: Completed Stage 6 of [Standalone Diagnostic Scheduling Implementation Checklist](/archive/standalone-diagnostic-scheduling-checklist.md) in `development`. Updated [Primary Vehicle Repair Workflow](/workflow.md), [Schedule Entry DocType](/doctypes/schedule-entry.md), and [Vehicle Check-in DocType](/doctypes/vehicle-check-in.md) to reflect standalone diagnostic scheduling, provisional quick-entry fields, `Schedule Entry Type` schema additions, fallback display helpers, and automated vehicle intake cross-linking. All modified documentation files adhere strictly to OKF frontmatter and repository standards.
+* **Update**: Completed Stage 5 of [Standalone Diagnostic Scheduling Implementation Checklist](/archive/standalone-diagnostic-scheduling-checklist.md) in `development`. Expanded unit test suite in `test_schedule_entry.py` covering Schedule Entry Type records, standalone capacity gating, Vehicle Check-in cross-linking, and Sales Order repair entry auto-population. 69 unit tests passing with 100% success rate and clean `bench migrate` validation.
 
 ## 2026-08-03
 * **Update**: Refactored [Primary Vehicle Repair Workflow](/workflow.md) to position the Project as the top-level Service File container encompassing all steps (including initial diagnostic appointment scheduling) as a guided, checklist-style staff navigation experience.

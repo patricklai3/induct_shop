@@ -2,9 +2,9 @@
 type: Specification
 title: "Standalone Diagnostic Scheduling & Dynamic Entry Types Specification"
 description: "Detailed technical specification for standalone capacity-blocking scheduling, the Schedule Entry Type DocType, disposable quick-entry fields, and intake integration."
-status: Proposed
-tags: [specification, scheduling, doctype, vehicle-check-in, project, intake]
-timestamp: 2026-08-04T15:45:00Z
+status: Archived
+tags: [specification, scheduling, doctype, vehicle-check-in, project, intake, archived]
+timestamp: 2026-08-05T14:11:41Z
 ---
 
 # Standalone Diagnostic Scheduling & Dynamic Entry Types Specification
