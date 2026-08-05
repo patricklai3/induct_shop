@@ -54,12 +54,15 @@ class TestSchedulingViewsApi(unittest.TestCase):
 
         e1 = event_map[entry1.name]
         self.assertFalse(e1["spans_lunch"])
-        self.assertEqual(e1["color"], STATUS_COLOR_MAP["Scheduled"])
+        diag_color = frappe.db.get_value("Schedule Entry Type", "Diagnostic", "color")
+        expected_e1_color = diag_color or STATUS_COLOR_MAP["Scheduled"]
+        self.assertEqual(e1["color"], expected_e1_color)
         self.assertEqual(e1["end"], f"{today} 09:30:00")
 
         e2 = event_map[entry2.name]
         self.assertTrue(e2["spans_lunch"])
-        self.assertEqual(e2["color"], STATUS_COLOR_MAP["In Progress"])
+        expected_e2_color = diag_color or STATUS_COLOR_MAP["In Progress"]
+        self.assertEqual(e2["color"], expected_e2_color)
         # 11:00 + 120 min + 30 min lunch = 13:30
         self.assertEqual(e2["end"], f"{today} 13:30:00")
 
@@ -137,7 +140,6 @@ class TestSchedulingViewsApi(unittest.TestCase):
             },
         )
 
-
         # Create Project linked to vehicle
         project = frappe.get_doc(
             {
@@ -167,5 +169,36 @@ class TestSchedulingViewsApi(unittest.TestCase):
         self.assertIsNotNone(event_dict)
         self.assertIn("2023 Model Y Long Range", event_dict["repair_vehicle"])
         self.assertIn("2023 Model Y Long Range", event_dict["title"])
+
+    def test_get_calendar_events_provisional_fields_and_entry_type(self):
+        today = frappe.utils.today()
+        entry = frappe.get_doc(
+            {
+                "doctype": "Schedule Entry",
+                "entry_type": "Diagnostic",
+                "provisional_customer_name": "Jane Quick",
+                "provisional_vehicle_info": "2022 Model 3",
+                "scheduled_date": today,
+                "scheduled_time": "14:00:00",
+                "estimated_duration": 45,
+                "service_bay": self.bay1,
+                "status": "Scheduled",
+            }
+        ).insert(ignore_permissions=True)
+
+        events = get_calendar_events(start=today, end=today)
+        event_dict = next((e for e in events if e["name"] == entry.name), None)
+
+        self.assertIsNotNone(event_dict)
+        self.assertEqual(event_dict["customer"], "Jane Quick")
+        self.assertEqual(event_dict["repair_vehicle"], "2022 Model 3")
+        self.assertIn("Jane Quick", event_dict["title"])
+        self.assertIn("2022 Model 3", event_dict["title"])
+        self.assertEqual(event_dict["entry_type"], "Diagnostic")
+        if frappe.db.exists("Schedule Entry Type", "Diagnostic"):
+            diag_color = frappe.db.get_value("Schedule Entry Type", "Diagnostic", "color")
+            if diag_color:
+                self.assertEqual(event_dict["color"], diag_color)
+
 
 

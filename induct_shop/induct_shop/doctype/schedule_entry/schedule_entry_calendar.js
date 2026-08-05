@@ -35,7 +35,7 @@ frappe.views.calendar["Schedule Entry"] = {
 				"Cancelled": "#6c757d",
 				"Draft": "#718096"
 			};
-			const border_color = color_map[status] || "#2b6cb0";
+			const border_color = props.entry_type_color || props.color || color_map[status] || "#2b6cb0";
 
 			$el.css({
 				"border-left": "5px solid " + border_color,
@@ -59,13 +59,15 @@ frappe.views.calendar["Schedule Entry"] = {
 				}
 			}
 
+			const entry_type_display = props.entry_type ? frappe.utils.escape_html(props.entry_type) : 'Diagnostic';
 			const tooltip_content = `
 				<div class="schedule-entry-popover" style="text-align: left; padding: 4px; font-size: 12px;">
 					<div style="font-weight: bold; margin-bottom: 4px;">${frappe.utils.escape_html(event.title || '')}</div>
+					<div><b>Entry Type:</b> ${entry_type_display}</div>
 					<div><b>Status:</b> ${frappe.utils.escape_html(props.status || '')}</div>
 					<div><b>Service Bay:</b> ${frappe.utils.escape_html(props.service_bay || 'Unassigned')}</div>
 					<div><b>Technician:</b> ${frappe.utils.escape_html(props.assigned_technician || 'Unassigned')}</div>
-					<div><b>Duration:</b> ${props.estimated_duration || 0} min (P80)</div>
+					<div><b>Duration:</b> ${props.estimated_duration || 0} min</div>
 					${props.spans_lunch ? '<div style="color: #b7791f; font-weight: 500; margin-top: 2px;">🍱 Job spans lunch break</div>' : ''}
 					${props.items_summary ? `<div style="margin-top: 4px; color: #4a5568;"><b>Services:</b> ${frappe.utils.escape_html(props.items_summary)}</div>` : ''}
 				</div>

@@ -75,10 +75,10 @@ This checklist tracks the staged implementation of standalone capacity-blocking 
 ---
 
 ## Stage 4: Form UI & Calendar Enhancements
-- [ ] **4.1 Form Client Script (`schedule_entry.js`)**:
+- [x] **4.1 Form Client Script (`schedule_entry.js`)**:
   - Dynamic field visibility: show `sales_order` / master link fields when present, show provisional quick-entry fields when master records do not exist.
   - Add **"Vehicle Check-in"** custom action button when `status == "Scheduled"` and no `vehicle_check_in` is linked.
-- [ ] **4.2 Calendar Client Script (`schedule_entry_calendar.js`)**:
+- [x] **4.2 Calendar Client Script (`schedule_entry_calendar.js`)**:
   - Update title formatting to use fallback display helpers (`get_display_customer()` / `get_display_vehicle()`).
   - Render event colors using linked `Schedule Entry Type.color`.
 
