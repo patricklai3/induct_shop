@@ -289,7 +289,64 @@ class TestScheduleEntry(unittest.TestCase):
         self.assertEqual(se_master.get_display_customer(), "_Test Schedule Customer")
         self.assertTrue(len(se_master.get_display_vehicle()) > 0)
 
+    def test_schedule_entry_type_records(self):
+        """Test creation and existence of Schedule Entry Type records."""
+        self.assertTrue(frappe.db.exists("Schedule Entry Type", "Diagnostic"))
+        self.assertTrue(frappe.db.exists("Schedule Entry Type", "Repair"))
+        diag_type = frappe.get_doc("Schedule Entry Type", "Diagnostic")
+        self.assertEqual(diag_type.requires_sales_order, 0)
+        repair_type = frappe.get_doc("Schedule Entry Type", "Repair")
+        self.assertEqual(repair_type.requires_sales_order, 1)
+
+    def test_vehicle_check_in_linkage(self):
+        """Test Vehicle Check-in linkage and automatic project cross-referencing to originating Schedule Entry."""
+        se = frappe.get_doc({
+            "doctype": "Schedule Entry",
+            "entry_type": "Diagnostic",
+            "scheduled_date": frappe.utils.today(),
+            "scheduled_time": "17:00:00",
+            "estimated_duration": 45,
+            "service_bay": "Test Schedule Bay",
+            "provisional_customer_name": "Test Intake Cust",
+            "provisional_vehicle_info": "Test Intake Veh",
+            "status": "Scheduled"
+        }).insert(ignore_permissions=True)
+
+        vci = frappe.get_doc({
+            "doctype": "Vehicle Check-in",
+            "customer": "_Test Schedule Customer",
+            "vehicle": "TEST-VIN-SCHED-01",
+            "schedule_entry": se.name,
+            "intake_mileage": 10000,
+            "check_in_date": frappe.utils.now_datetime()
+        }).insert(ignore_permissions=True)
+
+        se.reload()
+        self.assertEqual(se.project, vci.project)
+        self.assertEqual(se.repair_vehicle, "TEST-VIN-SCHED-01")
+        self.assertEqual(se.customer, "_Test Schedule Customer")
+        self.assertEqual(se.vehicle_check_in, vci.name)
+
+    def test_repair_entry_with_sales_order(self):
+        """Test Sales Order creation and linking for repair entries."""
+        se = frappe.get_doc({
+            "doctype": "Schedule Entry",
+            "entry_type": "Repair",
+            "sales_order": self.so_name,
+            "scheduled_date": frappe.utils.today(),
+            "scheduled_time": "18:00:00",
+            "service_bay": "Test Schedule Bay",
+            "status": "Scheduled"
+        }).insert(ignore_permissions=True)
+
+        self.assertEqual(se.entry_type, "Repair")
+        self.assertEqual(se.sales_order, self.so_name)
+        self.assertEqual(se.customer, "_Test Schedule Customer")
+        self.assertEqual(se.repair_vehicle, "TEST-VIN-SCHED-01")
+        self.assertTrue(se.estimated_duration > 0)
+
 
 if __name__ == "__main__":
     unittest.main()
+
 

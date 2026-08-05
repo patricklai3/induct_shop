@@ -1,5 +1,8 @@
 # Directory Update Log
 
+## 2026-08-05
+* **Update**: Completed Stage 5 of [Standalone Diagnostic Scheduling Implementation Checklist](/development/standalone-diagnostic-scheduling-checklist.md) in `development`. Expanded unit test suite in `test_schedule_entry.py` covering Schedule Entry Type records, standalone capacity gating, Vehicle Check-in cross-linking, and Sales Order repair entry auto-population. 69 unit tests passing with 100% success rate and clean `bench migrate` validation.
+
 ## 2026-08-03
 * **Update**: Refactored [Primary Vehicle Repair Workflow](/workflow.md) to position the Project as the top-level Service File container encompassing all steps (including initial diagnostic appointment scheduling) as a guided, checklist-style staff navigation experience.
 * **Archive**: Relocated `scheduling-implementation-checklist.md` from `docs/development/` to `docs/archive/` and updated frontmatter to OKF specification (`type: Specification`, `status: Archived`).

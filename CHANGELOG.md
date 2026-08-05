@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Standalone Diagnostic Scheduling Stage 5: Completed automated unit testing suite (`test_schedule_entry.py`) and clean database migration verification. Test suite expanded to 69 tests passing with 100% pass rate.
 - Completed Stage 12 (Integration Testing & Edge Cases) of the Scheduling System: end-to-end verification covering full workflow, bay & technician pool capacity gating, Sales Order amendment recalculation & bay overlap warnings, leave application integration, holiday detection, lunch edge cases, equipment tag filtering, technician capacity toggling, multi-day capacity isolation, and reinstall resilience. Added comprehensive `test_stage12_integration.py` test suite (59 total tests passing).
 - Tag-based Equipment Tag system (`Equipment Tag`, `Service Bay Equipment`, and `Service Equipment Requirement`) for scalable bay capability and service requirements tracking.
 - Interactive equipment requirement tag chips editor in the Service & Parts Selector ingestion dialog.

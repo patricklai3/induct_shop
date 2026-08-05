@@ -92,12 +92,12 @@ This checklist tracks the staged implementation of standalone capacity-blocking 
 ---
 
 ## Stage 5: Automated Testing Suite & Clean Migration
-- [ ] **5.1 Unit Tests (`test_schedule_entry.py`)**:
+- [x] **5.1 Unit Tests (`test_schedule_entry.py`)**:
   - Test creation of `Schedule Entry Type` records.
   - Test standalone `Schedule Entry` creation with zero master records (only provisional text fields). Assert save succeeds and bay/technician capacity validation blocks overlapping slots.
   - Test `Vehicle Check-in` linkage and automatic project cross-referencing to `Schedule Entry`.
   - Test `Sales Order` creation and linking for repair entries.
-- [ ] **5.2 Migration & Reinstall Verification**:
+- [x] **5.2 Migration & Reinstall Verification**:
   - Execute `bench --site development.localhost run-tests --app induct_shop` inside Docker container to ensure all tests pass cleanly.
 
 ### Stage 5 Acceptance Criteria
