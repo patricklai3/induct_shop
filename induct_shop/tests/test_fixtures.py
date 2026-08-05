@@ -1,4 +1,5 @@
 import frappe
+from induct_shop.install import seed_schedule_entry_types
 
 PREFIX = "_IST_"
 
@@ -97,8 +98,10 @@ def setup_all():
     emp_map = ensure_employees()
     ensure_items()
     ensure_shop_settings()
+    seed_schedule_entry_types()
     frappe.db.commit()
     return emp_map
+
 
 def ensure_uom():
     if not frappe.db.exists("UOM", "Hour"):

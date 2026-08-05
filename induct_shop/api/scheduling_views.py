@@ -151,8 +151,11 @@ def get_calendar_events(
         filters=query_filters,
         fields=[
             "name",
+            "entry_type",
             "customer",
+            "provisional_customer_name",
             "repair_vehicle",
+            "provisional_vehicle_info",
             "project",
             "scheduled_date",
             "scheduled_time",
@@ -165,6 +168,11 @@ def get_calendar_events(
         ],
         order_by="scheduled_date asc, scheduled_time asc",
     )
+
+    type_color_map = {}
+    if frappe.db.exists("DocType", "Schedule Entry Type"):
+        types = frappe.get_all("Schedule Entry Type", fields=["name", "color"])
+        type_color_map = {t.name: t.color for t in types if t.color}
 
     settings = get_shop_settings()
     bs_td = settings.get("break_start")
@@ -200,14 +208,30 @@ def get_calendar_events(
             bs_td and be_td and be_td > bs_td and start_td < bs_td and naive_end_td > bs_td
         )
 
-        customer_name = doc.customer or _("No Customer")
-        vehicle_display = resolve_vehicle_info(doc)
+        if doc.customer:
+            customer_display = frappe.db.get_value("Customer", doc.customer, "customer_name") or doc.customer
+        elif doc.provisional_customer_name:
+            customer_display = doc.provisional_customer_name
+        else:
+            customer_display = _("Guest")
+
+        vehicle_display = ""
+        if doc.repair_vehicle:
+            vehicle_display = resolve_vehicle_info(doc)
+            if vehicle_display == _("No Vehicle"):
+                vehicle_display = ""
+        if not vehicle_display and doc.provisional_vehicle_info:
+            vehicle_display = doc.provisional_vehicle_info
+
         bay_name = doc.service_bay or _("Unassigned Bay")
-        tech_name = doc.assigned_technician or _("Unassigned Tech")
+        if vehicle_display:
+            title = f"{customer_display} | {vehicle_display} ({bay_name})"
+        else:
+            title = f"{customer_display} ({bay_name})"
 
-        title = f"{customer_name} | {vehicle_display} ({bay_name})"
-
-        color = STATUS_COLOR_MAP.get(doc.status, "#718096")
+        entry_type = doc.entry_type or "Diagnostic"
+        entry_type_color = type_color_map.get(entry_type)
+        color = entry_type_color or STATUS_COLOR_MAP.get(doc.status, "#718096")
 
         events.append(
             {
@@ -219,8 +243,10 @@ def get_calendar_events(
                 "scheduled_date": str(entry_date),
                 "scheduled_time": str(doc.scheduled_time),
                 "estimated_duration": duration_mins,
+                "entry_type": entry_type,
+                "entry_type_color": entry_type_color,
                 "status": doc.status or "Scheduled",
-                "customer": doc.customer,
+                "customer": customer_display,
                 "repair_vehicle": vehicle_display,
                 "service_bay": doc.service_bay,
                 "assigned_technician": doc.assigned_technician,

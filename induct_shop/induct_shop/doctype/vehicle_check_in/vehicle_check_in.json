@@ -9,6 +9,7 @@
   "customer",
   "vehicle",
   "project",
+  "schedule_entry",
   "column_break_1",
   "intake_mileage",
   "check_in_date",
@@ -48,6 +49,12 @@
    "label": "Project",
    "options": "Project",
    "read_only": 1
+  },
+  {
+   "fieldname": "schedule_entry",
+   "fieldtype": "Link",
+   "label": "Schedule Entry",
+   "options": "Schedule Entry"
   },
   {
    "fieldname": "column_break_1",
