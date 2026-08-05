@@ -35,7 +35,7 @@ This checklist tracks the staged implementation of standalone capacity-blocking 
 ---
 
 ## Stage 2: `Schedule Entry` Schema & Controller Refactoring
-- [ ] **2.1 Schema Updates (`schedule_entry.json`)**:
+- [x] **2.1 Schema Updates (`schedule_entry.json`)**:
   - Add Link field `entry_type` -> `Schedule Entry Type` (default: `Diagnostic`).
   - Modify `sales_order`: set `reqd: 0`, remove schema-level `unique: 1`.
   - Modify `customer`: set `reqd: 0` (optional), remove `read_only`.
@@ -44,7 +44,7 @@ This checklist tracks the staged implementation of standalone capacity-blocking 
   - Add `provisional_customer_name` (Data, "Customer Name (Quick Entry)").
   - Add `provisional_vehicle_info` (Data, "Vehicle Description (Quick Entry)").
   - Add Link field `vehicle_check_in` -> `Vehicle Check-in` (read-only).
-- [ ] **2.2 Controller Refactoring (`schedule_entry.py`)**:
+- [x] **2.2 Controller Refactoring (`schedule_entry.py`)**:
   - Update `before_insert()`: Auto-populate from `sales_order` only if `sales_order` is set; otherwise preserve user-defined duration and fields.
   - Implement `get_display_customer()` and `get_display_vehicle()` fallback helper methods.
   - Update `validate_unique_sales_order()` to execute only when `sales_order` is populated.

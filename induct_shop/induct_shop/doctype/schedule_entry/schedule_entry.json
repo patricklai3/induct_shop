@@ -8,8 +8,10 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "entry_type",
   "sales_order",
   "customer",
+  "provisional_customer_name",
   "column_break_1",
   "scheduled_date",
   "scheduled_time",
@@ -17,6 +19,8 @@
   "section_break_details",
   "project",
   "repair_vehicle",
+  "provisional_vehicle_info",
+  "vehicle_check_in",
   "estimated_duration",
   "column_break_assignment",
   "service_bay",
@@ -36,21 +40,34 @@
    "set_only_once": 1
   },
   {
+   "allow_in_quick_entry": 1,
+   "default": "Diagnostic",
+   "fieldname": "entry_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Entry Type",
+   "options": "Schedule Entry Type",
+   "reqd": 1
+  },
+  {
    "fieldname": "sales_order",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Sales Order",
-   "options": "Sales Order",
-   "reqd": 1,
-   "unique": 1
+   "options": "Sales Order"
   },
   {
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Customer",
-   "options": "Customer",
-   "read_only": 1
+   "options": "Customer"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "provisional_customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name (Quick Entry)"
   },
   {
    "fieldname": "column_break_1",
@@ -88,15 +105,26 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
-   "options": "Project",
-   "read_only": 1
+   "options": "Project"
   },
   {
    "fieldname": "repair_vehicle",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Repair Vehicle",
-   "options": "Repair Vehicle",
+   "options": "Repair Vehicle"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "provisional_vehicle_info",
+   "fieldtype": "Data",
+   "label": "Vehicle Description (Quick Entry)"
+  },
+  {
+   "fieldname": "vehicle_check_in",
+   "fieldtype": "Link",
+   "label": "Vehicle Check-in",
+   "options": "Vehicle Check-in",
    "read_only": 1
   },
   {
@@ -144,7 +172,7 @@
  "index_web_pages_for_search": 1,
  "is_calendar_and_gantt": 1,
  "links": [],
- "modified": "2026-07-24 12:00:00.000000",
+ "modified": "2026-08-04 16:37:00.000000",
  "modified_by": "Administrator",
  "module": "Induct Shop",
  "name": "Schedule Entry",

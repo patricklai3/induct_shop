@@ -91,9 +91,8 @@ class TestScheduleEntry(unittest.TestCase):
         self.so_name = so_name
 
     def tearDown(self):
-        if hasattr(self, "so_name"):
-            frappe.db.sql("DELETE FROM `tabSchedule Entry` WHERE sales_order=%s", self.so_name)
-            frappe.db.commit()
+        frappe.db.sql("DELETE FROM `tabSchedule Entry` WHERE service_bay='Test Schedule Bay'")
+        frappe.db.commit()
 
     def test_schedule_entry_auto_population(self):
         se = frappe.get_doc({
@@ -201,6 +200,96 @@ class TestScheduleEntry(unittest.TestCase):
         se.save(ignore_permissions=True)
         self.assertEqual(frappe.db.get_value("Schedule Entry", se.name, "status"), "Completed")
 
+    def test_standalone_schedule_entry_creation(self):
+        se = frappe.get_doc({
+            "doctype": "Schedule Entry",
+            "entry_type": "Diagnostic",
+            "scheduled_date": frappe.utils.today(),
+            "scheduled_time": "14:00:00",
+            "estimated_duration": 60,
+            "service_bay": "Test Schedule Bay",
+            "provisional_customer_name": "John Phone",
+            "provisional_vehicle_info": "2021 Model Y",
+            "status": "Scheduled"
+        })
+        se.insert(ignore_permissions=True)
+
+        self.assertTrue(se.name.startswith("SE-"))
+        self.assertEqual(se.entry_type, "Diagnostic")
+        self.assertIsNone(se.sales_order)
+        self.assertIsNone(se.customer)
+        self.assertIsNone(se.repair_vehicle)
+        self.assertEqual(se.estimated_duration, 60)
+        self.assertEqual(se.get_display_customer(), "John Phone")
+        self.assertEqual(se.get_display_vehicle(), "2021 Model Y")
+
+    def test_standalone_capacity_conflict(self):
+        se1 = frappe.get_doc({
+            "doctype": "Schedule Entry",
+            "entry_type": "Diagnostic",
+            "scheduled_date": frappe.utils.today(),
+            "scheduled_time": "15:00:00",
+            "estimated_duration": 60,
+            "service_bay": "Test Schedule Bay",
+            "provisional_customer_name": "Alice",
+            "status": "Scheduled"
+        })
+        se1.insert(ignore_permissions=True)
+
+        se2 = frappe.get_doc({
+            "doctype": "Schedule Entry",
+            "entry_type": "Diagnostic",
+            "scheduled_date": frappe.utils.today(),
+            "scheduled_time": "15:30:00",
+            "estimated_duration": 60,
+            "service_bay": "Test Schedule Bay",
+            "provisional_customer_name": "Bob",
+            "status": "Scheduled"
+        })
+        with self.assertRaises(frappe.ValidationError):
+            se2.insert(ignore_permissions=True)
+
+    def test_display_helper_fallbacks(self):
+        # 1. Fully empty links and quick-entry fields -> Guest / ""
+        se_empty = frappe.get_doc({
+            "doctype": "Schedule Entry",
+            "entry_type": "Diagnostic",
+            "scheduled_date": frappe.utils.today(),
+            "scheduled_time": "16:00:00",
+            "service_bay": "Test Schedule Bay",
+        })
+        self.assertEqual(se_empty.get_display_customer(), "Guest")
+        self.assertEqual(se_empty.get_display_vehicle(), "")
+
+        # 2. Provisional quick entry fields set
+        se_prov = frappe.get_doc({
+            "doctype": "Schedule Entry",
+            "entry_type": "Diagnostic",
+            "scheduled_date": frappe.utils.today(),
+            "scheduled_time": "16:00:00",
+            "service_bay": "Test Schedule Bay",
+            "provisional_customer_name": "Charlie",
+            "provisional_vehicle_info": "2022 F-150",
+        })
+        self.assertEqual(se_prov.get_display_customer(), "Charlie")
+        self.assertEqual(se_prov.get_display_vehicle(), "2022 F-150")
+
+        # 3. Master records set
+        se_master = frappe.get_doc({
+            "doctype": "Schedule Entry",
+            "entry_type": "Repair",
+            "sales_order": self.so_name,
+            "scheduled_date": frappe.utils.today(),
+            "scheduled_time": "16:00:00",
+            "service_bay": "Test Schedule Bay",
+            "provisional_customer_name": "Charlie",
+            "provisional_vehicle_info": "2022 F-150",
+        })
+        se_master.populate_from_sales_order()
+        self.assertEqual(se_master.get_display_customer(), "_Test Schedule Customer")
+        self.assertTrue(len(se_master.get_display_vehicle()) > 0)
+
 
 if __name__ == "__main__":
     unittest.main()
+

@@ -5,6 +5,29 @@ from induct_shop.api.estimation_service import get_total_estimate
 
 
 class ScheduleEntry(Document):
+    def get_display_customer(self) -> str:
+        """Returns linked Customer name, or provisional customer name, or fallback."""
+        if self.customer:
+            return frappe.db.get_value("Customer", self.customer, "customer_name") or self.customer
+        if self.provisional_customer_name:
+            return self.provisional_customer_name
+        return "Guest"
+
+    def get_display_vehicle(self) -> str:
+        """Returns linked Repair Vehicle title, or provisional vehicle info."""
+        if self.repair_vehicle:
+            if frappe.db.has_column("Repair Vehicle", "title"):
+                return frappe.db.get_value("Repair Vehicle", self.repair_vehicle, "title") or self.repair_vehicle
+            v = frappe.db.get_value("Repair Vehicle", self.repair_vehicle, ["model_year", "model", "vin"], as_dict=True)
+            if v:
+                parts = [str(p) for p in [v.get("model_year"), v.get("model"), v.get("vin")] if p]
+                if parts:
+                    return " ".join(parts)
+            return self.repair_vehicle
+        if self.provisional_vehicle_info:
+            return self.provisional_vehicle_info
+        return ""
+
     def before_insert(self):
         self.populate_from_sales_order()
 
