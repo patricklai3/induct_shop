@@ -8,6 +8,20 @@ from frappe.model.document import Document
 class VehicleCheckin(Document):
 	def after_insert(self):
 		self.create_project()
+		self.update_originating_schedule_entry()
+
+	def update_originating_schedule_entry(self):
+		if self.schedule_entry and frappe.db.exists("Schedule Entry", self.schedule_entry):
+			update_dict = {}
+			if self.project:
+				update_dict["project"] = self.project
+			if self.vehicle:
+				update_dict["repair_vehicle"] = self.vehicle
+			if self.customer:
+				update_dict["customer"] = self.customer
+			update_dict["vehicle_check_in"] = self.name
+
+			frappe.db.set_value("Schedule Entry", self.schedule_entry, update_dict)
 
 	def create_project(self):
 		if not self.project:

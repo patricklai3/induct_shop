@@ -38,6 +38,46 @@ class IntegrationTestVehicleCheckin(unittest.TestCase):
 			"trim": "Plaid"
 		})
 
+		# 3. Ensure test Service Bay exists
+		if not frappe.db.exists("Service Bay", "_Test Checkin Bay"):
+			frappe.get_doc({
+				"doctype": "Service Bay",
+				"bay_name": "_Test Checkin Bay",
+				"is_active": 1
+			}).insert(ignore_permissions=True)
+
+	def tearDown(self):
+		frappe.db.sql("DELETE FROM `tabSchedule Entry` WHERE service_bay='_Test Checkin Bay'")
+		frappe.db.commit()
+
+	def test_schedule_entry_cross_linking(self):
+		se = frappe.get_doc({
+			"doctype": "Schedule Entry",
+			"entry_type": "Diagnostic",
+			"scheduled_date": frappe.utils.today(),
+			"scheduled_time": "11:00:00",
+			"estimated_duration": 45,
+			"service_bay": "_Test Checkin Bay",
+			"provisional_customer_name": "Provisional Customer",
+			"provisional_vehicle_info": "Provisional Vehicle",
+			"status": "Scheduled"
+		}).insert(ignore_permissions=True)
+
+		vci = frappe.get_doc({
+			"doctype": "Vehicle Check-in",
+			"customer": "_Test Checkin Customer",
+			"vehicle": "TEST-VIN-VCI-01",
+			"schedule_entry": se.name,
+			"intake_mileage": 18000,
+			"check_in_date": frappe.utils.now_datetime()
+		}).insert(ignore_permissions=True)
+
+		se.reload()
+		self.assertEqual(se.project, vci.project)
+		self.assertEqual(se.repair_vehicle, vci.vehicle)
+		self.assertEqual(se.customer, vci.customer)
+		self.assertEqual(se.vehicle_check_in, vci.name)
+
 
 
 	def test_vehicle_checkin_project_creation_naming(self):

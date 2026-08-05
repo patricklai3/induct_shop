@@ -61,9 +61,9 @@ This checklist tracks the staged implementation of standalone capacity-blocking 
 ---
 
 ## Stage 3: `Vehicle Check-in` Integration & Cross-Linking
-- [ ] **3.1 Schema Update (`vehicle_check_in.json`)**:
+- [x] **3.1 Schema Update (`vehicle_check_in.json`)**:
   - Add Link field `schedule_entry` -> `Schedule Entry`.
-- [ ] **3.2 Controller Hook (`vehicle_check_in.py`)**:
+- [x] **3.2 Controller Hook (`vehicle_check_in.py`)**:
   - In `after_insert()`, when `Project` is auto-created, write `project`, `repair_vehicle`, `customer`, and `vehicle_check_in` links back to the originating `Schedule Entry`.
 
 ### Stage 3 Acceptance Criteria
