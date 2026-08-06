@@ -76,9 +76,8 @@ This checklist tracks the staged implementation of testing methodology improveme
 
 ### Stage 2 Acceptance Criteria
 - **Automated Testing Criteria**:
-  - All 3 Vehicle Check-in tests pass.
-  - After test run, `SELECT count(*) FROM \`tabVehicle Check-in\` WHERE customer LIKE 'Test %' OR customer LIKE '_Test%'` returns `0`.
-  - After test run, `SELECT count(*) FROM \`tabProject\` WHERE customer LIKE 'Test %' OR customer LIKE '_Test%'` returns `0`.
+- All 3 Vehicle Check-in tests pass.
+- After test run, `bench --site development.localhost execute induct_shop.tests.test_fixtures.count_test_records` returns `vci = 0` and `project = 0`.
 
 ---
 
@@ -193,15 +192,12 @@ This checklist tracks the staged implementation of testing methodology improveme
   - Second run: all tests pass with identical results (no accumulated test data).
 
 - [ ] **7.3 Verify zero residual test data** after final run:
-  ```sql
-  SELECT count(*) FROM `tabVehicle Check-in` WHERE customer LIKE 'Test %' OR customer LIKE '_Test%';
-  SELECT count(*) FROM `tabProject` WHERE customer LIKE 'Test %' OR customer LIKE '_Test%';
-  SELECT count(*) FROM `tabSchedule Entry` WHERE service_bay LIKE 'Test %' OR service_bay LIKE '_Test%' OR service_bay = 'Test Schedule Bay';
-  SELECT count(*) FROM `tabSales Order` WHERE customer LIKE 'Test %' OR customer LIKE '_Test%';
+  ```bash
+  docker exec -i devcontainer-frappe-1 bash -c "cd /workspace/development/frappe-bench && bench --site development.localhost execute induct_shop.tests.test_fixtures.count_test_records"
   ```
-  All queries must return `0`.
+  Returns `{"vci": 0, "project": 0, "se": 0, "so": 0}` (all counts equal `0`).
 
 ### Stage 7 Acceptance Criteria
 - **Automated Testing Criteria**:
   - Docker command `bench --site development.localhost run-tests --app induct_shop` completes with 100% pass rate on two consecutive runs.
-  - Zero residual test data in all transactional DocTypes.
+  - Verification helper `bench execute induct_shop.tests.test_fixtures.count_test_records` returns 0 residual records across all transactional DocTypes.

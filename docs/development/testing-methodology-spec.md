@@ -169,7 +169,7 @@ def teardown_transactional(employee_ids=None):
 def create_test_vehicle_check_in(customer=None, vehicle=None, schedule_entry=None):
     """Helper to create a transactional Vehicle Check-in on demand during test execution."""
     customer = customer or CUSTOMER  # "Test Customer"
-    vehicle = vehicle or REPAIR_VEHICLE_MODEL_S["vin"]  # "5YJSA1E27PF123456"
+    vehicle = vehicle or REPAIR_VEHICLE_MODEL_S["vin"]  # "5YJSA1E69PF123456"
     vci = frappe.get_doc({
         "doctype": "Vehicle Check-in",
         "customer": customer,
@@ -179,6 +179,18 @@ def create_test_vehicle_check_in(customer=None, vehicle=None, schedule_entry=Non
         "check_in_date": frappe.utils.now_datetime()
     }).insert(ignore_permissions=True)
     return vci
+```
+
+#### New Verification Helper: `count_test_records()`
+
+```python
+def count_test_records():
+    """Returns record counts for all test transactional records in the database."""
+    vci_count = frappe.db.sql("SELECT count(*) FROM `tabVehicle Check-in` WHERE customer LIKE %s OR customer LIKE %s", (f"{PREFIX}%", "_Test%"))[0][0]
+    project_count = frappe.db.sql("SELECT count(*) FROM `tabProject` WHERE customer LIKE %s OR customer LIKE %s", (f"{PREFIX}%", "_Test%"))[0][0]
+    se_count = frappe.db.sql("SELECT count(*) FROM `tabSchedule Entry` WHERE service_bay LIKE %s OR service_bay = 'Test Schedule Bay'", (f"{PREFIX}%",))[0][0]
+    so_count = frappe.db.sql("SELECT count(*) FROM `tabSales Order` WHERE customer = %s OR customer LIKE %s", (CUSTOMER, "_Test%"))[0][0]
+    return {"vci": vci_count, "project": project_count, "se": se_count, "so": so_count}
 ```
 
 ---
