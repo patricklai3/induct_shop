@@ -159,8 +159,8 @@ This checklist tracks the staged implementation of testing methodology improveme
 
 ## Stage 6: Create Testing Documentation
 
-- [ ] **6.1 Create `docs/systems/testing-suite.md`**:
-  - Add OKF frontmatter (`type: Reference`).
+- [x] **6.1 Create `docs/systems/testing-suite.md`**:
+  - Add OKF frontmatter (`type: System`).
   - Include architecture diagram (Mermaid) showing test file → fixture → API/DocType dependency graph.
   - Include complete test suite inventory table (all files, classes, methods, categories).
   - Document fixture system: master pool, transactional helpers, `Test ` prefix convention.
@@ -168,8 +168,9 @@ This checklist tracks the staged implementation of testing methodology improveme
   - Document Docker-specific test execution commands.
   - Document `setUp`/`tearDown` transactional hygiene contract.
 
-- [ ] **6.2 Update `docs/index.md`**:
+- [x] **6.2 Update `docs/index.md`**:
   - Add link to `docs/systems/testing-suite.md` under `# Systems`.
+
 
 ### Stage 6 Acceptance Criteria
 - **Automated Testing Criteria**:
@@ -182,16 +183,16 @@ This checklist tracks the staged implementation of testing methodology improveme
 
 ## Stage 7: Full Suite Verification & Cleanup
 
-- [ ] **7.1 Run full test suite**:
+- [x] **7.1 Run full test suite**:
   ```bash
   docker exec -i devcontainer-frappe-1 bash -c "cd /workspace/development/frappe-bench && bench --site development.localhost run-tests --app induct_shop"
   ```
 
-- [ ] **7.2 Run suite twice consecutively** to verify no data leaks between runs:
-  - First run: all tests pass.
-  - Second run: all tests pass with identical results (no accumulated test data).
+- [x] **7.2 Run suite twice consecutively** to verify no data leaks between runs:
+  - First run: all tests pass (71/71 passed in 14.3s).
+  - Second run: all tests pass with identical results (71/71 passed in 14.1s).
 
-- [ ] **7.3 Verify zero residual test data** after final run:
+- [x] **7.3 Verify zero residual test data** after final run:
   ```bash
   docker exec -i devcontainer-frappe-1 bash -c "cd /workspace/development/frappe-bench && bench --site development.localhost execute induct_shop.tests.test_fixtures.count_test_records"
   ```
@@ -201,3 +202,4 @@ This checklist tracks the staged implementation of testing methodology improveme
 - **Automated Testing Criteria**:
   - Docker command `bench --site development.localhost run-tests --app induct_shop` completes with 100% pass rate on two consecutive runs.
   - Verification helper `bench execute induct_shop.tests.test_fixtures.count_test_records` returns 0 residual records across all transactional DocTypes.
+

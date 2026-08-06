@@ -14,6 +14,8 @@ Welcome to the central repository for metadata, context, and operational playboo
 
 * [Frappe Bench](/systems/frappe-bench.md) - The local Frappe and ERPNext development environment.
 * [Scheduling System](/systems/scheduling-system.md) - Duration estimation engine and scheduling architecture.
+* [Test Suite](/systems/testing-suite.md) - Architecture, complete test inventory, fixture pool, and transactional hygiene standards.
+
 
 # Scripts
 

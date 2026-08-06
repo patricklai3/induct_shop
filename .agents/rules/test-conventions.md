@@ -5,7 +5,8 @@ description: Apply this rule when creating or modifying unit tests or test fixtu
 
 # Test Conventions Rule
 
-When implementing unit tests or adding test coverage for new features in the `induct_shop` app, you MUST follow these guidelines.
+When implementing unit tests or adding test coverage for new features in the `induct_shop` app, you MUST follow these guidelines. For complete architectural documentation, test suite inventory, and Docker test execution commands, refer to [docs/systems/testing-suite.md](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/systems/testing-suite.md).
+
 
 ## 1. Centralized Test Fixtures
 
@@ -61,7 +62,8 @@ Some record insertions trigger cascading creation of other transactional records
 | Insert `Schedule Entry` with `sales_order` | Auto-populates `customer`, `project`, `repair_vehicle` from SO |
 | Submit + Amend `Sales Order` | Updates linked `Schedule Entry` status to `Needs Review` |
 
-**You MUST account for cascaded records in your tearDown.** The centralized `teardown_transactional()` handles all known cascades. If you introduce a new side-effect, update the function.
+**You MUST account for cascaded records in your tearDown.** The centralized `teardown_transactional()` handles all known cascades. If a new feature introduces a new transactional DocType (e.g., `Diagnostic Report`, `Inspection Record`), you MUST update `teardown_transactional()` in `test_fixtures.py` to clean up those records in FK-safe deletion order and update `count_test_records()`.
+
 
 ## 5. Settings Restoration
 
@@ -97,4 +99,24 @@ Use `unittest.TestCase` for all test classes. Do not use `frappe.tests.Integrati
 - Tests MUST NOT populate vehicle attributes (`manufacturer`, `model`, `trim`, `model_year`, etc.) by hand or use dummy/invalid VIN strings (e.g., `TEST-VIN-01`, random hashes).
 - Always use valid 17-character Tesla VINs provided by `test_fixtures.py` (e.g. `5YJSA1E27PF123456` for Model S Plaid, `5YJYGDEE1PF123456` for Model Y).
 - Allow `RepairVehicle.before_save()` to automatically decode and set all vehicle specifications on insert.
+
+## 9. Mocking External Network Calls
+
+- Tests MUST NOT make live external HTTP network calls (e.g., to external APIs like `service.tesla.com`).
+- Use `unittest.mock.patch` or mock adapters to intercept HTTP requests and supply predictable test payloads.
+
+## 10. Docker Test Execution & Residual Leak Verification
+
+All `bench` test commands MUST be executed inside the Docker container (`devcontainer-frappe-1`):
+
+```bash
+# Run full app test suite
+docker exec -i devcontainer-frappe-1 bash -c "cd /workspace/development/frappe-bench && bench --site development.localhost run-tests --app induct_shop"
+
+# Verify zero residual test records
+docker exec -i devcontainer-frappe-1 bash -c "cd /workspace/development/frappe-bench && bench --site development.localhost execute induct_shop.tests.test_fixtures.count_test_records"
+```
+
+After creating or modifying test files, you MUST verify that `count_test_records` returns `{"vci": 0, "project": 0, "se": 0, "so": 0}` (zero residual records).
+
 
