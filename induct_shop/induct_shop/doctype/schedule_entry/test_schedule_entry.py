@@ -59,6 +59,7 @@ class TestScheduleEntry(unittest.TestCase):
                 "doctype": "Project",
                 "project_name": "_Test Schedule Project",
                 "customer": "_Test Schedule Customer",
+                "company": frappe.db.get_single_value("Global Defaults", "default_company") or "Wind Power LLC",
             }
             if frappe.db.has_column("Project", "custom_repair_vehicle"):
                 proj_data["custom_repair_vehicle"] = "TEST-VIN-SCHED-01"

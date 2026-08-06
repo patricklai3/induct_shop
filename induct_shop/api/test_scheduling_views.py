@@ -145,6 +145,7 @@ class TestSchedulingViewsApi(unittest.TestCase):
             {
                 "doctype": "Project",
                 "project_name": f"Project {vin}",
+                "company": frappe.db.get_single_value("Global Defaults", "default_company") or "Wind Power LLC",
                 "custom_repair_vehicle": vehicle.name,
                 "sales_order": self.test_so1,
             }

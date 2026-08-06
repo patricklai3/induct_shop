@@ -15,13 +15,13 @@ This checklist tracks the staged implementation of testing methodology improveme
 
 ## Stage 1: Expand `test_fixtures.py` Infrastructure & Prefix Migration
 
-- [ ] **1.1 Migrate `PREFIX` constant from `_IST_` to `Test `**:
+- [x] **1.1 Migrate `PREFIX` constant from `_IST_` to `Test `**:
   - Change `PREFIX = "_IST_"` to `PREFIX = "Test "` in `test_fixtures.py`.
   - Rename all master data constants (e.g., `_IST_Bay 1` → `Test Bay 1`, `_IST_Customer` → `Test Customer`).
   - Update all test files that import `PREFIX` from `test_fixtures` — string references will automatically resolve via the constant.
   - Delete any old `_IST_*` master data records left over in the database.
 
-- [ ] **1.2 Overhaul `.agents/rules/test-conventions.md`**:
+- [x] **1.2 Overhaul `.agents/rules/test-conventions.md`**:
   - Replace the current 4-bullet-point rule with the comprehensive 7-section version specified in [testing-methodology-spec.md Section 6.2](./testing-methodology-spec.md).
   - Key additions beyond the prefix rename:
     - Add explicit master vs transactional DocType classification table (6 transactional types).
@@ -32,18 +32,18 @@ This checklist tracks the staged implementation of testing methodology improveme
     - Add test base class guidance (`unittest.TestCase` standard).
     - Add complete fixture pool inventory listing all master data records.
 
-- [ ] **1.3 Add valid Tesla VIN Repair Vehicles to master data pool**:
+- [x] **1.3 Add valid Tesla VIN Repair Vehicles to master data pool**:
   - Add `REPAIR_VEHICLE_MODEL_S` (`5YJSA1E27PF123456`) and `REPAIR_VEHICLE_MODEL_Y` (`5YJYGDEE1PF123456`) dict constants to `test_fixtures.py`.
   - Add `ensure_repair_vehicles()` function that inserts `Repair Vehicle` with valid 17-character VINs and lets `RepairVehicle.before_save()` automatically decode all vehicle specifications (`manufacturer`, `model`, `trim`, `model_year`, `drivetrain`, `battery_type`, etc.) — zero manual field assignment.
   - Add call to `ensure_repair_vehicles()` inside `setup_all()`.
 
-- [ ] **1.4 Expand `teardown_transactional()` scope**:
+- [x] **1.4 Expand `teardown_transactional()` scope**:
   - Add `Vehicle Check-in` cleanup (filter: `customer LIKE 'Test %' OR customer LIKE '_Test%'`).
   - Add `Project` cleanup (filter: `customer LIKE 'Test %' OR customer LIKE '_Test%'`).
   - Add `Repair Vehicle` cleanup for ad-hoc test VINs (filter: `name LIKE 'TESTVIN%'`).
   - Ensure FK-safe deletion order: VCI → SE → Project → SO → Leave Application.
 
-- [ ] **1.5 Add `create_test_vehicle_check_in()` helper**:
+- [x] **1.5 Add `create_test_vehicle_check_in()` helper**:
   - Create helper function accepting optional `customer`, `vehicle`, and `schedule_entry` params.
   - Default to `Test Customer` and `5YJSA1E27PF123456`.
 
