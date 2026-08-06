@@ -84,16 +84,16 @@ This checklist tracks the staged implementation of testing methodology improveme
 
 ## Stage 3: Migrate `test_schedule_entry.py`
 
-- [ ] **3.1 Replace 91-line ad-hoc `setUp()` with `test_fixtures.setup_all()`**:
+- [x] **3.1 Replace 91-line ad-hoc `setUp()` with `test_fixtures.setup_all()`**:
   - Remove inline creation of `_Test Schedule Customer`, `Test Schedule Bay`, `_Test Service Item 01`, `TEST-VIN-SCHED-01`, `_Test Schedule Project`, and Sales Order.
   - Remove manual vehicle attribute assignments.
   - Replace with `setUp()` calling `test_fixtures.setup_all()` + `create_test_sales_order()`.
   - Update all test references to use `Test *` pool records and valid VIN `5YJSA1E27PF123456`.
 
-- [ ] **3.2 Add proper `tearDown()` with full cleanup**:
+- [x] **3.2 Add proper `tearDown()` with full cleanup**:
   - Call `test_fixtures.teardown_transactional()` to clean all transactional records including cross-DocType VCI and Project entries.
 
-- [ ] **3.3 Verify all 10 test methods pass unchanged**:
+- [x] **3.3 Verify all 10 test methods pass unchanged**:
   - `test_schedule_entry_auto_population`
   - `test_so_line_frt_override`
   - `test_duplicate_sales_order_blocked`
