@@ -2,7 +2,14 @@ import unittest
 from datetime import timedelta
 import frappe
 from induct_shop.api.scheduling_views import get_calendar_events, STATUS_COLOR_MAP
-from induct_shop.tests.test_fixtures import setup_all, teardown_transactional, create_test_sales_order, PREFIX
+from induct_shop.tests.test_fixtures import (
+    setup_all,
+    teardown_transactional,
+    create_test_sales_order,
+    PREFIX,
+    CUSTOMER,
+    REPAIR_VEHICLE_MODEL_Y,
+)
 
 
 class TestSchedulingViewsApi(unittest.TestCase):
@@ -120,33 +127,16 @@ class TestSchedulingViewsApi(unittest.TestCase):
 
     def test_resolve_vehicle_info_with_model_formatting(self):
         today = frappe.utils.today()
-        # Create a test Repair Vehicle with Model and Year
-        vin = f"TESTVIN{frappe.generate_hash(length=8)}"
-        vehicle = frappe.get_doc(
-            {
-                "doctype": "Repair Vehicle",
-                "vin": vin,
-            }
-        ).insert(ignore_permissions=True)
-
-        frappe.db.set_value(
-            "Repair Vehicle",
-            vehicle.name,
-            {
-                "model_year": "2023",
-                "manufacturer": "Tesla",
-                "model": "Model Y",
-                "trim": "Long Range",
-            },
-        )
+        vehicle_vin = REPAIR_VEHICLE_MODEL_Y["vin"]
 
         # Create Project linked to vehicle
         project = frappe.get_doc(
             {
                 "doctype": "Project",
-                "project_name": f"Project {vin}",
+                "project_name": f"Test Project View Model Y",
                 "company": frappe.db.get_single_value("Global Defaults", "default_company") or "Wind Power LLC",
-                "custom_repair_vehicle": vehicle.name,
+                "customer": CUSTOMER,
+                "custom_repair_vehicle": vehicle_vin,
                 "sales_order": self.test_so1,
             }
         ).insert(ignore_permissions=True)

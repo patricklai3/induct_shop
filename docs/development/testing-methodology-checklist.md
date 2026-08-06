@@ -115,11 +115,11 @@ This checklist tracks the staged implementation of testing methodology improveme
 
 ## Stage 4: Fix `test_scheduling_views.py` Leak & Migrate to Valid VINs
 
-- [ ] **4.1 Migrate `test_resolve_vehicle_info_with_model_formatting` to valid Tesla VIN**:
+- [x] **4.1 Migrate `test_resolve_vehicle_info_with_model_formatting` to valid Tesla VIN**:
   - Remove fake hash VIN and manual vehicle field assignments (`model_year="2023"`, `model="Model Y"`, `trim="Long Range"`).
   - Use valid Tesla Model Y VIN `5YJYGDEE1PF123456` and rely on `RepairVehicle.before_save()` automatic decoding.
 
-- [ ] **4.2 Verify expanded `teardown_transactional()` coverage**:
+- [x] **4.2 Verify expanded `teardown_transactional()` coverage**:
   - Confirm Repair Vehicle and Project created in test are cleaned by `teardown_transactional()`.
 
 ### Stage 4 Acceptance Criteria
