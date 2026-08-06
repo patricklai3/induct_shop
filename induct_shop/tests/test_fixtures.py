@@ -26,11 +26,11 @@ SERVICE_BAYS = {
 CUSTOMER = f"{PREFIX}Customer"
 
 REPAIR_VEHICLE_MODEL_S = {
-    "vin": "5YJSA1E27PF123456"
+    "vin": "5YJSA1E69PF123456"
 }
 
 REPAIR_VEHICLE_MODEL_Y = {
-    "vin": "5YJYGDEE1PF123456"
+    "vin": "5YJYGDEE9PF123456"
 }
 
 EMPLOYEES = {
@@ -122,15 +122,17 @@ def ensure_uom():
             frappe.get_doc({"doctype": "UOM", "uom_name": uom_name}).insert(ignore_permissions=True)
 
 def ensure_company():
-    company_name = frappe.db.get_single_value("Global Defaults", "default_company") or "Wind Power LLC"
-    if not frappe.db.exists("Company", company_name):
-        frappe.get_doc({
-            "doctype": "Company",
-            "company_name": company_name,
-            "abbr": "WP",
-            "default_currency": "USD",
-            "country": "United States"
-        }).insert(ignore_permissions=True)
+    company_name = frappe.db.get_single_value("Global Defaults", "default_company")
+    if not company_name or company_name == "i" or not frappe.db.exists("Company", company_name):
+        company_name = "Wind Power LLC"
+        if not frappe.db.exists("Company", company_name):
+            frappe.get_doc({
+                "doctype": "Company",
+                "company_name": company_name,
+                "abbr": "WP",
+                "default_currency": "USD",
+                "country": "United States"
+            }).insert(ignore_permissions=True)
     frappe.db.set_single_value("Global Defaults", "default_company", company_name)
     frappe.defaults.set_user_default("company", company_name)
     frappe.defaults.set_global_default("company", company_name)
@@ -434,4 +436,15 @@ def teardown_transactional(employee_ids=None):
             tuple(employee_ids)
         )
     frappe.db.commit()
+
+
+def count_test_records():
+    """Returns record counts for all test transactional records in the database."""
+    vci_count = frappe.db.sql("SELECT count(*) FROM `tabVehicle Check-in` WHERE customer LIKE %s OR customer LIKE %s", (f"{PREFIX}%", "_Test%"))[0][0]
+    project_count = frappe.db.sql("SELECT count(*) FROM `tabProject` WHERE customer LIKE %s OR customer LIKE %s", (f"{PREFIX}%", "_Test%"))[0][0]
+    se_count = frappe.db.sql("SELECT count(*) FROM `tabSchedule Entry` WHERE service_bay LIKE %s OR service_bay = 'Test Schedule Bay'", (f"{PREFIX}%",))[0][0]
+    so_count = frappe.db.sql("SELECT count(*) FROM `tabSales Order` WHERE customer = %s OR customer LIKE %s", (CUSTOMER, "_Test%"))[0][0]
+    print(f"RESIDUAL_RECORDS_CHECK -> VCI: {vci_count}, Project: {project_count}, SE: {se_count}, SO: {so_count}")
+    return {"vci": vci_count, "project": project_count, "se": se_count, "so": so_count}
+
 

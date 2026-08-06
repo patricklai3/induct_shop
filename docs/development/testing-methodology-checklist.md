@@ -60,16 +60,16 @@ This checklist tracks the staged implementation of testing methodology improveme
 
 ## Stage 2: Migrate `test_vehicle_check_in.py`
 
-- [ ] **2.1 Replace `setUpClass` master data with `test_fixtures.setup_all()`**:
+- [x] **2.1 Replace `setUpClass` master data with `test_fixtures.setup_all()`**:
   - Remove inline creation of `_Test Checkin Customer`, `TEST-VIN-VCI-01`, `_Test Checkin Bay`.
   - Remove manual vehicle attribute assignments (`manufacturer`, `model`, `trim`).
   - Replace with `setUp()` calling `test_fixtures.setup_all()`.
   - Update all test references: `_Test Checkin Customer` → `Test Customer`, `_Test Checkin Bay` → `Test Bay 1`, `TEST-VIN-VCI-01` → `5YJSA1E27PF123456` (valid Model S VIN).
 
-- [ ] **2.2 Add proper `tearDown()` with full cleanup**:
+- [x] **2.2 Add proper `tearDown()` with full cleanup**:
   - Call `test_fixtures.teardown_transactional()` to clean VCI, Project, SE, and SO records.
 
-- [ ] **2.3 Verify all 3 test methods pass unchanged**:
+- [x] **2.3 Verify all 3 test methods pass unchanged**:
   - `test_schedule_entry_cross_linking`
   - `test_vehicle_checkin_project_creation_naming`
   - `test_duplicate_vehicle_checkin_same_customer_car`
