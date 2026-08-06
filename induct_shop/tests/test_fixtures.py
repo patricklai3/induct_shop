@@ -121,11 +121,17 @@ def ensure_uom():
         if not frappe.db.exists("UOM", uom_name):
             frappe.get_doc({"doctype": "UOM", "uom_name": uom_name}).insert(ignore_permissions=True)
 
+def ensure_warehouse_types():
+    for wt in ["Transit", "Stores", "Work In Progress", "Finished Goods", "Reserved"]:
+        if frappe.db.exists("DocType", "Warehouse Type") and not frappe.db.exists("Warehouse Type", wt):
+            frappe.get_doc({"doctype": "Warehouse Type", "name": wt}).insert(ignore_permissions=True)
+
 def ensure_company():
     company_name = frappe.db.get_single_value("Global Defaults", "default_company")
     if not company_name or company_name == "i" or not frappe.db.exists("Company", company_name):
         company_name = "Wind Power LLC"
         if not frappe.db.exists("Company", company_name):
+            ensure_warehouse_types()
             frappe.get_doc({
                 "doctype": "Company",
                 "company_name": company_name,

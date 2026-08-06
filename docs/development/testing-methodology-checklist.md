@@ -132,20 +132,20 @@ This checklist tracks the staged implementation of testing methodology improveme
 
 ## Stage 5: Convert `run_ingestion_test.py` to Proper Unit Test
 
-- [ ] **5.1 Rename and restructure**:
+- [x] **5.1 Rename and restructure**:
   - Rename file from `run_ingestion_test.py` to `test_ingestion.py`.
   - Replace manual `run_tests()` function with standard `unittest.TestCase` class.
 
-- [ ] **5.2 Implement `test_ingest_part()` method**:
+- [x] **5.2 Implement `test_ingest_part()` method**:
   - Call `ingest_part()` with the existing `TEST_PARTS` constant.
-  - Assert expected Items are created (e.g., `1083401`, `2188359-10-B`, `2188354-10-B`).
+  - Assert expected Items are created (e.g., `1083401`, `2188359`, `2188354`).
   - Assert deduplication: `1083401` has exactly 2 model compatibility entries (Model 3, Model Y).
 
-- [ ] **5.3 Implement `test_ingest_service()` method with mocked HTTP**:
+- [x] **5.3 Implement `test_ingest_service()` method with mocked HTTP**:
   - Use `unittest.mock.patch` to mock the HTTP response from `service.tesla.com`.
   - Assert service item is ingested correctly without making external network calls.
 
-- [ ] **5.4 Add proper `setUp()` and `tearDown()`**:
+- [x] **5.4 Add proper `setUp()` and `tearDown()`**:
   - `setUp()` calls `test_fixtures.setup_all()`.
   - `tearDown()` cleans up any Items created during tests (filter by known test item codes).
 
