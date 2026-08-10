@@ -4,7 +4,7 @@ title: "Dual-Stage Quotation Approval System"
 description: "Technical specification for the modular quotation approval system combining internal staff governance (Frappe Workflow) with customer-facing tokenized line-item authorization (Quotation Approval Record)."
 status: Proposed
 tags: [specification, quotation, approval, workflow, customer, authorization, doctype, project]
-timestamp: 2026-08-10T13:50:00Z
+timestamp: 2026-08-10T15:42:00Z
 ---
 
 # Dual-Stage Quotation Approval System
@@ -84,6 +84,7 @@ A standard Frappe `Workflow` (document type: `Quotation`) provides role-gated st
 | `Customer Approved` | `1` (Submitted) | System (via controller) | All line items approved by customer. |
 | `Partially Approved` | `1` (Submitted) | System (via controller) | Customer approved some items, deferred/rejected others. |
 | `Customer Rejected` | `1` (Submitted) | System (via controller) | Customer rejected all items or explicitly declined. |
+| `Customer No Response` | `1` (Submitted) | System (via scheduler) | Token expired without customer action. Eligible for re-send. |
 | `Cancelled` | `2` (Cancelled) | Sales Manager | Quotation voided. |
 
 ### 3.3 Workflow Transitions
@@ -98,6 +99,11 @@ A standard Frappe `Workflow` (document type: `Quotation`) provides role-gated st
 | `Sent to Customer` | *(System)* | `Customer Approved` | System | All items approved |
 | `Sent to Customer` | *(System)* | `Partially Approved` | System | Mixed decisions |
 | `Sent to Customer` | *(System)* | `Customer Rejected` | System | All items rejected |
+| `Sent to Customer` | *(System)* | `Customer No Response` | System | Token expired (see §8) |
+| `Sent to Customer` | **Log Manual Approval** | `Customer Approved` / `Partially Approved` | Sales User, Sales Manager | Staff/Manager manual override dialog (see §4.6) |
+| `Customer No Response` | **Log Manual Approval** | `Customer Approved` / `Partially Approved` | Sales User, Sales Manager | Staff/Manager manual override dialog (see §4.6) |
+| `Customer No Response` | **Re-send Approval** | `Sent to Customer` | Sales User, Sales Manager | Generates fresh token (see §8.4) |
+| `Customer No Response` | **Revise Quote** | `Draft` | Sales User | Creates amended version |
 | `Customer Rejected` | **Revise Quote** | `Draft` | Sales User | Creates amended version |
 
 ### 3.4 Auto-Approval Bypass
@@ -114,8 +120,8 @@ To avoid slowing down low-risk estimates, the workflow supports a **configurable
 ### 3.5 Implementation Notes
 
 - The Workflow definition will be exported as a fixture (`hooks.py` → `fixtures` list includes `"Workflow"`, `"Workflow State"`, `"Workflow Action Master"`).
-- Custom Workflow States (`Sent to Customer`, `Customer Approved`, `Partially Approved`, `Customer Rejected`) must be seeded as `Workflow State` records.
-- The `update_after_submit = 1` flag must be set on the Workflow to allow post-submission state transitions by the Stage 2 controller.
+- Custom Workflow States (`Sent to Customer`, `Customer Approved`, `Partially Approved`, `Customer Rejected`, `Customer No Response`) must be seeded as `Workflow State` records.
+- The `update_after_submit = 1` flag must be set on the Workflow to allow post-submission state transitions by the Stage 2 controller and the token expiry scheduler.
 
 ---
 
@@ -131,9 +137,10 @@ When a quotation transitions to `Sent to Customer`, the system generates a uniqu
 
 | Field Name | Field Type | Description |
 | :--- | :--- | :--- |
-| `approval_token` | Data (Hidden, Read Only) | Cryptographically random token (UUID4 or `secrets.token_urlsafe(32)`). |
+| `approval_token` | Data (Hidden, Read Only) | Cryptographically random token (`secrets.token_urlsafe(32)`, 43 characters). |
 | `approval_token_expiry` | Datetime (Hidden, Read Only) | Expiry timestamp. Default: 72 hours from generation. Configurable via `Shop Settings.approval_token_expiry_hours`. |
 | `approval_link_sent_via` | Select (Read Only) | Channel used: `SMS`, `Email`, `In-Person Tablet`, `Not Sent`. |
+| `approval_reminder_sent` | Check (Hidden, Read Only) | Flag indicating whether an expiry reminder has already been sent for the current token (prevents duplicate reminders). |
 
 #### Token Lifecycle
 
@@ -194,7 +201,7 @@ A submittable (`is_submittable = 1`) standard DocType in the `Induct Shop` modul
    - All items `Approved` → `Full Approval`
    - Mix of decisions → `Partial Approval`
    - All items `Rejected` or `Deferred` → `Full Rejection`
-2. Validate that the linked `Quotation` is in `Sent to Customer` state.
+2. Validate that the linked `Quotation` is in `Sent to Customer`, `Internally Approved`, or `Customer No Response` state.
 3. Validate that no other submitted `Quotation Approval Record` exists for this quotation version (prevent double submission).
 
 #### `on_submit(self)`
@@ -206,8 +213,74 @@ A submittable (`is_submittable = 1`) standard DocType in the `Induct Shop` modul
    - `Partial Approval` → `Partially Approved`
    - `Full Rejection` → `Customer Rejected`
 4. **If `Full Approval` or `Partial Approval`**: Auto-generate `Sales Order` containing only items where `decision == 'Approved'`, linked to the same `Project`.
-5. **If `Partial Approval`**: Log deferred items to the `Project` (via a comment, custom child table, or dedicated `Deferred Recommendation` record — see §7.2 for proposed improvement).
-6. **If `Full Rejection`**: No Sales Order generated. Quotation remains submitted in `Customer Rejected` state. Advisor can initiate a revision (Frappe amendment).
+5. **If `Partial Approval`**: Log deferred items to the `Project` via `frappe.add_comment('Info', ...)` on the Project document, listing each deferred item code, description, and customer note. This serves as the interim resolution; structured deferred recommendation tracking is specified in the [Quotation Approval Extensions (EXT-1)](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/quotation-approval-extensions-spec.md).
+6. **Generate PDF Snapshot**: Attach a point-in-time PDF of the Quotation to the submitted `Quotation Approval Record` (see §9).
+7. **Trigger Advisor Notification**: Fire a system notification to the Quotation owner (see §7).
+8. **If `Full Rejection`**: No Sales Order generated. Quotation remains submitted in `Customer Rejected` state. Advisor can initiate a revision (Frappe amendment).
+
+---
+
+### 4.6 Staff / Manager Manual Approval Override
+
+#### Overview & Fallback Scenarios
+
+In real-world shop operations, automated digital approvals (SMS/Email token link) may fail or be bypassed due to operational edge cases:
+- SMS/MMS gateway outage, API failure, or carrier delivery issues.
+- Customer calling the shop directly to approve over the phone ("Phone Verbal").
+- Customer visiting the shop in person and granting verbal authorization ("Walk-In").
+- Customer unable or unwilling to open a web link on their personal device.
+
+To ensure shop operations are never blocked by gateway failures, the system provides a **Staff / Manager Manual Approval Override** workflow directly on the `Quotation` form.
+
+#### "Log Manual Approval" Action Button & Interactive Dialog
+
+When a Quotation is in `Sent to Customer`, `Internally Approved`, or `Customer No Response` state, authorized staff (`Sales User`, `Sales Manager`) see an action button on the Quotation form: **"Log Manual Approval"** (under `Actions`).
+
+```mermaid
+sequenceDiagram
+    participant S as Staff / Manager
+    participant Q as Quotation Form UI
+    participant D as Interactive Override Dialog
+    participant API as Whitelisted Override API
+    participant DB as Quotation Approval Record
+
+    S->>Q: Clicks "Log Manual Approval" button
+    Q->>D: Opens dialog with pre-filled quotation items
+    S->>D: Selects channel (Phone Verbal / Walk-In / etc.)
+    S->>D: Confirms/adjusts line item decisions (Approve/Defer)
+    S->>D: Enters approver name & optional internal notes
+    S->>D: Clicks "Submit Approval"
+    D->>API: create_manual_approval_record(args)
+    API->>DB: Inserts & Submits Quotation Approval Record
+    API->>Q: Invalidates token, updates Workflow State, creates Sales Order
+    API-->>D: Returns success response & reloads Quotation
+```
+
+#### Dialog Specification & Auto-Prepopulation
+
+Clicking **"Log Manual Approval"** opens an interactive Frappe dialog (`frappe.ui.Dialog`):
+
+1. **Auto-Prepopulated Fields**:
+   - `quotation`: Current Quotation ID (Read-Only)
+   - `customer`: Linked Customer (Read-Only)
+   - `approver_name`: Pre-filled with `customer_name` (Editable, e.g. if an authorized proxy approved)
+   - `approval_channel`: Select dropdown defaulting to `Phone Verbal` (Options: `Phone Verbal`, `Walk-In`, `Email Link`, `Paper Sign-Off`)
+   - `signature_method`: Select dropdown defaulting to `Verbal Confirmation` (Options: `Verbal Confirmation`, `Paper Document`, `None`)
+   - `internal_notes`: Small Text for staff justification (e.g. "SMS provider down; customer called in at 2:30 PM to approve verbally")
+2. **Pre-Filled Line-Item Decision Table**:
+   - Renders a child table populated with all lines from the Quotation.
+   - Each row displays: `item_code`, `item_name`, `qty`, `amount`, and a `decision` selector (`Approved` / `Deferred` / `Rejected`), defaulting to `Approved`.
+   - Allows line-item customization if the customer verbally approved a subset of work over the phone.
+3. **Submission Endpoint**:
+   - Submitting the dialog calls `induct_shop.api.quotation_approval.create_manual_approval_record`.
+   - The API constructs, inserts, and submits the `Quotation Approval Record` (`ignore_permissions=False` using staff permissions).
+   - Triggers the standard `on_submit` downstream logic (§4.5): token invalidation, workflow state sync, PDF snapshot (§9), and Sales Order auto-creation (§5.1).
+
+#### Audit & Security Safeguards
+
+- **No Bypass of Audit Log**: The manual override **does not** simply set fields on Quotation. It programmatically creates and submits an immutable `Quotation Approval Record`, maintaining 100% audit trail parity with remote customer link approvals.
+- **Operator Attribution**: The `owner` field of the created `Quotation Approval Record` records the exact staff member (`frappe.session.user`) who logged the manual override.
+- **Distinct Channel Tagging**: The `approval_channel` field (`Phone Verbal`, `Walk-In`) explicitly distinguishes staff-assisted entries from customer self-service link submissions for compliance audits.
 
 ---
 
@@ -226,7 +299,10 @@ The generated `Sales Order` is saved in `Draft` status to allow advisor review b
 
 ### 5.2 Deferred Item Tracking
 
-Items marked `Deferred` represent future revenue opportunities and customer care follow-ups. These are logged to the parent `Project` so advisors can reference them on the customer's next visit. See §7.2 for the proposed `Deferred Recommendation` enhancement.
+Items marked `Deferred` represent future revenue opportunities and customer care follow-ups. In the initial implementation, these are logged to the parent `Project` as structured comments listing each deferred item's code, description, quantity, amount, and the customer's note.
+
+> [!NOTE]
+> **Deferred Feature**: Structured `Deferred Recommendation` tracking (queryable child table on Project with follow-up workflow and next-visit surfacing) is specified in the [Quotation Approval Extensions (EXT-1)](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/quotation-approval-extensions-spec.md), tracked in the [Deferred Implementation Backlog](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/index.md) as `DEF-002`.
 
 ### 5.3 Revision Loop (Amendment Flow)
 
@@ -241,11 +317,68 @@ If a customer rejects or requests changes:
 
 ## 6. Customer-Facing Approval Page
 
-### 6.1 Architecture
+### 6.1 Architecture & Design Philosophy
 
-The customer approval experience is delivered via a **Frappe Web Page** (route: `/approve-quote`) backed by a Jinja template and a whitelisted Python API. No login is required — authentication is token-based.
+> [!IMPORTANT]
+> The approval page is the **first customer-facing web surface** in `induct_shop`. Its architecture must be designed as a **modular foundation** for a future **Customer Portal** that will include appointment management, job status tracking, and service history. All design decisions prioritize composability and API isolation over standalone polish.
 
-### 6.2 Page Flow
+The approval page is delivered via a Frappe Web Page (route: `/approve-quote`) backed by a Jinja template and whitelisted Python APIs. No login is required — authentication is token-based.
+
+**Design Constraints**:
+- **Functional over decorative**: Clean, readable, mobile-friendly — but no premium UI framework, custom animations, or design system investment at this stage.
+- **API-first**: The web page is a **thin rendering layer** consuming the same JSON APIs that the future customer portal (and potential mobile app) will use. No business logic lives in the template.
+- **Module isolation**: Each UI concern (line-item display, signature capture, confirmation) is a self-contained JS module that can be lifted into the portal without refactoring.
+
+### 6.2 Layered Architecture
+
+```mermaid
+flowchart TB
+    subgraph FuturePortal["Future: Customer Portal"]
+        direction TB
+        Portal["Portal Shell\n(Auth, Navigation, Dashboard)"]
+        Portal --> AM["Appointment Module"]
+        Portal --> QA["Quote Approval Module ←"]
+        Portal --> SH["Service History Module"]
+        Portal --> JS["Job Status Module"]
+    end
+
+    subgraph Current["Current: Standalone Approval Page"]
+        direction TB
+        Page["/approve-quote\n(Jinja + Vanilla JS)"] --> QA2["Quote Approval Module\n(Same reusable components)"]
+    end
+
+    subgraph API["Shared API Layer (induct_shop.api.quotation_approval)"]
+        V["validate_token()"]
+        S["submit_approval()"]
+        R["resend_approval_link()"]
+    end
+
+    QA2 --> API
+    QA --> API
+
+    classDef current fill:#1f538d,stroke:#333,stroke-width:2px,color:#fff;
+    classDef future fill:#555,stroke:#333,stroke-width:1px,color:#ccc,stroke-dasharray: 5 5;
+    classDef api fill:#2e7d32,stroke:#333,stroke-width:2px,color:#fff;
+
+    class Page,QA2 current;
+    class Portal,AM,QA,SH,JS future;
+    class V,S,R api;
+```
+
+### 6.3 API Layer (Shared, Portal-Ready)
+
+All customer-facing interactions go through whitelisted API methods. These are designed to be consumed by any frontend — the current Jinja page, a future Vue/React portal, or a mobile app.
+
+| API Method | Auth | Input | Output | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `validate_token(token)` | Guest (token) | `token: str` | `{ quotation, customer_name, items[], totals, shop_info }` | Validates token, returns quotation data for rendering. |
+| `submit_approval(token, decisions, signature, approver_name, approver_contact)` | Guest (token) | Token + line-item decisions array + optional signature base64 | `{ success, approval_record_name, approval_type, approved_total }` | Creates and submits the `Quotation Approval Record`. |
+| `get_approval_status(token)` | Guest (token) | `token: str` | `{ status, submitted_at }` or `{ error }` | Allows re-checking status if customer revisits the link post-submission. |
+
+> [!NOTE]
+> The API methods are intentionally stateless and token-scoped. They do not rely on session cookies, `frappe.session.user`, or Frappe's standard web context. This makes them portable to any authentication scheme the future portal adopts (e.g., customer login, OAuth, magic links).
+
+### 6.4 Page Flow
 
 ```mermaid
 sequenceDiagram
@@ -267,94 +400,383 @@ sequenceDiagram
     W->>C: Confirmation page with summary
 ```
 
-### 6.3 UI Requirements
+### 6.5 Frontend Module Structure
 
-The approval page must be:
+The page's JavaScript is organized as isolated modules. Each module exposes a `render(container, data)` function and emits events, making them liftable into a future component framework.
 
-- **Mobile-first responsive**: Most customers will open the link on their phone.
-- **No-login**: Token-only authentication. Must not redirect to a Frappe login page.
-- **Clear line-item display**: Each quotation line shows item description, quantity, rate, and amount with a toggle/button for `Approve` / `Defer` / `Reject`.
-- **Signature capture**: HTML5 `<canvas>` element for touch/stylus signature (optional based on approval channel).
-- **Summary before submit**: Confirmation modal showing total approved amount vs. total quoted amount before final submission.
-- **Thank you page**: Post-submission confirmation with reference number.
+```
+induct_shop/www/approve_quote/
+├── approve_quote.html          # Jinja shell template (minimal layout, loads modules)
+├── approve_quote.py            # Route handler (calls validate_token, passes context)
+├── approve_quote.css           # Minimal functional styles (no design system)
+└── modules/
+    ├── line_item_selector.js   # Renders item table with Approve/Defer/Reject toggles
+    ├── signature_pad.js        # Canvas-based signature capture (thin wrapper)
+    ├── approval_summary.js     # Pre-submit confirmation: approved vs. total amounts
+    └── approval_submit.js      # Handles form submission to API + confirmation display
+```
 
-### 6.4 In-Person Tablet Mode
+**Module contract**:
+- Each module is a plain JS file (no build step, no bundler dependency).
+- Modules communicate via a simple `CustomEvent` bus on `document` (e.g., `document.dispatchEvent(new CustomEvent('items-decided', { detail: decisions }))`).
+- Modules receive data via function arguments, not by querying the DOM or globals.
+- The Jinja template initializes modules by passing server-rendered JSON context into each `render()` call.
 
-For walk-in customers, the advisor loads the approval page on a shop tablet:
+### 6.6 UI Requirements (Minimal Functional)
 
-1. Advisor selects `In-Person Tablet` as the approval channel.
-2. The system generates the token but does not send SMS/Email.
-3. Advisor navigates to the approval URL on the tablet and hands it to the customer.
-4. Customer reviews, makes line-item decisions, signs on the touchscreen, and submits.
-5. The system captures the tablet's IP and user-agent for audit.
+The approval page prioritizes clarity and usability over visual sophistication:
 
----
+- **Mobile-first responsive**: Fluid layout that works on phone screens (320px+). Uses standard HTML form controls — no custom component library.
+- **No-login**: Token-only authentication. Must not redirect to a Frappe login page. If token is invalid or expired, shows a clear error message with the shop's contact information.
+- **Line-item display**: Each quotation line shows item name/description, quantity, rate, and amount. Each row has a three-state toggle (`Approve` / `Defer` / `Reject`) defaulting to `Approve`.
+- **Running totals**: A summary bar at the bottom updates in real-time showing `Approved: $X / Total: $Y` as the customer makes selections.
+- **Signature capture**: HTML5 `<canvas>` element for touch/stylus input. Clear/redo button. Optional — the system works without a signature (controlled by `signature_method` on the approval record).
+- **Confirmation step**: Before final submission, a summary screen shows the customer's decisions and asks for explicit confirmation. No accidental one-click approvals.
+- **Post-submission**: Simple confirmation with the approval record reference number and a "You may close this page" message.
 
-## 7. Proposed Additional Improvements
-
-### 7.1 Approval Notification System
-
-**Problem**: Advisors currently have no automated notification when a customer responds to a remote approval link.
-
-**Proposal**: On `Quotation Approval Record` submission, trigger a Frappe `Notification` (Email/System) to the quotation owner (advisor) with:
-- Customer decision summary (Approved / Partial / Rejected)
-- Link to the `Quotation Approval Record`
-- If partial: list of deferred/rejected items
-
-Implementation: Use Frappe's standard `Notification` DocType with event trigger `on Submit` for `Quotation Approval Record`.
-
-### 7.2 Deferred Recommendation Tracking
-
-**Problem**: When customers defer line items ("do this next visit"), there's no structured way to surface these recommendations on the customer's next check-in.
-
-**Proposal**: Create a lightweight **`Deferred Recommendation`** child table on the `Project` DocType (or a standalone link DocType) that captures:
-- `item_code`, `item_name`, `description`
-- `original_quotation` (link)
-- `deferred_date`, `customer_reason`
-- `status`: `Pending Follow-Up`, `Completed on Next Visit`, `Cancelled`
-
-When the customer returns for their next service (new `Vehicle Check-in` linked to the same `Repair Vehicle`), the advisor sees a banner: *"This vehicle has 3 deferred recommendations from visit on [date]."*
-
-### 7.3 Approval Analytics Dashboard
-
-**Problem**: Shop management lacks visibility into approval conversion rates, average response times, and common rejection reasons.
-
-**Proposal**: Create a **Quotation Approval Report** (Frappe Report Builder or Script Report) providing:
-- Approval rate by period (% of quotations fully approved vs. partially vs. rejected)
-- Average time from `Sent to Customer` to customer response
-- Most frequently deferred item categories (labor vs. parts)
-- Revenue impact: approved amount vs. total quoted amount
-- Advisor-level performance metrics
-
-### 7.4 Token Expiry Reminder & Auto-Follow-Up
-
-**Problem**: Customers may not respond to the initial approval link, and tokens expire silently.
-
-**Proposal**:
-- **Reminder Scheduler**: A scheduled task (`scheduler_events.daily`) checks for quotations in `Sent to Customer` state where `approval_token_expiry` is within 24 hours. Sends a reminder SMS/Email to the customer with the same link.
-- **Expiry Handler**: When a token expires, auto-transition the quotation to a `Customer No Response` state (or back to `Internally Approved` to allow re-sending).
-- **Re-Send Action**: Advisor can click "Re-send Approval Link" to generate a fresh token with a new expiry window.
-
-### 7.5 Multi-Quotation Approval Batching
-
-**Problem**: Complex jobs may produce multiple quotations (e.g., initial diagnostic quote + teardown discovery quote). Customers must approve each independently.
-
-**Proposal**: Allow the approval page to accept a `project` parameter instead of a single `token`, displaying all pending quotations for that project in a single approval session. The customer makes line-item decisions across all quotations and submits once, generating individual `Quotation Approval Record` entries per quotation.
-
-### 7.6 PDF Snapshot Attachment
-
-**Problem**: The quotation content may be amended after customer approval, creating audit discrepancies.
-
-**Proposal**: On `Quotation Approval Record` submission, automatically generate a **PDF snapshot** of the Quotation at the moment of approval (using Frappe's `frappe.attach_print`) and attach it to the approval record. This creates a legally defensible point-in-time artifact.
-
----
-
-## 8. Roles & Permission Governance
+### 6.7 In-Person Tablet Mode (Deferred)
 
 > [!NOTE]
-> **Deferred Feature Requirement**: Dedicated custom shop roles (`Shop Manager`, `Service Advisor`, `Shop Technician`) have been deferred to a standalone specification. See [User Roles & Permissions Management Specification](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/user-roles-and-permissions-spec.md), tracked in the [Deferred Implementation Backlog](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/index.md).
+> **Deferred Feature**: Dedicated "In-Person Tablet Mode" (kiosk locking, hardware PIN, auto-resetting sessions) is deferred to [Quotation Approval Extensions (EXT-4)](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/quotation-approval-extensions-spec.md), tracked in the [Deferred Implementation Backlog](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/index.md) as `DEF-005`.
 
-### 8.1 Active Role Mapping (Phase 1 Implementation)
+**Interim MVP Resolution**: Walk-in customers utilize the **exact same customer-initiated token approval flow** as remote customers. When a walk-in customer needs to review an estimate, the advisor sends the standard approval link via text/email or opens the token URL directly on a shop device. A single customer approval mechanism handles both remote and in-shop scenarios seamlessly without needing a separate tablet-only channel.
+
+### 6.8 Future Portal Integration Path
+
+When the Customer Portal is built, the approval page modules transition as follows:
+
+| Current (Standalone) | Future (Portal) | Migration Effort |
+| :--- | :--- | :--- |
+| `approve_quote.html` (Jinja shell) | Portal route `/portal/approvals/:token` | Replace shell only; modules unchanged |
+| `line_item_selector.js` | Portal component `<QuoteLineItems>` | Wrap as component; same render logic |
+| `signature_pad.js` | Shared component `<SignaturePad>` | Zero changes — already isolated |
+| `approval_summary.js` | Portal component `<ApprovalSummary>` | Wrap as component; same render logic |
+| API layer (`quotation_approval.py`) | Same API layer | Zero changes — portal calls same endpoints |
+| Token auth | Customer session auth + token fallback | API gains optional session check; token path preserved |
+
+
+---
+
+## 7. Advisor Notification System
+
+### 7.1 Overview
+
+When a customer responds to a remote approval link, the service advisor who owns the quotation must be notified immediately so they can act on the decision — generate a Sales Order, schedule service, or initiate a revision. This is implemented via Frappe's built-in `Notification` DocType framework.
+
+### 7.2 Notification Trigger & Recipients
+
+| Event | DocType | Trigger | Recipient | Channel |
+| :--- | :--- | :--- | :--- | :--- |
+| Customer responds to approval link | `Quotation Approval Record` | `on Submit` | Quotation owner (advisor) | System Notification + Email |
+| Token expiring (reminder sent) | `Quotation` | Scheduled task (§8.2) | Quotation owner (advisor) | System Notification |
+| Token expired (no response) | `Quotation` | Scheduled task (§8.3) | Quotation owner (advisor) | System Notification |
+
+### 7.3 Notification Content Templates
+
+#### Customer Response Notification
+
+**Subject**: `Quotation {{ doc.quotation }} — {{ doc.approval_type }}`
+
+**Body** (Jinja template):
+```
+{{ doc.approver_name }} has responded to Quotation {{ doc.quotation }}.
+
+Decision: {{ doc.approval_type }}
+Channel: {{ doc.approval_channel }}
+Time: {{ doc.approval_datetime }}
+
+{% if doc.approval_type == "Partial Approval" %}
+Approved Items:
+{% for item in doc.items %}
+{% if item.decision == "Approved" %}
+  • {{ item.item_name }} ({{ item.qty }} × {{ item.rate | currency }}) ✓
+{% endif %}
+{% endfor %}
+
+Deferred / Rejected Items:
+{% for item in doc.items %}
+
+
+{% if item.decision != "Approved" %}
+  • {{ item.item_name }} — {{ item.decision }}{% if item.customer_note %}: "{{ item.customer_note }}"{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+View approval record: {{ frappe.utils.get_url_to_form("Quotation Approval Record", doc.name) }}
+```
+
+#### Token Expiring Reminder (to Advisor)
+
+**Subject**: `Approval link expiring soon — {{ doc.name }}`
+
+**Body**: Notifies the advisor that the customer has not yet responded and the token expires in < 24 hours. Includes a link to the Quotation for re-sending.
+
+### 7.4 Notification Fixture
+
+The `Notification` record is exported as a fixture (`hooks.py` → `fixtures` list includes `"Notification"`). The fixture defines:
+- `document_type`: `Quotation Approval Record`
+- `event`: `Submit`
+- `channel`: `Email` and `System` (dual-channel)
+- `recipients`: Dynamic — owner of the linked `Quotation`
+- `condition`: None (fires on every submission)
+- `message`: Jinja template per §7.3
+
+### 7.5 Implementation Details
+
+```python
+# In quotation_approval_record.py on_submit()
+def on_submit(self):
+    # ... existing logic ...
+
+    # Notification is handled automatically by the Notification DocType framework
+    # because the fixture defines a Submit event trigger on this DocType.
+    # No manual frappe.sendmail() call is needed.
+    pass
+```
+
+The Frappe Notification engine evaluates the fixture definition on every `Quotation Approval Record` submission and dispatches notifications automatically. No custom notification code is required in the controller.
+
+---
+
+## 8. Token Lifecycle Management
+
+### 8.1 Overview
+
+Approval tokens have a finite validity window to prevent stale links and encourage timely customer responses. The token lifecycle includes generation, validation, expiry reminders, expiry handling, and re-generation.
+
+### 8.2 Expiry Reminder Scheduler
+
+A **daily scheduled task** checks for quotations approaching token expiry and sends a reminder to the customer before the link dies.
+
+#### Scheduler Configuration
+
+```python
+# In hooks.py
+scheduler_events = {
+    "daily": [
+        "induct_shop.api.quotation_approval.process_expiring_tokens"
+    ]
+}
+```
+
+#### Reminder Logic (`process_expiring_tokens`)
+
+```python
+def process_expiring_tokens():
+    """
+    Finds quotations in 'Sent to Customer' state whose approval token
+    expires within the next 24 hours and sends a reminder notification.
+    """
+    now = frappe.utils.now_datetime()
+    reminder_window = frappe.utils.add_to_date(now, hours=24)
+
+    expiring_quotations = frappe.get_all(
+        "Quotation",
+        filters={
+            "workflow_state": "Sent to Customer",
+            "approval_token": ["is", "set"],
+            "approval_token_expiry": ["between", [now, reminder_window]],
+            "approval_reminder_sent": 0
+        },
+        fields=["name", "owner", "party_name", "approval_token_expiry"]
+    )
+
+    for q in expiring_quotations:
+        # Send reminder to customer (via same channel as original)
+        send_customer_reminder(q.name)
+
+        # Notify advisor that customer hasn't responded
+        notify_advisor_expiring(q.name, q.owner)
+
+        # Mark reminder as sent to prevent duplicates
+        frappe.db.set_value(
+            "Quotation", q.name,
+            "approval_reminder_sent", 1,
+            update_modified=False
+        )
+
+    frappe.db.commit()
+```
+
+### 8.3 Expiry Handler
+
+A **second daily scheduled task** (or combined with §8.2) handles quotations whose tokens have fully expired without a customer response.
+
+#### Expiry Logic
+
+```python
+def process_expired_tokens():
+    """
+    Transitions quotations with expired tokens to 'Customer No Response' state.
+    """
+    now = frappe.utils.now_datetime()
+
+    expired_quotations = frappe.get_all(
+        "Quotation",
+        filters={
+            "workflow_state": "Sent to Customer",
+            "approval_token": ["is", "set"],
+            "approval_token_expiry": ["<", now]
+        },
+        fields=["name", "owner"]
+    )
+
+    for q in expired_quotations:
+        doc = frappe.get_doc("Quotation", q.name)
+
+        # Invalidate the expired token
+        doc.approval_token = None
+        doc.approval_token_expiry = None
+        doc.approval_reminder_sent = 0
+
+        # Transition workflow state
+        doc.workflow_state = "Customer No Response"
+        doc.add_comment(
+            "Info",
+            "Approval token expired without customer response. "
+            "Use 'Re-send Approval' to generate a new link."
+        )
+        doc.save(ignore_permissions=True)
+
+        # Notify advisor
+        notify_advisor_expired(q.name, q.owner)
+
+    frappe.db.commit()
+```
+
+### 8.4 Re-Send Approval Action
+
+When a quotation is in `Customer No Response` state, the advisor can click **"Re-send Approval"** from the Quotation form. This workflow transition:
+
+1. Generates a **fresh token** (`secrets.token_urlsafe(32)`) and a new expiry timestamp.
+2. Resets `approval_reminder_sent = 0`.
+3. Transitions the workflow state back to `Sent to Customer`.
+4. Delivers the new link via the advisor's selected channel.
+
+The client script adds the button conditionally:
+
+```javascript
+// In quotation.js
+if (frm.doc.workflow_state === 'Customer No Response') {
+    frm.add_custom_button(__('Re-send Approval Link'), function() {
+        frappe.call({
+            method: 'induct_shop.api.quotation_approval.resend_approval_link',
+            args: { quotation: frm.doc.name },
+            callback: function(r) {
+                if (r.message) {
+                    frappe.show_alert({
+                        message: __('New approval link sent.'),
+                        indicator: 'green'
+                    });
+                    frm.reload_doc();
+                }
+            }
+        });
+    }, __('Actions'));
+}
+```
+
+### 8.5 Token Lifecycle State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Generated: Workflow → Sent to Customer
+    Generated --> Valid: Token active, awaiting response
+    Valid --> ReminderSent: < 24h remaining (scheduler)
+    ReminderSent --> Used: Customer submits approval
+    Valid --> Used: Customer submits approval
+    ReminderSent --> Expired: Expiry time reached (scheduler)
+    Valid --> Expired: Expiry time reached (scheduler)
+    Expired --> Regenerated: Advisor clicks Re-send
+    Regenerated --> Valid: Fresh token, new expiry
+    Used --> [*]: Token invalidated
+```
+
+### 8.6 Shop Settings Fields (Token Lifecycle)
+
+| Field Name | Field Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `approval_token_expiry_hours` | Int | `72` | Token validity period in hours from generation. |
+| `approval_reminder_hours_before` | Int | `24` | Hours before expiry to send reminder. Set `0` to disable reminders. |
+| `max_approval_resends` | Int | `3` | Maximum number of times an advisor can re-send an approval link for the same quotation version. `0` for unlimited. |
+
+---
+
+## 9. PDF Snapshot Audit Artifact
+
+### 9.1 Overview
+
+To create a legally defensible audit trail, the system automatically generates a **point-in-time PDF snapshot** of the Quotation at the exact moment the customer submits their approval decision. This PDF is permanently attached to the `Quotation Approval Record`, ensuring that even if the original Quotation is later amended or cancelled, the authorized version is preserved.
+
+### 9.2 Implementation
+
+The PDF is generated in the `on_submit` hook of the `Quotation Approval Record` controller, using Frappe's built-in `frappe.attach_print` utility:
+
+```python
+# In quotation_approval_record.py on_submit()
+def _attach_quotation_pdf(self):
+    """Attach a PDF snapshot of the approved Quotation to this record."""
+    pdf_content = frappe.attach_print(
+        doctype="Quotation",
+        name=self.quotation,
+        print_format=None,  # Uses default print format
+        doc=frappe.get_doc("Quotation", self.quotation)
+    )
+
+    file_name = f"Quotation_{self.quotation}_approved_{self.approval_datetime.strftime('%Y%m%d_%H%M%S')}.pdf"
+
+    _file = frappe.get_doc({
+        "doctype": "File",
+        "file_name": file_name,
+        "attached_to_doctype": self.doctype,
+        "attached_to_name": self.name,
+        "content": pdf_content,
+        "is_private": 1
+    })
+    _file.save(ignore_permissions=True)
+
+    frappe.db.set_value(
+        self.doctype, self.name,
+        "quotation_pdf_snapshot", _file.file_url,
+        update_modified=False
+    )
+```
+
+### 9.3 Additional Field on `Quotation Approval Record`
+
+| Field Name | Field Type | Description |
+| :--- | :--- | :--- |
+| `quotation_pdf_snapshot` | Attach (Read Only) | Auto-populated URL to the PDF snapshot file attached on submission. |
+
+### 9.4 Legal & Compliance Value
+
+- **Immutability**: The PDF is attached to a submitted (read-only) DocType. Neither the PDF nor the record can be modified post-submission.
+- **Point-in-Time Accuracy**: Captures exact pricing, terms, and line items as presented to the customer.
+- **Dispute Resolution**: Provides a printable artifact for customer disputes, warranty claims, or insurance documentation.
+- **Regulatory Compliance**: Satisfies record-keeping requirements for automotive repair authorization in jurisdictions requiring written customer consent.
+
+---
+
+## 10. Deferred Extensions
+
+The following enhancements were identified during design and deferred to the [Quotation Approval Extensions](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/quotation-approval-extensions-spec.md) specification, tracked in the [Deferred Implementation Backlog](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/index.md):
+
+| Backlog ID | Extension | Summary |
+| :--- | :--- | :--- |
+| `DEF-002` | **Deferred Recommendation Tracking (EXT-1)** | Structured child table on `Project` for deferred line items with next-visit surfacing and follow-up workflow. |
+| `DEF-003` | **Approval Analytics Dashboard (EXT-2)** | Script Report with conversion rates, response times, revenue capture metrics, and advisor-level performance. |
+| `DEF-004` | **Multi-Quotation Approval Batching (EXT-3)** | Project-level approval token enabling customers to review and decide on all pending quotations in a single session. |
+| `DEF-005` | **In-Person Tablet Approval Mode (EXT-4)** | Dedicated kiosk locking, hardware PIN, and auto-resetting session handler for shop tablets. |
+
+---
+
+## 11. Roles & Permission Governance
+
+> [!NOTE]
+> **Deferred Feature Requirement**: Dedicated custom shop roles (`Shop Manager`, `Service Advisor`, `Shop Technician`) have been deferred to a standalone specification. See [User Roles & Permissions Management Specification](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/user-roles-and-permissions-spec.md), tracked in the [Deferred Implementation Backlog](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/index.md) as `DEF-001`.
+
+### 11.1 Active Role Mapping (Phase 1 Implementation)
 
 To minimize implementation friction and ensure immediate compatibility, Stage 1 Internal Governance uses standard native ERPNext roles:
 
@@ -363,47 +785,71 @@ To minimize implementation friction and ensure immediate compatibility, Stage 1 
 | Create / Submit Quotation | Service Advisor | `Sales User` |
 | Internal Approval / Override | Shop Manager Review | `Sales Manager` |
 | Customer Link Generation | Service Advisor / Controller | `Sales User` |
+| Re-send Approval Link | Service Advisor / Shop Manager | `Sales User`, `Sales Manager` |
+| Log Manual Approval | Staff / Manager Manual Override | `Sales User`, `Sales Manager` |
+
+### 11.2 Quotation Approval Record Permissions
+
+| Role | Read | Write | Create | Submit | Cancel |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `Sales User` | ✓ | ✓ (Draft only) | ✓ | ✓ | ✗ |
+| `Sales Manager` | ✓ | ✓ (Draft only) | ✓ | ✓ | ✓ |
+| `Guest` | ✗ | ✗ | ✗ | ✗ | ✗ |
+
+> [!IMPORTANT]
+> Guest users interact with approval records exclusively through the whitelisted API (`induct_shop.api.quotation_approval`). The API creates and submits the record using `frappe.get_doc(...).insert(ignore_permissions=True)` after validating the token. Guests never have direct DocType-level access.
 
 ---
 
-## 9. Custom Fields Summary
+## 12. Custom Fields Summary
 
 ### On `Quotation` (via fixtures)
 
 | Field Name | Type | Section | Description |
 | :--- | :--- | :--- | :--- |
-| `approval_token` | Data | Hidden | Secure token for customer approval link. |
+| `approval_token` | Data | Hidden | Secure token (`secrets.token_urlsafe(32)`, 43 chars) for customer approval link. |
 | `approval_token_expiry` | Datetime | Hidden | Token expiration timestamp. |
-| `approval_link_sent_via` | Select | Approval Status | Channel used to deliver approval link. |
+| `approval_link_sent_via` | Select | Approval Status | Channel used to deliver approval link (`SMS`, `Email`, `In-Person Tablet`, `Not Sent`). |
+| `approval_reminder_sent` | Check | Hidden | Flag to prevent duplicate expiry reminders for the same token. |
 
-### On `Shop Settings`
+### On `Quotation Approval Record`
 
 | Field Name | Type | Description |
 | :--- | :--- | :--- |
-| `approval_threshold_amount` | Currency | Auto-approval bypass threshold. |
-| `approval_threshold_discount_pct` | Percent | Discount % that always requires manager review. |
-| `approval_token_expiry_hours` | Int | Token validity period (default: 72 hours). |
+| `quotation_pdf_snapshot` | Attach (Read Only) | Auto-populated URL to the PDF snapshot file attached on submission (§9). |
+
+### On `Shop Settings`
+
+| Field Name | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `approval_threshold_amount` | Currency | `0` | Quotations at or below this amount auto-approve to `Internally Approved`. Set `0` to require manager review for all. |
+| `approval_threshold_discount_pct` | Percent | `0` | Discount % that always requires manager review regardless of amount. Set `0` to disable. |
+| `approval_token_expiry_hours` | Int | `72` | Token validity period in hours from generation. |
+| `approval_reminder_hours_before` | Int | `24` | Hours before expiry to send customer reminder. Set `0` to disable. |
+| `max_approval_resends` | Int | `3` | Maximum re-sends per quotation version. `0` for unlimited. |
 
 ---
 
-## 10. File & Module Inventory
+## 13. File & Module Inventory
 
 | Component | Path | Type |
 | :--- | :--- | :--- |
 | `Quotation Approval Record` DocType | `induct_shop/induct_shop/doctype/quotation_approval_record/` | Standard DocType (Submittable) |
 | `Quotation Approval Item` DocType | `induct_shop/induct_shop/doctype/quotation_approval_item/` | Child Table DocType |
-| Quotation Approval API | `induct_shop/api/quotation_approval.py` | Whitelisted API (token validation, submission) |
-| Approval Web Page (Jinja) | `induct_shop/www/approve_quote.html` + `.py` | Guest-accessible web page |
+| Quotation Approval API | `induct_shop/api/quotation_approval.py` | Whitelisted API (`validate_token`, `submit_approval`, `resend_approval_link`, `create_manual_approval_record`) |
+| Token Lifecycle Scheduler | `induct_shop/api/quotation_approval.py` | Scheduled tasks (`process_expiring_tokens`, `process_expired_tokens`) |
+| Approval Web Page (Shell) | `induct_shop/www/approve_quote/approve_quote.html` + `.py` + `.css` | Guest-accessible Jinja page + route handler |
+| Approval Page Modules | `induct_shop/www/approve_quote/modules/` | Isolated JS modules (line_item_selector, signature_pad, approval_summary, approval_submit) |
 | Workflow Fixture | `induct_shop/fixtures/workflow.json` | Frappe Workflow definition |
-| Workflow State Fixtures | `induct_shop/fixtures/workflow_state.json` | Custom workflow states |
-| Custom Field Fixtures | `induct_shop/fixtures/custom_field.json` | Updated with approval fields on Quotation |
-| Shop Settings Fields | `induct_shop/induct_shop/doctype/shop_settings/` | Updated schema |
-| Notification Template | `induct_shop/fixtures/notification.json` | Advisor notification on customer response |
-| Client Script (Quotation) | `induct_shop/public/js/quotation.js` | Updated with "Send to Customer" UX |
+| Workflow State Fixtures | `induct_shop/fixtures/workflow_state.json` | Custom workflow states (incl. `Customer No Response`) |
+| Custom Field Fixtures | `induct_shop/fixtures/custom_field.json` | Updated with approval + token fields on Quotation |
+| Shop Settings Fields | `induct_shop/induct_shop/doctype/shop_settings/` | Updated schema (thresholds, token config) |
+| Notification Fixture | `induct_shop/fixtures/notification.json` | Advisor notifications (customer response, token expiry) |
+| Client Script (Quotation) | `induct_shop/public/js/quotation.js` | Updated with "Send to Customer", "Re-send Approval", and "Log Manual Approval" UX |
 
 ---
 
-## 11. Integration with Primary Workflow
+## 14. Integration with Primary Workflow
 
 This system directly implements **Step 4 (Quote Approval / Rejection Loop)** from the [Primary Vehicle Repair Workflow](/workflow.md). Upon implementation, the workflow documentation should be updated to reference this specification and the new `Quotation Approval Record` DocType.
 
@@ -430,9 +876,11 @@ flowchart LR
 
 ---
 
-## 12. Related Documentation
+## 15. Related Documentation
 
 - [Primary Vehicle Repair Workflow](/workflow.md)
 - [Quotation Customizations](/doctypes/quotation.md)
 - [Shop Settings](/doctypes/shop-settings.md)
 - [Project DocType](/doctypes/project.md)
+- [Quotation Approval Extensions (Deferred)](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/quotation-approval-extensions-spec.md)
+- [Deferred Implementation Backlog](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/index.md)

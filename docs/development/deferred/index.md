@@ -4,7 +4,7 @@ title: "Deferred Implementation Backlog"
 description: "Master backlog index tracking deferred feature specifications, their originating specs, and current implementation status."
 status: Active
 tags: [reference, backlog, deferred, development, specifications]
-timestamp: 2026-08-10T15:22:00Z
+timestamp: 2026-08-10T15:42:00Z
 ---
 
 # Deferred Implementation Backlog
@@ -25,3 +25,7 @@ This directory contains specifications and technical feature modules that have b
 | ID | Title / Feature | Originating Spec | Deferred Spec File | Status | Date Deferred |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `DEF-001` | User Roles & Permissions Governance | [quotation-approval-system-spec.md](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/quotation-approval-system-spec.md) | [user-roles-and-permissions-spec.md](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/user-roles-and-permissions-spec.md) | Deferred | 2026-08-10 |
+| `DEF-002` | Deferred Recommendation Tracking | [quotation-approval-system-spec.md](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/quotation-approval-system-spec.md) | [quotation-approval-extensions-spec.md (EXT-1)](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/quotation-approval-extensions-spec.md) | Deferred | 2026-08-10 |
+| `DEF-003` | Approval Analytics Dashboard | [quotation-approval-system-spec.md](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/quotation-approval-system-spec.md) | [quotation-approval-extensions-spec.md (EXT-2)](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/quotation-approval-extensions-spec.md) | Deferred | 2026-08-10 |
+| `DEF-004` | Multi-Quotation Approval Batching | [quotation-approval-system-spec.md](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/quotation-approval-system-spec.md) | [quotation-approval-extensions-spec.md (EXT-3)](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/quotation-approval-extensions-spec.md) | Deferred | 2026-08-10 |
+| `DEF-005` | In-Person Tablet Approval Mode | [quotation-approval-system-spec.md](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/quotation-approval-system-spec.md) | [quotation-approval-extensions-spec.md (EXT-4)](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/quotation-approval-extensions-spec.md) | Deferred | 2026-08-10 |
