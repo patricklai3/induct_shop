@@ -1,0 +1,243 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2026-08-11 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "quotation",
+  "quotation_owner",
+  "approval_token",
+  "project",
+  "customer",
+  "cb_1",
+  "approval_channel",
+  "approver_name",
+  "approver_contact",
+  "ip_address",
+  "user_agent",
+  "sb_decision",
+  "approval_type",
+  "approval_datetime",
+  "cb_2",
+  "digital_signature",
+  "signature_method",
+  "sb_notes",
+  "customer_notes",
+  "internal_notes",
+  "sb_items",
+  "items",
+  "sb_pdf",
+  "quotation_pdf_snapshot"
+ ],
+ "fields": [
+  {
+   "default": "QAR-.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "QAR-.#####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "quotation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Quotation",
+   "options": "Quotation",
+   "reqd": 1
+  },
+  {
+   "fieldname": "quotation_owner",
+   "fieldtype": "Link",
+   "label": "Quotation Owner",
+   "options": "User",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "approval_token",
+   "fieldtype": "Data",
+   "label": "Approval Token",
+   "read_only": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "approval_channel",
+   "fieldtype": "Data",
+   "label": "Approval Channel",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approver_name",
+   "fieldtype": "Data",
+   "label": "Approver Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "approver_contact",
+   "fieldtype": "Data",
+   "label": "Approver Contact"
+  },
+  {
+   "fieldname": "ip_address",
+   "fieldtype": "Data",
+   "label": "IP Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_agent",
+   "fieldtype": "Small Text",
+   "label": "User Agent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_decision",
+   "fieldtype": "Section Break",
+   "label": "Decision"
+  },
+  {
+   "fieldname": "approval_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Approval Type",
+   "options": "Full Approval\nPartial Approval\nFull Rejection",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "approval_datetime",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Approval Datetime",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "digital_signature",
+   "fieldtype": "Attach Image",
+   "label": "Digital Signature"
+  },
+  {
+   "fieldname": "signature_method",
+   "fieldtype": "Select",
+   "label": "Signature Method",
+   "options": "Touchscreen Canvas\nUploaded Image\nVerbal Confirmation\nNone"
+  },
+  {
+   "fieldname": "sb_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "customer_notes",
+   "fieldtype": "Small Text",
+   "label": "Customer Notes"
+  },
+  {
+   "fieldname": "internal_notes",
+   "fieldtype": "Small Text",
+   "label": "Internal Notes"
+  },
+  {
+   "fieldname": "sb_items",
+   "fieldtype": "Section Break",
+   "label": "Approval Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Quotation Approval Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sb_pdf",
+   "fieldtype": "Section Break",
+   "label": "Audit Artifacts"
+  },
+  {
+   "fieldname": "quotation_pdf_snapshot",
+   "fieldtype": "Attach",
+   "label": "Quotation PDF Snapshot",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-08-11 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Induct Shop",
+ "name": "Quotation Approval Record",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

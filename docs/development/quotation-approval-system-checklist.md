@@ -21,29 +21,29 @@ This checklist tracks the staged implementation of the dual-stage quotation appr
 **Spec Reference**: §4.2 (Token Custom Fields), §4.3 (Quotation Approval Record DocType), §4.4 (Quotation Approval Item Child Table), §12 (Custom Fields Summary), §3.4 (Shop Settings Fields), §8.6 (Shop Settings Token Fields)
 **Files**: `induct_shop/induct_shop/doctype/quotation_approval_record/`, `induct_shop/induct_shop/doctype/quotation_approval_item/`, `induct_shop/induct_shop/doctype/shop_settings/`, `induct_shop/fixtures/custom_field.json`
 
-- [ ] **1.1 Create `Quotation Approval Item` Child Table DocType**:
+- [x] **1.1 Create `Quotation Approval Item` Child Table DocType**:
   - Create standard DocType in `induct_shop/induct_shop/doctype/quotation_approval_item/`.
   - Fields: `quotation_item` (Data, Read Only, Reqd), `item_code` (Link → Item, Read Only, Reqd), `item_name` (Data, Read Only), `qty` (Float, Read Only, Reqd), `rate` (Currency, Read Only, Reqd), `amount` (Currency, Read Only, Reqd), `decision` (Select: `Approved`, `Deferred`, `Rejected`, Reqd, Default: `Approved`), `customer_note` (Small Text).
   - Set `istable = 1` (child table), module = `Induct Shop`.
 
-- [ ] **1.2 Create `Quotation Approval Record` Standard DocType**:
+- [x] **1.2 Create `Quotation Approval Record` Standard DocType**:
   - Create submittable (`is_submittable = 1`) standard DocType in `induct_shop/induct_shop/doctype/quotation_approval_record/`.
   - Fields per §4.3: `naming_series` (`QAR-.#####`), `quotation` (Link → Quotation, Reqd), `quotation_owner` (Link → User, Read Only, Reqd), `approval_token` (Data, Read Only), `project` (Link → Project), `customer` (Link → Customer), `approval_channel` (Data, Read Only), `approver_name` (Data, Reqd), `approver_contact` (Data), `ip_address` (Data, Read Only), `user_agent` (Small Text, Read Only), `approval_type` (Select: `Full Approval` / `Partial Approval` / `Full Rejection`, Read Only, Reqd), `approval_datetime` (Datetime, Read Only, Reqd), `digital_signature` (Attach Image), `signature_method` (Select: `Touchscreen Canvas` / `Uploaded Image` / `Verbal Confirmation` / `None`), `customer_notes` (Small Text), `internal_notes` (Small Text), `items` (Table → `Quotation Approval Item`, Reqd), `quotation_pdf_snapshot` (Attach, Read Only).
   - Set module = `Induct Shop`.
 
-- [ ] **1.3 Set Permissions on `Quotation Approval Record`**:
+- [x] **1.3 Set Permissions on `Quotation Approval Record`**:
   - `Sales User`: Read, Write (Draft only), Create, Submit.
   - `Sales Manager`: Read, Write (Draft only), Create, Submit, Cancel.
   - `Guest`: No permissions (API-only access via `ignore_permissions=True`).
 
-- [ ] **1.4 Add Custom Fields on `Quotation` via Fixtures**:
+- [x] **1.4 Add Custom Fields on `Quotation` via Fixtures**:
   - Update `induct_shop/fixtures/custom_field.json` to add: `requires_manager_approval` (Check, Hidden, `read_only: 1`), `approval_token` (Data, Hidden, `allow_on_submit: 1`, `search_index: 1`), `approval_token_status` (Select: `Active` / `Used` / `Expired`, Hidden, `allow_on_submit: 1`), `approval_token_expiry` (Datetime, Hidden, `allow_on_submit: 1`), `approval_link_sent_via` (Select: `SMS` / `Email` / `In-Person Tablet` / `Not Sent`, `allow_on_submit: 1`), `approval_reminder_sent` (Check, Hidden, `allow_on_submit: 1`), `approval_resend_count` (Int, Hidden, `allow_on_submit: 1`).
 
-- [ ] **1.5 Add Shop Settings Approval Fields**:
+- [x] **1.5 Add Shop Settings Approval Fields**:
   - Add to Shop Settings schema: `approval_threshold_amount` (Currency, Default: `0`), `approval_threshold_discount_pct` (Percent, Default: `0`), `approval_token_expiry_hours` (Int, Default: `72`), `approval_reminder_hours_before` (Int, Default: `24`), `max_approval_resends` (Int, Default: `3`).
   - Group fields under an "Approval Settings" section.
 
-- [ ] **1.6 Run `bench migrate` and Verify Schema**:
+- [x] **1.6 Run `bench migrate` and Verify Schema**:
   - Run `bench migrate` to apply DocType and Custom Field changes.
   - Verify all fields exist via Frappe Desk or `frappe.get_meta(...)`.
 

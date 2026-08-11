@@ -15,7 +15,14 @@
   "holiday_list",
   "sb_capacity",
   "technician_designation",
-  "enable_technician_capacity"
+  "enable_technician_capacity",
+  "sb_approval",
+  "approval_threshold_amount",
+  "approval_threshold_discount_pct",
+  "cb_approval",
+  "approval_token_expiry_hours",
+  "approval_reminder_hours_before",
+  "max_approval_resends"
  ],
  "fields": [
   {
@@ -84,6 +91,45 @@
    "fieldname": "enable_technician_capacity",
    "fieldtype": "Check",
    "label": "Enable Technician Capacity"
+  },
+  {
+   "fieldname": "sb_approval",
+   "fieldtype": "Section Break",
+   "label": "Approval Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "approval_threshold_amount",
+   "fieldtype": "Currency",
+   "label": "Approval Threshold Amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "approval_threshold_discount_pct",
+   "fieldtype": "Percent",
+   "label": "Approval Threshold Discount (%)"
+  },
+  {
+   "fieldname": "cb_approval",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "72",
+   "fieldname": "approval_token_expiry_hours",
+   "fieldtype": "Int",
+   "label": "Approval Token Expiry (Hours)"
+  },
+  {
+   "default": "24",
+   "fieldname": "approval_reminder_hours_before",
+   "fieldtype": "Int",
+   "label": "Approval Reminder (Hours Before)"
+  },
+  {
+   "default": "3",
+   "fieldname": "max_approval_resends",
+   "fieldtype": "Int",
+   "label": "Max Approval Resends"
   }
  ],
  "issingle": 1,
