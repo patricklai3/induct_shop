@@ -295,6 +295,51 @@ Clicking **"Log Manual Approval"** opens an interactive Frappe dialog (`frappe.u
 
 ---
 
+### 4.7 Staff Approval Link Access & Preview UX
+
+#### Overview & Use Cases
+
+Staff members (service advisors, shop managers, QA testers) need direct access to open and copy the tokenized customer approval page URL (`/approve-quote?token=<TOKEN>`) for operational and testing purposes:
+
+1. **Manual Testing & QA**: Testing line-item toggles, responsive layouts, signature pad behavior, and submit flows directly in browser tabs or incognito windows during development or pre-release verification.
+2. **Staff Preview & Double Checking**: Enabling advisors to review *exactly* what the customer will see (pricing, descriptions, line items) before or while discussing the estimate with the customer over the phone or at the counter.
+3. **In-Shop Presentation**: Opening the live approval page directly on a shop tablet or workstation browser for walk-in customers to review and sign in person.
+4. **Manual Sharing**: Copying the full approval link to share manually via internal chat, custom email messages, or customer support tools.
+
+#### Quotation Form Desk Actions (`quotation.js`)
+
+When a Quotation has an generated `approval_token` (when in state `Sent to Customer`, `Internally Approved`, `Customer Approved`, `Partially Approved`, or `Customer Rejected`), the following action buttons are available under the **Actions** dropdown menu on the `Quotation` form:
+
+1. **`View Approval Page` Button**:
+   - Opens `/approve-quote?token=<TOKEN>` directly in a new browser window/tab (`window.open(url, '_blank')`).
+   - Because authentication is token-based, staff immediately see the live customer-facing web page.
+   - If the token status is `Active`, it presents the interactive authorization UI. If `Used`, it displays the submitted approval summary (`get_approval_status(token)`).
+2. **`Copy Approval Link` Button**:
+   - Copies the full absolute URL (`https://<domain>/approve-quote?token=<TOKEN>`) to the user's clipboard using `navigator.clipboard.writeText(...)`.
+   - Displays a Frappe feedback toast (`frappe.show_alert({ message: __('Approval link copied to clipboard'), indicator: 'green' })`).
+
+```javascript
+// In quotation.js
+if (frm.doc.approval_token) {
+    var approval_url = frappe.urllib.get_full_url('/approve-quote?token=' + frm.doc.approval_token);
+
+    frm.add_custom_button(__('View Approval Page'), function() {
+        window.open(approval_url, '_blank');
+    }, __('Actions'));
+
+    frm.add_custom_button(__('Copy Approval Link'), function() {
+        navigator.clipboard.writeText(approval_url).then(function() {
+            frappe.show_alert({
+                message: __('Approval link copied to clipboard'),
+                indicator: 'green'
+            });
+        });
+    }, __('Actions'));
+}
+```
+
+---
+
 ## 5. Stage 3: State Synchronization & Downstream Processing
 
 ### 5.1 Sales Order Auto-Generation
@@ -871,7 +916,7 @@ To minimize implementation friction and ensure immediate compatibility, Stage 1 
 | Custom Field Fixtures | `induct_shop/fixtures/custom_field.json` | Updated with approval + token fields on Quotation |
 | Shop Settings Fields | `induct_shop/induct_shop/doctype/shop_settings/` | Updated schema (thresholds, token config) |
 | Notification Fixture | `induct_shop/fixtures/notification.json` | Advisor notifications (customer response, token expiry) |
-| Client Script (Quotation) | `induct_shop/public/js/quotation.js` | Updated with "Send to Customer", "Re-send Approval", and "Log Manual Approval" UX |
+| Client Script (Quotation) | `induct_shop/public/js/quotation.js` | Updated with "Send to Customer", "View Approval Page", "Copy Approval Link", "Re-send Approval", and "Log Manual Approval" UX |
 
 ---
 
