@@ -1,6 +1,7 @@
 # Directory Update Log
 
 ## 2026-08-11
+* **Update**: Completed Stage 2 (Internal Governance Workflow) of [Dual-Stage Quotation Approval System Implementation Checklist](/development/quotation-approval-system-checklist.md). Exported `workflow_state.json`, `workflow_action_master.json`, and `workflow.json` fixtures for Quotation Workflow with 9 states and auto-approval threshold conditions. Registered fixtures in `hooks.py`. Implemented `compute_requires_manager_approval` auto-pass threshold evaluation on Quotation `validate` and `handle_quotation_cancel` token invalidation on Quotation `on_cancel`. Created unit test suite in `induct_shop/api/test_quotation_approval_stage2.py` (4 tests passing, zero residual records).
 * **Creation**: Added [quotation-approval-system-checklist.md](/development/quotation-approval-system-checklist.md) — 13-stage implementation checklist (10 active, 3 deferred) generated from the [Dual-Stage Quotation Approval System Specification](/development/quotation-approval-system-spec.md). Covers schema foundation, Frappe Workflow, controller logic, API layer, token lifecycle scheduler, notification fixtures, Desk UI client scripts, customer-facing web page, integration tests, and documentation.
 
 ## 2026-08-07

@@ -5,7 +5,14 @@ app_description = "Shop Management System"
 app_email = "admin@example.com"
 app_license = "mit"
 
-fixtures = ["Custom Field", "Property Setter"]
+fixtures = [
+    "Custom Field",
+    "Property Setter",
+    "Workflow",
+    "Workflow State",
+    "Workflow Action Master",
+    "Notification"
+]
 
 # Apps
 # ------------------
@@ -182,8 +189,12 @@ doc_events = {
 		"on_cancel": "induct_shop.induct_shop.overrides.project.update_project_costing"
 	},
 	"Quotation": {
-		"validate": "induct_shop.api.service_parts_selector.auto_assign_parent_services",
-		"on_submit": "induct_shop.api.service_parts_selector.update_associations"
+		"validate": [
+			"induct_shop.api.service_parts_selector.auto_assign_parent_services",
+			"induct_shop.api.quotation_approval.compute_requires_manager_approval"
+		],
+		"on_submit": "induct_shop.api.service_parts_selector.update_associations",
+		"on_cancel": "induct_shop.api.quotation_approval.handle_quotation_cancel"
 	},
 	"Sales Order": {
 		"validate": "induct_shop.api.service_parts_selector.auto_assign_parent_services",

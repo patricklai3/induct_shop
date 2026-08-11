@@ -66,34 +66,34 @@ This checklist tracks the staged implementation of the dual-stage quotation appr
 **Spec Reference**: §3.2 (Workflow State Machine), §3.3 (Workflow Transitions), §3.4 (Auto-Approval Bypass Logic), §3.5 (Implementation Notes)
 **Files**: `induct_shop/fixtures/workflow.json`, `induct_shop/fixtures/workflow_state.json`, `induct_shop/fixtures/workflow_action_master.json`, `induct_shop/hooks.py`, `induct_shop/induct_shop/doctype/quotation_approval_record/quotation_approval_record.py` (stub), `induct_shop/public/js/quotation.js`
 
-- [ ] **2.1 Create Custom Workflow State Fixtures**:
+- [x] **2.1 Create Custom Workflow State Fixtures**:
   - Create `induct_shop/fixtures/workflow_state.json` seeding states: `Sent to Customer`, `Customer Approved`, `Partially Approved`, `Customer Rejected`, `Customer No Response`.
   - Include `style` property for each state (e.g., Success, Warning, Danger, Info indicators).
 
-- [ ] **2.2 Create Workflow Action Master Fixtures**:
+- [x] **2.2 Create Workflow Action Master Fixtures**:
   - Create `induct_shop/fixtures/workflow_action_master.json` seeding actions: `Submit for Review`, `Quick Approve`, `Approve`, `Reject`, `Send to Customer`, `Log Manual Approval`, `Cancel Quotation`, `Re-send Approval`, `Revise Quote`.
 
-- [ ] **2.3 Create Workflow Definition Fixture**:
+- [x] **2.3 Create Workflow Definition Fixture**:
   - Create `induct_shop/fixtures/workflow.json` defining the `Quotation` workflow with:
     - All 9 states from §3.2 (Draft, Pending Manager Approval, Internally Approved, Sent to Customer, Customer Approved, Partially Approved, Customer Rejected, Customer No Response, Cancelled).
     - All transitions from §3.3 with correct `allowed`, `condition`, and `allow_self_approval` settings.
     - `update_after_submit = 1` to enable post-submission state transitions.
     - Condition expressions using `doc.requires_manager_approval == 1` / `== 0` for the Draft → Pending Manager Approval / Internally Approved split.
 
-- [ ] **2.4 Register Fixtures in `hooks.py`**:
+- [x] **2.4 Register Fixtures in `hooks.py`**:
   - Add `"Workflow"`, `"Workflow State"`, `"Workflow Action Master"` to the `fixtures` list in `hooks.py`.
   - Ensure `"Notification"` is also added to `fixtures` list (for Stage 6).
 
-- [ ] **2.5 Implement Auto-Approval Bypass Logic (Quotation Override)**:
+- [x] **2.5 Implement Auto-Approval Bypass Logic (Quotation Override)**:
   - Add a Quotation `validate` override (via `doc_events` hook or server script) that computes `requires_manager_approval` when `docstatus == 0`:
     - Reads `approval_threshold_amount` and `approval_threshold_discount_pct` from `Shop Settings`.
     - Sets `requires_manager_approval = 1` if `grand_total > threshold_amount` OR (discount threshold active AND max item discount pct > threshold).
     - Otherwise sets `requires_manager_approval = 0`.
 
-- [ ] **2.6 Implement Quotation `on_cancel` Token Invalidation Hook**:
+- [x] **2.6 Implement Quotation `on_cancel` Token Invalidation Hook**:
   - On Quotation cancellation (`docstatus = 2`), set `approval_token_status = 'Expired'` to invalidate any active customer approval links.
 
-- [ ] **2.7 Run `bench migrate` and Verify Workflow Installation**:
+- [x] **2.7 Run `bench migrate` and Verify Workflow Installation**:
   - Import fixtures and verify workflow states and transitions render correctly on the Quotation form.
 
 ### Stage 2 Acceptance Criteria

@@ -1,0 +1,56 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "name": "Submit for Review",
+  "workflow_action_name": "Submit for Review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "name": "Quick Approve",
+  "workflow_action_name": "Quick Approve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "name": "Approve",
+  "workflow_action_name": "Approve"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "name": "Reject",
+  "workflow_action_name": "Reject"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "name": "Send to Customer",
+  "workflow_action_name": "Send to Customer"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "name": "Log Manual Approval",
+  "workflow_action_name": "Log Manual Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "name": "Cancel Quotation",
+  "workflow_action_name": "Cancel Quotation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "name": "Re-send Approval",
+  "workflow_action_name": "Re-send Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow Action Master",
+  "name": "Revise Quote",
+  "workflow_action_name": "Revise Quote"
+ }
+]

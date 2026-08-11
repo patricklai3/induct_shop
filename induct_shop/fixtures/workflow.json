@@ -1,0 +1,174 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Quotation",
+  "is_active": 1,
+  "name": "Quotation Approval Workflow",
+  "override_status": 0,
+  "states": [
+   {
+    "allow_edit": "Sales User",
+    "doc_status": "0",
+    "state": "Draft"
+   },
+   {
+    "allow_edit": "Sales Manager",
+    "doc_status": "0",
+    "state": "Pending Manager Approval"
+   },
+   {
+    "allow_edit": "Sales Manager",
+    "doc_status": "1",
+    "state": "Internally Approved"
+   },
+   {
+    "allow_edit": "Sales Manager",
+    "doc_status": "1",
+    "state": "Sent to Customer"
+   },
+   {
+    "allow_edit": "Sales Manager",
+    "doc_status": "1",
+    "state": "Customer Approved"
+   },
+   {
+    "allow_edit": "Sales Manager",
+    "doc_status": "1",
+    "state": "Partially Approved"
+   },
+   {
+    "allow_edit": "Sales Manager",
+    "doc_status": "1",
+    "state": "Customer Rejected"
+   },
+   {
+    "allow_edit": "Sales Manager",
+    "doc_status": "1",
+    "state": "Customer No Response"
+   },
+   {
+    "allow_edit": "Sales Manager",
+    "doc_status": "2",
+    "state": "Cancelled"
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Submit for Review",
+    "allow_self_approval": 1,
+    "allowed": "Sales User",
+    "condition": "doc.requires_manager_approval == 1",
+    "next_state": "Pending Manager Approval",
+    "state": "Draft"
+   },
+   {
+    "action": "Submit for Review",
+    "allow_self_approval": 1,
+    "allowed": "Sales User",
+    "condition": "doc.requires_manager_approval == 0",
+    "next_state": "Internally Approved",
+    "state": "Draft"
+   },
+   {
+    "action": "Quick Approve",
+    "allow_self_approval": 1,
+    "allowed": "Sales Manager",
+    "condition": "",
+    "next_state": "Internally Approved",
+    "state": "Draft"
+   },
+   {
+    "action": "Approve",
+    "allow_self_approval": 1,
+    "allowed": "Sales Manager",
+    "condition": "",
+    "next_state": "Internally Approved",
+    "state": "Pending Manager Approval"
+   },
+   {
+    "action": "Reject",
+    "allow_self_approval": 1,
+    "allowed": "Sales Manager",
+    "condition": "",
+    "next_state": "Draft",
+    "state": "Pending Manager Approval"
+   },
+   {
+    "action": "Send to Customer",
+    "allow_self_approval": 1,
+    "allowed": "Sales User",
+    "condition": "",
+    "next_state": "Sent to Customer",
+    "state": "Internally Approved"
+   },
+   {
+    "action": "Log Manual Approval",
+    "allow_self_approval": 1,
+    "allowed": "Sales User",
+    "condition": "",
+    "next_state": "Customer Approved",
+    "state": "Internally Approved"
+   },
+   {
+    "action": "Cancel Quotation",
+    "allow_self_approval": 1,
+    "allowed": "Sales Manager",
+    "condition": "",
+    "next_state": "Cancelled",
+    "state": "Internally Approved"
+   },
+   {
+    "action": "Log Manual Approval",
+    "allow_self_approval": 1,
+    "allowed": "Sales User",
+    "condition": "",
+    "next_state": "Customer Approved",
+    "state": "Sent to Customer"
+   },
+   {
+    "action": "Re-send Approval",
+    "allow_self_approval": 1,
+    "allowed": "Sales User",
+    "condition": "",
+    "next_state": "Sent to Customer",
+    "state": "Sent to Customer"
+   },
+   {
+    "action": "Cancel Quotation",
+    "allow_self_approval": 1,
+    "allowed": "Sales Manager",
+    "condition": "",
+    "next_state": "Cancelled",
+    "state": "Sent to Customer"
+   },
+   {
+    "action": "Log Manual Approval",
+    "allow_self_approval": 1,
+    "allowed": "Sales User",
+    "condition": "",
+    "next_state": "Customer Approved",
+    "state": "Customer No Response"
+   },
+   {
+    "action": "Re-send Approval",
+    "allow_self_approval": 1,
+    "allowed": "Sales User",
+    "condition": "",
+    "next_state": "Sent to Customer",
+    "state": "Customer No Response"
+   },
+   {
+    "action": "Cancel Quotation",
+    "allow_self_approval": 1,
+    "allowed": "Sales Manager",
+    "condition": "",
+    "next_state": "Cancelled",
+    "state": "Customer No Response"
+   }
+  ],
+  "update_after_submit": 1,
+  "workflow_name": "Quotation Approval Workflow",
+  "workflow_state_field": "workflow_state"
+ }
+]

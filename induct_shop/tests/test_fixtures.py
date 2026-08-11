@@ -407,6 +407,11 @@ def create_test_vehicle_check_in(customer=None, vehicle=None, schedule_entry=Non
 
 def teardown_transactional(employee_ids=None):
     """Cleans up ALL transactional test entries created during tests."""
+    # 0. Quotation Approval Record
+    frappe.db.sql(
+        "DELETE FROM `tabQuotation Approval Record` WHERE customer LIKE %s OR customer LIKE %s OR approver_name LIKE %s",
+        (f"{PREFIX}%", "_Test%", f"{PREFIX}%")
+    )
     # 1. Vehicle Check-in (before Project due to link)
     frappe.db.sql(
         "DELETE FROM `tabVehicle Check-in` WHERE customer LIKE %s OR customer LIKE %s",
@@ -429,12 +434,17 @@ def teardown_transactional(employee_ids=None):
         "DELETE FROM `tabSales Order` WHERE customer = %s OR customer LIKE %s OR po_no LIKE %s",
         (CUSTOMER, "_Test%", f"{PREFIX}%")
     )
-    # 5. Repair Vehicle ad-hoc cleanup
+    # 5. Quotation
+    frappe.db.sql(
+        "DELETE FROM `tabQuotation` WHERE party_name = %s OR party_name LIKE %s",
+        (CUSTOMER, f"{PREFIX}%")
+    )
+    # 6. Repair Vehicle ad-hoc cleanup
     frappe.db.sql(
         "DELETE FROM `tabRepair Vehicle` WHERE name LIKE %s",
         ("TESTVIN%",)
     )
-    # 6. Leave Application
+    # 7. Leave Application
     if employee_ids:
         frappe.db.sql(
             "DELETE FROM `tabLeave Application` WHERE employee IN (%s)"
@@ -450,7 +460,9 @@ def count_test_records():
     project_count = frappe.db.sql("SELECT count(*) FROM `tabProject` WHERE customer LIKE %s OR customer LIKE %s", (f"{PREFIX}%", "_Test%"))[0][0]
     se_count = frappe.db.sql("SELECT count(*) FROM `tabSchedule Entry` WHERE service_bay LIKE %s OR service_bay = 'Test Schedule Bay'", (f"{PREFIX}%",))[0][0]
     so_count = frappe.db.sql("SELECT count(*) FROM `tabSales Order` WHERE customer = %s OR customer LIKE %s", (CUSTOMER, "_Test%"))[0][0]
-    print(f"RESIDUAL_RECORDS_CHECK -> VCI: {vci_count}, Project: {project_count}, SE: {se_count}, SO: {so_count}")
-    return {"vci": vci_count, "project": project_count, "se": se_count, "so": so_count}
+    quotation_count = frappe.db.sql("SELECT count(*) FROM `tabQuotation` WHERE party_name = %s OR party_name LIKE %s", (CUSTOMER, f"{PREFIX}%"))[0][0]
+    qar_count = frappe.db.sql("SELECT count(*) FROM `tabQuotation Approval Record` WHERE customer LIKE %s OR customer LIKE %s OR approver_name LIKE %s", (f"{PREFIX}%", "_Test%", f"{PREFIX}%"))[0][0]
+    print(f"RESIDUAL_RECORDS_CHECK -> VCI: {vci_count}, Project: {project_count}, SE: {se_count}, SO: {so_count}, Quotation: {quotation_count}, QAR: {qar_count}")
+    return {"vci": vci_count, "project": project_count, "se": se_count, "so": so_count, "quotation": quotation_count, "qar": qar_count}
 
 
