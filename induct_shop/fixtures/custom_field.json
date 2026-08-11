@@ -4600,5 +4600,78 @@
   "translatable": 0,
   "unique": 0,
   "width": null
+ },
+ {
+  "allow_on_submit": 1,
+  "doctype": "Custom Field",
+  "dt": "Quotation",
+  "fieldname": "approval_token",
+  "fieldtype": "Data",
+  "hidden": 1,
+  "insert_after": "terms",
+  "label": "Approval Token",
+  "name": "Quotation-approval_token",
+  "no_copy": 1,
+  "search_index": 1
+ },
+ {
+  "allow_on_submit": 1,
+  "doctype": "Custom Field",
+  "dt": "Quotation",
+  "fieldname": "approval_token_status",
+  "fieldtype": "Select",
+  "insert_after": "approval_token",
+  "label": "Approval Token Status",
+  "name": "Quotation-approval_token_status",
+  "no_copy": 1,
+  "options": "Active\nUsed\nExpired"
+ },
+ {
+  "allow_on_submit": 1,
+  "doctype": "Custom Field",
+  "dt": "Quotation",
+  "fieldname": "approval_token_expiry",
+  "fieldtype": "Datetime",
+  "hidden": 1,
+  "insert_after": "approval_token_status",
+  "label": "Approval Token Expiry",
+  "name": "Quotation-approval_token_expiry",
+  "no_copy": 1
+ },
+ {
+  "allow_on_submit": 1,
+  "doctype": "Custom Field",
+  "dt": "Quotation",
+  "fieldname": "approval_link_sent_via",
+  "fieldtype": "Select",
+  "insert_after": "approval_token_expiry",
+  "label": "Approval Link Sent Via",
+  "name": "Quotation-approval_link_sent_via",
+  "no_copy": 1,
+  "options": "SMS\nEmail\nIn-Person Tablet\nNot Sent"
+ },
+ {
+  "allow_on_submit": 1,
+  "doctype": "Custom Field",
+  "dt": "Quotation",
+  "fieldname": "approval_reminder_sent",
+  "fieldtype": "Check",
+  "hidden": 1,
+  "insert_after": "approval_link_sent_via",
+  "label": "Approval Reminder Sent",
+  "name": "Quotation-approval_reminder_sent",
+  "no_copy": 1
+ },
+ {
+  "allow_on_submit": 1,
+  "doctype": "Custom Field",
+  "dt": "Quotation",
+  "fieldname": "approval_resend_count",
+  "fieldtype": "Int",
+  "hidden": 1,
+  "insert_after": "approval_reminder_sent",
+  "label": "Approval Resend Count",
+  "name": "Quotation-approval_resend_count",
+  "no_copy": 1
  }
 ]

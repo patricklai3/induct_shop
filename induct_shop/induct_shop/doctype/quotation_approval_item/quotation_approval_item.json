@@ -1,0 +1,92 @@
+{
+ "actions": [],
+ "creation": "2026-08-11 16:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "quotation_item",
+  "item_code",
+  "item_name",
+  "qty",
+  "rate",
+  "amount",
+  "decision",
+  "customer_note"
+ ],
+ "fields": [
+  {
+   "fieldname": "quotation_item",
+   "fieldtype": "Data",
+   "label": "Quotation Item",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Quantity",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "Approved",
+   "fieldname": "decision",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Decision",
+   "options": "Approved\nRejected",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer_note",
+   "fieldtype": "Small Text",
+   "label": "Customer Note"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-11 16:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Induct Shop",
+ "name": "Quotation Approval Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

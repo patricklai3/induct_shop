@@ -1,0 +1,22 @@
+[
+ {
+  "channel": "Email",
+  "condition": "doc.approval_channel == 'Customer Digital Link'",
+  "docstatus": 0,
+  "doctype": "Notification",
+  "document_type": "Quotation Approval Record",
+  "enabled": 1,
+  "event": "Submit",
+  "is_standard": 1,
+  "message": "{{ doc.approver_name }} has responded to Quotation {{ doc.quotation }}.\n\nDecision: {{ doc.approval_type }}\nChannel: {{ doc.approval_channel }}\nTime: {{ doc.approval_datetime }}\n\n{% if doc.approval_type == \"Partial Approval\" %}\nApproved Items:\n{% for item in doc.items %}\n{% if item.decision == \"Approved\" %}\n  \u2022 {{ item.item_name }} ({{ item.qty }} \u00d7 {{ item.rate | currency }}) \u2713\n{% endif %}\n{% endfor %}\n\nRejected Items:\n{% for item in doc.items %}\n{% if item.decision != \"Approved\" %}\n  \u2022 {{ item.item_name }} \u2014 {{ item.decision }}{% if item.customer_note %}: \"{{ item.customer_note }}\"{% endif %}\n{% endif %}\n{% endfor %}\n{% endif %}\n\nView approval record: {{ frappe.utils.get_url_to_form(\"Quotation Approval Record\", doc.name) }}",
+  "module": "Induct Shop",
+  "name": "Quotation Customer Authorization Submitted",
+  "recipients": [
+   {
+    "receiver_by_document_field": "quotation_owner"
+   }
+  ],
+  "send_system_notification": 1,
+  "subject": "Quotation {{ doc.quotation }} \u2014 {{ doc.approval_type }}"
+ }
+]

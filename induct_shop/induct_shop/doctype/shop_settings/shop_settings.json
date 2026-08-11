@@ -15,7 +15,13 @@
   "holiday_list",
   "sb_capacity",
   "technician_designation",
-  "enable_technician_capacity"
+  "enable_technician_capacity",
+  "sb_quotation_approval",
+  "approval_token_expiry_hours",
+  "approval_reminder_hours_before",
+  "cb_approval_resend",
+  "max_approval_resends",
+  "quotation_approval_print_format"
  ],
  "fields": [
   {
@@ -84,6 +90,40 @@
    "fieldname": "enable_technician_capacity",
    "fieldtype": "Check",
    "label": "Enable Technician Capacity"
+  },
+  {
+   "fieldname": "sb_quotation_approval",
+   "fieldtype": "Section Break",
+   "label": "Quotation Approval Settings"
+  },
+  {
+   "default": "72",
+   "fieldname": "approval_token_expiry_hours",
+   "fieldtype": "Int",
+   "label": "Approval Token Expiry (Hours)"
+  },
+  {
+   "default": "24",
+   "fieldname": "approval_reminder_hours_before",
+   "fieldtype": "Int",
+   "label": "Approval Reminder Hours Before Expiry"
+  },
+  {
+   "fieldname": "cb_approval_resend",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "3",
+   "fieldname": "max_approval_resends",
+   "fieldtype": "Int",
+   "label": "Max Approval Link Re-sends"
+  },
+  {
+   "default": "Standard",
+   "fieldname": "quotation_approval_print_format",
+   "fieldtype": "Link",
+   "label": "Quotation Approval Print Format",
+   "options": "Print Format"
   }
  ],
  "issingle": 1,

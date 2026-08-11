@@ -5,7 +5,7 @@ app_description = "Shop Management System"
 app_email = "admin@example.com"
 app_license = "mit"
 
-fixtures = ["Custom Field", "Property Setter"]
+fixtures = ["Custom Field", "Property Setter", "Workflow", "Workflow State", "Notification"]
 
 # Apps
 # ------------------

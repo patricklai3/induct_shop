@@ -1,0 +1,75 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "document_type": "Quotation",
+  "is_active": 1,
+  "name": "Quotation Approval Workflow",
+  "override_status": 1,
+  "states": [
+   {
+    "allow_edit": "Sales User",
+    "doc_status": "0",
+    "state": "Draft"
+   },
+   {
+    "allow_edit": "Sales User",
+    "doc_status": "1",
+    "state": "Sent to Customer"
+   },
+   {
+    "allow_edit": "Sales User",
+    "doc_status": "1",
+    "state": "Customer Approved"
+   },
+   {
+    "allow_edit": "Sales User",
+    "doc_status": "1",
+    "state": "Partially Approved"
+   },
+   {
+    "allow_edit": "Sales User",
+    "doc_status": "1",
+    "state": "Customer Rejected"
+   },
+   {
+    "allow_edit": "Sales User",
+    "doc_status": "1",
+    "state": "Customer No Response"
+   },
+   {
+    "allow_edit": "Sales Manager",
+    "doc_status": "2",
+    "state": "Cancelled"
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Send to Customer",
+    "allowed": "Sales User",
+    "next_state": "Sent to Customer",
+    "state": "Draft"
+   },
+   {
+    "action": "Send to Customer",
+    "allowed": "Sales Manager",
+    "next_state": "Sent to Customer",
+    "state": "Draft"
+   },
+   {
+    "action": "Cancel Quotation",
+    "allowed": "Sales Manager",
+    "next_state": "Cancelled",
+    "state": "Sent to Customer"
+   },
+   {
+    "action": "Cancel Quotation",
+    "allowed": "Sales Manager",
+    "next_state": "Cancelled",
+    "state": "Customer No Response"
+   }
+  ],
+  "workflow_name": "Quotation Approval Workflow",
+  "workflow_state_field": "workflow_state"
+ }
+]

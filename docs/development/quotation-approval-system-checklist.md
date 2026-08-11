@@ -31,7 +31,7 @@ This checklist tracks the staged implementation of the Quotation Approval System
 **Spec Reference**: §3.2–3.4, §4.2–4.4, §7.4, §8.6, §11.2, §12, §13
 **Files**: `induct_shop/fixtures/custom_field.json`, `induct_shop/fixtures/workflow.json`, `induct_shop/fixtures/workflow_state.json`, `induct_shop/fixtures/notification.json`, `induct_shop/induct_shop/doctype/quotation_approval_record/`, `induct_shop/induct_shop/doctype/quotation_approval_item/`, `induct_shop/induct_shop/doctype/shop_settings/`
 
-- [ ] **1.1 Custom Fields on `Quotation`**:
+- [x] **1.1 Custom Fields on `Quotation`**:
   - Add `approval_token` (Data, Hidden, `allow_on_submit: 1`, `search_index: 1`).
   - Add `approval_token_status` (Select: `Active`, `Used`, `Expired`, `allow_on_submit: 1`).
   - Add `approval_token_expiry` (Datetime, Hidden, `allow_on_submit: 1`).
@@ -40,28 +40,28 @@ This checklist tracks the staged implementation of the Quotation Approval System
   - Add `approval_resend_count` (Int, Hidden, `allow_on_submit: 1`).
   - Export fixtures to `induct_shop/fixtures/custom_field.json`.
 
-- [ ] **1.2 Custom Fields on `Shop Settings`**:
+- [x] **1.2 Custom Fields on `Shop Settings`**:
   - Add `approval_token_expiry_hours` (Int, default `72`).
   - Add `approval_reminder_hours_before` (Int, default `24`).
   - Add `max_approval_resends` (Int, default `3`).
   - Add `quotation_approval_print_format` (Link to Print Format, default `"Standard"`).
 
-- [ ] **1.3 `Quotation Approval Record` Standard DocType**:
+- [x] **1.3 `Quotation Approval Record` Standard DocType**:
   - Create submittable standard DocType (`is_submittable = 1`) in `Induct Shop` module.
   - Set `naming_series` to `QAR-.#####`.
   - Fields: `quotation` (Link Quotation, Reqd), `quotation_owner` (Link User, Read Only), `approval_token` (Data, Read Only), `project` (Link Project), `customer` (Link Customer), `approval_channel` (Data, Read Only), `approver_name` (Data, Reqd), `approver_contact` (Data), `ip_address` (Data, Read Only), `user_agent` (Small Text, Read Only), `approval_type` (Select: `Full Approval`, `Partial Approval`, `Full Rejection`, Reqd), `approval_datetime` (Datetime, Read Only), `digital_signature` (Attach Image), `signature_method` (Select: `Touchscreen Canvas`, `Uploaded Image`, `Verbal Confirmation`, `None`), `customer_notes` (Small Text), `internal_notes` (Small Text), `quotation_pdf_snapshot` (Attach, Read Only), `items` (Table `Quotation Approval Item`, Reqd).
   - Permissions: Read/Write/Submit for `Sales User` and `Sales Manager`, Cancel for `Sales Manager`.
 
-- [ ] **1.4 `Quotation Approval Item` Child Table DocType**:
+- [x] **1.4 `Quotation Approval Item` Child Table DocType**:
   - Create child table DocType (`istable = 1`) in `Induct Shop` module.
   - Fields: `quotation_item` (Data, Read Only, Reqd), `item_code` (Link Item, Read Only, Reqd), `item_name` (Data, Read Only), `qty` (Float, Read Only, Reqd), `rate` (Currency, Read Only, Reqd), `amount` (Currency, Read Only, Reqd), `decision` (Select: `Approved`, `Rejected`, Reqd, Default `Approved`), `customer_note` (Small Text).
 
-- [ ] **1.5 Workflow Definition & Fixtures**:
+- [x] **1.5 Workflow Definition & Fixtures**:
   - Define Workflow on `Quotation`: States `Draft` (docstatus 0), `Sent to Customer` (docstatus 1), `Customer Approved` (docstatus 1), `Partially Approved` (docstatus 1), `Customer Rejected` (docstatus 1), `Customer No Response` (docstatus 1), `Cancelled` (docstatus 2).
   - Set `update_after_submit = 1` on Workflow definition.
   - Export fixtures to `induct_shop/fixtures/workflow.json` and `induct_shop/fixtures/workflow_state.json`.
 
-- [ ] **1.6 Advisor Notification Fixture**:
+- [x] **1.6 Advisor Notification Fixture**:
   - Create `Notification` record on `Quotation Approval Record` for `Submit` event.
   - Target `doc.quotation_owner` via Email and System channels when `doc.approval_channel == 'Customer Digital Link'`.
   - Export fixture to `induct_shop/fixtures/notification.json`.
