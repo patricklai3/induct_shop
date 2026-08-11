@@ -1,5 +1,8 @@
 # Directory Update Log
 
+## 2026-08-11
+* **Creation**: Added [quotation-approval-system-checklist.md](/development/quotation-approval-system-checklist.md) — 13-stage implementation checklist (10 active, 3 deferred) generated from the [Dual-Stage Quotation Approval System Specification](/development/quotation-approval-system-spec.md). Covers schema foundation, Frappe Workflow, controller logic, API layer, token lifecycle scheduler, notification fixtures, Desk UI client scripts, customer-facing web page, integration tests, and documentation.
+
 ## 2026-08-07
 * **Creation**: Created agent workflow [.agents/workflows/generate-checklist.md](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/.agents/workflows/generate-checklist.md) standardizing implementation checklist generation from specs based on historical spec/checklist analysis and 6 core refinements.
 
