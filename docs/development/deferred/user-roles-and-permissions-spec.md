@@ -15,7 +15,7 @@ timestamp: 2026-08-10T15:22:00Z
 
 This specification captures requirements for custom shop user role definitions and permission controls across the `induct_shop` application.
 
-This feature requirement originally emerged during the design of the [Dual-Stage Quotation Approval System](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/quotation-approval-system-spec.md) (Section 8 "New Roles"), where custom roles (`Shop Manager`, `Service Advisor`) were proposed to provide shop-specific access control beyond default ERPNext roles.
+This feature requirement originally emerged during the design of the [Quotation Approval System](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/quotation-approval-system-spec.md) (Section 11 "Roles & Permission Governance"), where custom roles (`Shop Manager`, `Service Advisor`) were proposed to provide shop-specific access control beyond default ERPNext roles.
 
 To maintain focus and avoid scope creep during the initial Quotation Approval System implementation, custom role creation has been **deferred** to this dedicated specification.
 

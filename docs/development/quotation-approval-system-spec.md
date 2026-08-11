@@ -1,22 +1,22 @@
 ---
 type: Specification
-title: "Dual-Stage Quotation Approval System"
-description: "Technical specification for the modular quotation approval system combining internal staff governance (Frappe Workflow) with customer-facing tokenized line-item authorization (Quotation Approval Record)."
+title: "Quotation Approval System"
+description: "Technical specification for the customer-facing tokenized line-item quotation approval system (Quotation Approval Record)."
 status: Proposed
 tags: [specification, quotation, approval, workflow, customer, authorization, doctype, project]
 timestamp: 2026-08-11T13:03:00Z
 ---
 
-# Dual-Stage Quotation Approval System
+# Quotation Approval System
 
 ## 1. Executive Summary
 
-This specification defines a **Dual-Stage Quotation Approval System** for Induct Shop that cleanly separates two distinct authorization concerns:
+This specification defines the **Quotation Approval System** for Induct Shop centered on customer authorization:
 
-1. **Stage 1 — Internal Governance**: Uses Frappe's native `Workflow` engine on the `Quotation` DocType to enforce internal business policy (margin checks, discount thresholds, manager sign-off) before any estimate reaches a customer.
-2. **Stage 2 — Customer Authorization**: Introduces a new **`Quotation Approval Record`** standard DocType (with child table **`Quotation Approval Item`**) to capture immutable, line-item-level customer decisions with signature, verification metadata, and legal compliance artifacts.
+1. **Customer Authorization**: Introduces a new **`Quotation Approval Record`** standard DocType (with child table **`Quotation Approval Item`**) to capture immutable, line-item-level customer decisions with signature, verification metadata, and legal compliance artifacts.
+2. **State Synchronization & Downstream Processing**: Automatically synchronizes customer responses back to the parent `Quotation` workflow state and conditionally generates a `Sales Order` containing only approved line items.
 
-The two stages operate in series: a quotation must pass internal governance before a customer authorization token is generated. Upon customer response, the system auto-synchronizes the quotation workflow state and conditionally generates a `Sales Order` containing only approved line items.
+When a quotation is prepared, the service advisor sends it to the customer, generating a tokenized authorization link. Upon customer response, the system auto-synchronizes the quotation workflow state and processes downstream orders and deferred recommendations.
 
 > [!IMPORTANT]
 > This system replaces the currently unimplemented **Step 4 (Quote Approval / Rejection Loop)** defined in the [Primary Vehicle Repair Workflow](/workflow.md#L89-L93).
@@ -27,26 +27,16 @@ The two stages operate in series: a quotation must pass internal governance befo
 
 ```mermaid
 flowchart TD
-    subgraph S1["Stage 1: Internal Governance (Frappe Workflow on Quotation)"]
+    subgraph S1["Customer Authorization (Quotation Approval Record)"]
         direction TB
-        A["Advisor creates Quotation\n(Draft)"] --> B{"Exceeds Policy\nThreshold?"}
-        B -- "Yes" --> C["Pending Manager Approval"]
-        C --> D{"Manager Decision"}
-        D -- "Reject (with notes)" --> A
-        D -- "Approve" --> E["Internally Approved"]
-        B -- "No (auto-pass)" --> E
-        E --> F["Send to Customer\n(Generate Approval Token)"]
-    end
-
-    subgraph S2["Stage 2: Customer Authorization (Quotation Approval Record)"]
-        direction TB
+        A["Advisor creates Quotation\n(Draft)"] --> F["Send to Customer\n(Generate Approval Token)"]
         F --> G["Customer receives link\n(SMS · Email · In-Person Tablet)"]
         G --> H["Line-Item Decision UI\n(Approve / Defer / Reject per item)"]
         H --> I["Digital Signature Capture\n+ Verification Metadata"]
         I --> J["Submit Quotation Approval Record\n(Immutable)"]
     end
 
-    subgraph S3["Stage 3: State Sync & Downstream Processing"]
+    subgraph S2["State Sync & Downstream Processing"]
         direction TB
         J --> K["Controller syncs Quotation\nWorkflow State"]
         K --> L["Auto-generate Sales Order\n(Approved items only)"]
@@ -55,50 +45,39 @@ flowchart TD
     end
 
     classDef stage1 fill:#1f538d,stroke:#333,stroke-width:2px,color:#fff;
-    classDef stage2 fill:#2e7d32,stroke:#333,stroke-width:2px,color:#fff;
-    classDef stage3 fill:#8a4b08,stroke:#333,stroke-width:2px,color:#fff;
-    classDef decision fill:#6a1b9a,stroke:#333,stroke-width:2px,color:#fff;
+    classDef stage2 fill:#8a4b08,stroke:#333,stroke-width:2px,color:#fff;
 
-    class A,C,E,F stage1;
-    class G,H,I,J stage2;
-    class K,L,M,N stage3;
-    class B,D decision;
+    class A,F,G,H,I,J stage1;
+    class K,L,M,N stage2;
 ```
 
 ---
 
-## 3. Stage 1: Internal Governance (Frappe Workflow)
+## 3. Quotation Workflow & Authorization States
 
 ### 3.1 Overview
 
-A standard Frappe `Workflow` (document type: `Quotation`) provides role-gated state transitions for internal staff review. This uses Frappe's built-in workflow engine — no custom DocType is required for this stage.
+A standard Frappe `Workflow` (document type: `Quotation`) manages the lifecycle of customer authorization. This uses Frappe's built-in workflow engine to track when an estimate is drafted, delivered to a customer, responded to, or cancelled — no custom governance DocType is required.
 
 ### 3.2 Workflow State Machine
 
 | State | Doc Status | Allowed Roles | Description |
 | :--- | :--- | :--- | :--- |
 | `Draft` | `0` (Draft) | Sales User, Sales Manager | Quotation being composed by service advisor. |
-| `Pending Manager Approval` | `0` (Draft) | Sales User | Advisor has submitted for internal review. Quotation is locked for editing by non-managers. |
-| `Internally Approved` | `1` (Submitted) | Sales Manager | Manager has approved the estimate. Ready for customer presentation. |
 | `Sent to Customer` | `1` (Submitted) | Sales User, Sales Manager | Approval token generated; customer has been notified. |
 | `Customer Approved` | `1` (Submitted) | System (via controller) | All line items approved by customer. |
 | `Partially Approved` | `1` (Submitted) | System (via controller) | Customer approved some items, deferred/rejected others. |
 | `Customer Rejected` | `1` (Submitted) | System (via controller) | Customer rejected all items or explicitly declined. |
 | `Customer No Response` | `1` (Submitted) | System (via scheduler) | Token expired without customer action. Eligible for re-send. |
-| `Cancelled` | `2` (Cancelled) | Sales Manager | Quotation voided. |
+| `Cancelled` | `2` (Cancelled) | Sales Manager, Sales User | Quotation voided. |
 
 ### 3.3 Workflow Transitions
 
 | From State | Action | To State | Allowed Role | Condition / Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `Draft` | **Submit for Review** | `Pending Manager Approval` | Sales User | Exceeds auto-approval thresholds (`doc.requires_manager_approval == 1`) |
-| `Draft` | **Submit for Review** | `Internally Approved` | Sales User | Auto-approve bypass (`doc.requires_manager_approval == 0`) |
-| `Draft` | **Quick Approve** | `Internally Approved` | Sales Manager | Manager direct submit (bypasses threshold review) |
-| `Pending Manager Approval` | **Approve** | `Internally Approved` | Sales Manager | Manager sign-off |
-| `Pending Manager Approval` | **Reject** | `Draft` | Sales Manager | Adds rejection comment |
-| `Internally Approved` | **Send to Customer** | `Sent to Customer` | Sales User, Sales Manager | Token generated via controller |
-| `Internally Approved` | **Log Manual Approval** | `Customer Approved` / `Partially Approved` | Sales User, Sales Manager | Direct staff/manager manual override before sending link (§4.6) |
-| `Internally Approved` | **Cancel Quotation** | `Cancelled` | Sales Manager | Manager void. Invalidates any generated token. |
+| `Draft` | **Send to Customer** | `Sent to Customer` | Sales User, Sales Manager | Token generated via controller (submits document if draft) |
+| `Draft` | **Log Manual Approval** | `Customer Approved` / `Partially Approved` | Sales User, Sales Manager | Direct staff manual override before sending link (§4.6) |
+| `Draft` | **Cancel Quotation** | `Cancelled` | Sales Manager, Sales User | Void quotation |
 | `Sent to Customer` | *(System)* | `Customer Approved` | System | All items approved |
 | `Sent to Customer` | *(System)* | `Partially Approved` | System | Mixed decisions |
 | `Sent to Customer` | *(System)* | `Customer Rejected` | System | All items rejected |
@@ -112,38 +91,20 @@ A standard Frappe `Workflow` (document type: `Quotation`) provides role-gated st
 | `Customer No Response` | **Cancel Quotation** | `Cancelled` | Sales Manager | Manager void. Sets `approval_token_status = 'Expired'`. |
 | `Customer Rejected` | **Revise Quote** | *(New Draft)* | Sales User | Triggers Frappe Amendment (`make_amendment`), creating a new `Draft` Quotation version |
 
-### 3.4 Auto-Approval Bypass Logic & Pre-Computed Flag
-
-To avoid slowing down low-risk estimates, the workflow supports a **configurable auto-approval bypass**. When a quotation's `grand_total` and discount percentage fall at or below configurable thresholds (stored in `Shop Settings`), the submission action transitions directly from `Draft` to `Internally Approved`, bypassing the manager review queue.
-
-Because standard Frappe Workflow `condition` strings in `safe_eval` context cannot execute `frappe.db.get_single_value` or dynamic Python methods at button-rendering time, the auto-approval status is pre-computed and stored on the document whenever a `Draft` quotation is saved:
-
-1. **Pre-Computed Field (`requires_manager_approval`)**: A hidden custom Check field `requires_manager_approval` on `Quotation` is evaluated in `Quotation.validate()` when `docstatus == 0`:
-   - Sets `requires_manager_approval = 1` if `grand_total > threshold_amount` OR (`threshold_discount_pct > 0` AND max item discount percentage > `threshold_discount_pct`).
-   - Otherwise sets `requires_manager_approval = 0`.
-2. **Deterministic UI Action Buttons**: The workflow condition expressions directly inspect `doc.requires_manager_approval == 1` vs `doc.requires_manager_approval == 0`, ensuring Frappe's Desk UI renders the correct action button (`Submit for Review`) reliably upon form load.
-
-#### Shop Settings Fields (New)
-
-| Field Name | Field Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `approval_threshold_amount` | Currency | `0` | Quotations **at or below** this amount auto-approve to `Internally Approved`. Set `0` to require manager review for all amounts. |
-| `approval_threshold_discount_pct` | Percent | `0` | Maximum allowed discount percentage before manager review is required. `0` means **0% max discount** (any discount > 0% requires manager review). Set `100` to disable discount threshold checking entirely. |
-
-### 3.5 Implementation Notes
+### 3.4 Implementation Notes
 
 - The Workflow definition will be exported as a fixture (`hooks.py` → `fixtures` list includes `"Workflow"`, `"Workflow State"`, `"Workflow Action Master"`).
 - Custom Workflow States (`Sent to Customer`, `Customer Approved`, `Partially Approved`, `Customer Rejected`, `Customer No Response`) must be seeded as `Workflow State` records.
 - **Submitted Document (`docstatus = 1`) State Transitions**:
-  - `Doc Status` remains `1` (Submitted) across all post-governance workflow states (`Internally Approved`, `Sent to Customer`, `Customer Approved`, `Partially Approved`, `Customer Rejected`, `Customer No Response`).
-  - Programmatic state transitions executed by the Stage 2 controller or scheduled tasks MUST use `quotation_doc.db_set("workflow_state", new_state)` or a controller state-sync helper. This updates the workflow state without re-triggering `on_submit()` or doc re-submission validations.
+  - `Doc Status` remains `1` (Submitted) across all post-delivery workflow states (`Sent to Customer`, `Customer Approved`, `Partially Approved`, `Customer Rejected`, `Customer No Response`).
+  - Programmatic state transitions executed by the controller or scheduled tasks MUST use `quotation_doc.db_set("workflow_state", new_state)` or a controller state-sync helper. This updates the workflow state without re-triggering `on_submit()` or doc re-submission validations.
 - The `update_after_submit = 1` flag MUST be set on the `Workflow` definition fixture to allow post-submission state transitions.
 - **`allow_on_submit = 1` Flag**: All custom approval fields on `Quotation` (`approval_token`, `approval_token_status`, `approval_token_expiry`, `approval_link_sent_via`, `approval_reminder_sent`, `approval_resend_count`) MUST have `allow_on_submit = 1` set in their Custom Field property definitions to allow programmatic writes after `docstatus = 1`.
 - **Cancellation & Token Invalidation (`on_cancel`)**: On Quotation cancellation (`docstatus = 2`), an `on_cancel` hook automatically updates any active token status to `approval_token_status = 'Expired'` so public customer approval links are invalidated.
 
 ---
 
-## 4. Stage 2: Customer Authorization
+## 4. Customer Authorization
 
 ### 4.1 Overview
 
@@ -155,7 +116,6 @@ When a quotation transitions to `Sent to Customer`, the system generates a uniqu
 
 | Field Name | Field Type | Options / Flags | Description |
 | :--- | :--- | :--- | :--- |
-| `requires_manager_approval` | Check | Hidden, `read_only: 1` | Pre-computed flag evaluated on `validate()` (`grand_total > threshold` OR `discount > threshold`). Used by Workflow transitions. |
 | `approval_token` | Data | Hidden, `allow_on_submit: 1`, `search_index: 1` | Cryptographically random token (`secrets.token_urlsafe(32)`, 43 characters). |
 | `approval_token_status` | Select | Options: `Active`, `Used`, `Expired` | State of the approval token (`allow_on_submit: 1`). |
 | `approval_token_expiry` | Datetime | Hidden, `allow_on_submit: 1` | Expiry timestamp. Default: 72 hours from generation. Configurable via `Shop Settings.approval_token_expiry_hours`. |
@@ -165,7 +125,7 @@ When a quotation transitions to `Sent to Customer`, the system generates a uniqu
 
 #### Token Lifecycle
 
-1. **Generation**: On `Internally Approved → Sent to Customer` transition, a `before_update` hook generates the token + expiry, sets `approval_token_status = 'Active'`, and stores them on the Quotation.
+1. **Generation**: On transition to `Sent to Customer` (or when advisor clicks **Send to Customer**), a controller hook generates the token + expiry, sets `approval_token_status = 'Active'`, and stores them on the Quotation.
 2. **Delivery**: A whitelisted API constructs the approval URL (`/approve-quote?token=<TOKEN>`) and delivers it via the selected channel.
 3. **Validation**: The public API endpoint validates: token exists, token matches a Quotation, token is not expired (real-time check: `frappe.utils.now_datetime() <= quotation.approval_token_expiry` and `approval_token_status == 'Active'`), and Quotation is in `Sent to Customer` state.
 4. **Single-Use with Re-visitation Support**: Upon submission of a `Quotation Approval Record`, the token is NOT wiped; its status is updated to `approval_token_status = 'Used'`. This prevents submitting duplicate approvals while allowing customers who re-open `/approve-quote?token=<TOKEN>` to view their submitted confirmation summary via `get_approval_status(token)`.
@@ -227,7 +187,7 @@ A submittable (`is_submittable = 1`) standard DocType in the `Induct Shop` modul
    - All items `Approved` → `Full Approval`
    - Mix of decisions → `Partial Approval`
    - All items `Rejected` or `Deferred` → `Full Rejection`
-5. Validate that the linked `Quotation` is in `Sent to Customer`, `Internally Approved`, or `Customer No Response` state.
+5. Validate that the linked `Quotation` is in `Sent to Customer`, `Draft`, or `Customer No Response` state.
 6. Validate that no other submitted `Quotation Approval Record` exists for this quotation version (prevent double submission).
 
 #### `on_submit(self)`
@@ -260,7 +220,7 @@ To ensure shop operations are never blocked by gateway failures, the system prov
 
 #### "Log Manual Approval" Action Button & Interactive Dialog
 
-When a Quotation is in `Sent to Customer`, `Internally Approved`, or `Customer No Response` state, authorized staff (`Sales User`, `Sales Manager`) see an action button on the Quotation form: **"Log Manual Approval"** (under `Actions`).
+When a Quotation is in `Draft`, `Sent to Customer`, or `Customer No Response` state, authorized staff (`Sales User`, `Sales Manager`) see an action button on the Quotation form: **"Log Manual Approval"** (under `Actions`).
 
 ```mermaid
 sequenceDiagram
@@ -298,7 +258,7 @@ Clicking **"Log Manual Approval"** opens an interactive Frappe dialog (`frappe.u
    - Allows line-item customization if the customer verbally approved a subset of work over the phone.
 3. **Submission Endpoint**:
    - Submitting the dialog calls `induct_shop.api.quotation_approval.create_manual_approval_record`.
-   - The API constructs, inserts, and submits the `Quotation Approval Record` (`ignore_permissions=False` using staff permissions). If `approval_token` is `None` (e.g., manual approval logged directly from `Internally Approved` prior to sending link), token status updates are safely skipped.
+   - The API constructs, inserts, and submits the `Quotation Approval Record` (`ignore_permissions=False` using staff permissions). If `approval_token` is `None` (e.g., manual approval logged directly from `Draft` prior to sending link), token status updates are safely skipped.
    - Triggers the standard `on_submit` downstream logic (§4.5): workflow state sync, PDF snapshot (§9), and Sales Order auto-creation (§5.1).
 
 #### Audit & Security Safeguards
@@ -322,7 +282,7 @@ Staff members (service advisors, shop managers, QA testers) need direct access t
 
 #### Quotation Form Desk Actions (`quotation.js`)
 
-When a Quotation has an generated `approval_token` (when in state `Sent to Customer`, `Internally Approved`, `Customer Approved`, `Partially Approved`, or `Customer Rejected`), the following action buttons are available under the **Actions** dropdown menu on the `Quotation` form:
+When a Quotation has a generated `approval_token` (when in state `Sent to Customer`, `Customer Approved`, `Partially Approved`, or `Customer Rejected`), the following action buttons are available under the **Actions** dropdown menu on the `Quotation` form:
 
 1. **`View Approval Page` Button**:
    - Opens `/approve-quote?token=<TOKEN>` directly in a new browser window/tab (`window.open(url, '_blank')`).
@@ -354,7 +314,7 @@ if (frm.doc.approval_token) {
 
 ---
 
-## 5. Stage 3: State Synchronization & Downstream Processing
+## 5. State Synchronization & Downstream Processing
 
 ### 5.1 Sales Order Auto-Generation
 
@@ -384,7 +344,7 @@ If a customer rejects or requests changes:
 
 1. Advisor clicks **"Revise Quote"** on the `Customer Rejected` quotation.
 2. Frappe creates an **amended** Quotation (`Quotation-1` → `Quotation-1-1`).
-3. The amended quotation enters `Draft` state and follows the full Stage 1 → Stage 2 cycle again.
+3. The amended quotation enters `Draft` state and follows the full customer authorization cycle again.
 4. The original `Quotation Approval Record` remains linked to the original quotation version, preserving full revision history.
 
 ### 5.4 Post-Approval Mind-Changes on Deferred Items
@@ -878,13 +838,12 @@ The following enhancements were identified during design and deferred to the [Qu
 
 ### 11.1 Active Role Mapping (Phase 1 Implementation)
 
-To minimize implementation friction and ensure immediate compatibility, Stage 1 Internal Governance uses standard native ERPNext roles:
+To minimize implementation friction and ensure immediate compatibility, the system uses standard native ERPNext roles:
 
 | Workflow Action | Internal Function | Mapped Native ERPNext Role |
 | :--- | :--- | :--- |
 | Create / Submit Quotation | Service Advisor | `Sales User` |
-| Internal Approval / Override | Shop Manager Review | `Sales Manager` |
-| Customer Link Generation | Service Advisor / Controller | `Sales User` |
+| Customer Link Generation | Service Advisor / Controller | `Sales User`, `Sales Manager` |
 | Re-send Approval Link | Service Advisor / Shop Manager | `Sales User`, `Sales Manager` |
 | Log Manual Approval | Staff / Manager Manual Override | `Sales User`, `Sales Manager` |
 
@@ -907,7 +866,6 @@ To minimize implementation friction and ensure immediate compatibility, Stage 1 
 
 | Field Name | Type | Section | Flags | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `requires_manager_approval` | Check | Hidden | `read_only: 1` | Pre-computed flag evaluated on `validate()` (`grand_total > threshold` OR `discount > threshold`). Used by Workflow. |
 | `approval_token` | Data | Hidden | `allow_on_submit: 1`, `search_index: 1` | Secure token (`secrets.token_urlsafe(32)`, 43 chars) for customer approval link. |
 | `approval_token_status` | Select | Hidden | `allow_on_submit: 1` | Token lifecycle status (`Active`, `Used`, `Expired`). |
 | `approval_token_expiry` | Datetime | Hidden | `allow_on_submit: 1` | Token expiration timestamp. |
@@ -928,8 +886,6 @@ To minimize implementation friction and ensure immediate compatibility, Stage 1 
 
 | Field Name | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `approval_threshold_amount` | Currency | `0` | Quotations at or below this amount auto-approve to `Internally Approved`. Set `0` to require manager review for all amounts. |
-| `approval_threshold_discount_pct` | Percent | `0` | Maximum allowed discount % before manager review is required. `0` means **0% max discount** (any discount > 0% requires review). Set `100` to disable discount checks. |
 | `approval_token_expiry_hours` | Int | `72` | Token validity period in hours from generation. |
 | `approval_reminder_hours_before` | Int | `24` | Hours before expiry to send customer reminder. Set `0` to disable. |
 | `max_approval_resends` | Int | `3` | Maximum re-sends per quotation version. `0` for unlimited. |
@@ -950,7 +906,7 @@ To minimize implementation friction and ensure immediate compatibility, Stage 1 
 | Workflow Fixture | `induct_shop/fixtures/workflow.json` | Frappe Workflow definition |
 | Workflow State Fixtures | `induct_shop/fixtures/workflow_state.json` | Custom workflow states (incl. `Customer No Response`) |
 | Custom Field Fixtures | `induct_shop/fixtures/custom_field.json` | Updated with approval + token fields on Quotation |
-| Shop Settings Fields | `induct_shop/induct_shop/doctype/shop_settings/` | Updated schema (thresholds, token config) |
+| Shop Settings Fields | `induct_shop/induct_shop/doctype/shop_settings/` | Updated schema (token config) |
 | Notification Fixture | `induct_shop/fixtures/notification.json` | Advisor notifications (customer response, token expiry) |
 | Client Script (Quotation) | `induct_shop/public/js/quotation.js` | Updated with "Send to Customer", "View Approval Page", "Copy Approval Link", "Re-send Approval", and "Log Manual Approval" UX |
 
@@ -966,19 +922,18 @@ flowchart LR
         S3["3. Quote\n(Quotation)"]
     end
 
-    subgraph New["New: Dual-Stage Approval"]
-        S4A["4a. Internal Review\n(Frappe Workflow)"]
-        S4B["4b. Customer Authorization\n(Quotation Approval Record)"]
+    subgraph New["New: Customer Approval System"]
+        S4["4. Customer Authorization\n(Quotation Approval Record)"]
     end
 
     subgraph Existing2["Existing Workflow Steps"]
         S5["5. Sales Order"]
     end
 
-    S3 --> S4A --> S4B --> S5
+    S3 --> S4 --> S5
 
     classDef new fill:#2e7d32,stroke:#333,stroke-width:2px,color:#fff;
-    class S4A,S4B new;
+    class S4 new;
 ```
 
 ---

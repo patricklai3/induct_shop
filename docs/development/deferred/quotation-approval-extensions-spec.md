@@ -1,7 +1,7 @@
 ---
 type: Specification
 title: "Quotation Approval System Extensions"
-description: "Deferred extensions to the Dual-Stage Quotation Approval System: Deferred Recommendation Tracking, Approval Analytics Dashboard, Multi-Quotation Approval Batching, and In-Person Tablet Approval Mode."
+description: "Deferred extensions to the Quotation Approval System: Deferred Recommendation Tracking, Approval Analytics Dashboard, Multi-Quotation Approval Batching, and In-Person Tablet Approval Mode."
 status: Deferred
 tags: [specification, deferred, quotation, approval, analytics, recommendations, batching, tablet]
 timestamp: 2026-08-10T16:41:00Z
@@ -9,7 +9,7 @@ timestamp: 2026-08-10T16:41:00Z
 
 # Quotation Approval System Extensions
 
-These extensions were identified during the design of the [Dual-Stage Quotation Approval System](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/quotation-approval-system-spec.md) and extracted here as deferred enhancements. Each builds upon the core approval infrastructure and can be implemented independently once the base system is operational.
+These extensions were identified during the design of the [Quotation Approval System](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/quotation-approval-system-spec.md) and extracted here as deferred enhancements. Each builds upon the core approval infrastructure and can be implemented independently once the base system is operational.
 
 ---
 
