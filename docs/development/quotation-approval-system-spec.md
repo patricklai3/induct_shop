@@ -16,7 +16,7 @@ This specification defines the **Quotation Approval System** for Induct Shop cen
 1. **Customer Authorization**: Introduces a new **`Quotation Approval Record`** standard DocType (with child table **`Quotation Approval Item`**) to capture immutable, line-item-level customer decisions with signature, verification metadata, and legal compliance artifacts.
 2. **State Synchronization & Downstream Processing**: Automatically synchronizes customer responses back to the parent `Quotation` workflow state and conditionally generates a `Sales Order` containing only approved line items.
 
-When a quotation is prepared, the service advisor sends it to the customer, generating a tokenized authorization link. Upon customer response, the system auto-synchronizes the quotation workflow state and processes downstream orders and deferred recommendations.
+When a quotation is prepared, the service advisor sends it to the customer, generating a tokenized authorization link. Upon customer response, the system auto-synchronizes the quotation workflow state and processes downstream orders and rejected items for future visit review.
 
 > [!IMPORTANT]
 > This system replaces the currently unimplemented **Step 4 (Quote Approval / Rejection Loop)** defined in the [Primary Vehicle Repair Workflow](/workflow.md#L89-L93).
@@ -31,7 +31,7 @@ flowchart TD
         direction TB
         A["Advisor creates Quotation\n(Draft)"] --> F["Send to Customer\n(Generate Approval Token)"]
         F --> G["Customer receives link\n(SMS · Email · In-Person Tablet)"]
-        G --> H["Line-Item Decision UI\n(Approve / Defer / Reject per item)"]
+        G --> H["Grouped Job Decision UI\n(Approve / Reject per service group)"]
         H --> I["Digital Signature Capture\n+ Verification Metadata"]
         I --> J["Submit Quotation Approval Record\n(Immutable)"]
     end
@@ -40,7 +40,7 @@ flowchart TD
         direction TB
         J --> K["Controller syncs Quotation\nWorkflow State"]
         K --> L["Auto-generate Sales Order\n(Approved items only)"]
-        K --> M["Log Deferred Items\nto Project for follow-up"]
+        K --> M["Log Rejected Items\nto Project for future visits"]
         K --> N["Handle Full Rejection\n(Revision loop or close)"]
     end
 
@@ -66,7 +66,7 @@ A standard Frappe `Workflow` (document type: `Quotation`) manages the lifecycle 
 | `Draft` | `0` (Draft) | Sales User, Sales Manager | Quotation being composed by service advisor. |
 | `Sent to Customer` | `1` (Submitted) | Sales User, Sales Manager | Approval token generated; customer has been notified. |
 | `Customer Approved` | `1` (Submitted) | System (via controller) | All line items approved by customer. |
-| `Partially Approved` | `1` (Submitted) | System (via controller) | Customer approved some items, deferred/rejected others. |
+| `Partially Approved` | `1` (Submitted) | System (via controller) | Customer approved some service groups, rejected others. |
 | `Customer Rejected` | `1` (Submitted) | System (via controller) | Customer rejected all items or explicitly declined. |
 | `Customer No Response` | `1` (Submitted) | System (via scheduler) | Token expired without customer action. Eligible for re-send. |
 | `Cancelled` | `2` (Cancelled) | Sales Manager, Sales User | Quotation voided. |
@@ -76,20 +76,19 @@ A standard Frappe `Workflow` (document type: `Quotation`) manages the lifecycle 
 | From State | Action | To State | Allowed Role | Condition / Description |
 | :--- | :--- | :--- | :--- | :--- |
 | `Draft` | **Send to Customer** | `Sent to Customer` | Sales User, Sales Manager | Token generated via controller (submits document if draft) |
-| `Draft` | **Log Manual Approval** | `Customer Approved` / `Partially Approved` | Sales User, Sales Manager | Direct staff manual override before sending link (§4.6) |
 | `Draft` | **Cancel Quotation** | `Cancelled` | Sales Manager, Sales User | Void quotation |
 | `Sent to Customer` | *(System)* | `Customer Approved` | System | All items approved |
 | `Sent to Customer` | *(System)* | `Partially Approved` | System | Mixed decisions |
 | `Sent to Customer` | *(System)* | `Customer Rejected` | System | All items rejected |
 | `Sent to Customer` | *(System)* | `Customer No Response` | System | Token expired (see §8) |
-| `Sent to Customer` | **Log Manual Approval** | `Customer Approved` / `Partially Approved` | Sales User, Sales Manager | Staff/Manager manual override dialog (see §4.6) |
+| `Sent to Customer` | **Log Manual Approval** | `Customer Approved` / `Partially Approved` | Sales User, Sales Manager | Staff/Manager manual override dialog for submitted quote (§4.6) |
 | `Sent to Customer` | **Re-send Approval** | `Sent to Customer` | Sales User, Sales Manager | Generates fresh token if `resend_count < max_resends` (see §8.4) |
 | `Sent to Customer` | **Cancel Quotation** | `Cancelled` | Sales Manager | Manager void. Sets `approval_token_status = 'Expired'`. |
-| `Customer No Response` | **Log Manual Approval** | `Customer Approved` / `Partially Approved` | Sales User, Sales Manager | Staff/Manager manual override dialog (see §4.6) |
+| `Customer No Response` | **Log Manual Approval** | `Customer Approved` / `Partially Approved` | Sales User, Sales Manager | Staff/Manager manual override dialog for submitted quote (§4.6) |
 | `Customer No Response` | **Re-send Approval** | `Sent to Customer` | Sales User, Sales Manager | Generates fresh token if `resend_count < max_resends` (see §8.4) |
-| `Customer No Response` | **Revise Quote** | *(New Draft)* | Sales User | Triggers Frappe Amendment (`make_amendment`), creating a new `Draft` Quotation version |
+| `Customer No Response` | **Revise Quote** | *(New Draft)* | Sales User | Triggers Frappe Amendment (`make_amendment`). Original Quotation `workflow_state` remains `Customer No Response`. |
 | `Customer No Response` | **Cancel Quotation** | `Cancelled` | Sales Manager | Manager void. Sets `approval_token_status = 'Expired'`. |
-| `Customer Rejected` | **Revise Quote** | *(New Draft)* | Sales User | Triggers Frappe Amendment (`make_amendment`), creating a new `Draft` Quotation version |
+| `Customer Rejected` | **Revise Quote** | *(New Draft)* | Sales User | Triggers Frappe Amendment (`make_amendment`). Original Quotation `workflow_state` remains `Customer Rejected`. |
 
 ### 3.4 Implementation Notes
 
@@ -173,8 +172,11 @@ A submittable (`is_submittable = 1`) standard DocType in the `Induct Shop` modul
 | `qty` | Float (Read Only) | — | Yes | Quantity from quotation line. |
 | `rate` | Currency (Read Only) | — | Yes | Per-unit rate from quotation line. |
 | `amount` | Currency (Read Only) | — | Yes | Line total from quotation line. |
-| `decision` | Select | `Approved`, `Deferred`, `Rejected` | Yes | Customer's decision for this line item. Default: `Approved`. |
-| `customer_note` | Small Text | — | No | Per-item note from customer (e.g., "do this next visit"). |
+| `decision` | Select | `Approved`, `Rejected` | Yes | Customer's decision for this line item. Default: `Approved`. |
+| `customer_note` | Small Text | — | No | Per-item note from customer. |
+
+> [!NOTE]
+> **Sequential Service & Parts Grouping**: In `induct_shop`, services (non-stock items) and their associated child parts (stock items positioned below the service line in `Quotation Item` table order, or matching `custom_parent_service_reference`) form a single atomic job group. The decision recorded on the parent service item automatically applies to all linked child part lines when saving approval record rows and building Sales Orders.
 
 ### 4.5 Controller Logic (`quotation_approval_record.py`)
 
@@ -186,9 +188,9 @@ A submittable (`is_submittable = 1`) standard DocType in the `Induct Shop` modul
 4. Compute `approval_type` from child table decisions:
    - All items `Approved` → `Full Approval`
    - Mix of decisions → `Partial Approval`
-   - All items `Rejected` or `Deferred` → `Full Rejection`
-5. Validate that the linked `Quotation` is in `Sent to Customer`, `Draft`, or `Customer No Response` state.
-6. Validate that no other submitted `Quotation Approval Record` exists for this quotation version (prevent double submission).
+   - All items `Rejected` → `Full Rejection`
+5. Validate that the linked `Quotation` is in `Sent to Customer` or `Customer No Response` state (`docstatus = 1`). Manual or digital approval is strictly prohibited on `Draft` (`docstatus = 0`) quotations.
+6. Validate that no other submitted `Quotation Approval Record` exists for this quotation version (strictly enforce single approval record per quotation version).
 
 #### `on_submit(self)`
 
@@ -200,8 +202,8 @@ A submittable (`is_submittable = 1`) standard DocType in the `Induct Shop` modul
    - `Partial Approval` → `Partially Approved`
    - `Full Rejection` → `Customer Rejected`
 5. **If `Full Approval` or `Partial Approval`**: Auto-generate `Sales Order` containing only items where `decision == 'Approved'`, linked to the same `Project`. Call `so.run_method("calculate_taxes_and_totals")` before saving (§5.1).
-6. **If `Partial Approval`**: Log deferred items to the `Project` (if `self.project` is set) via `frappe.add_comment('Info', ...)` on the Project document, listing each deferred item code, description, and customer note. This serves as the interim resolution; structured deferred recommendation tracking is specified in the [Quotation Approval Extensions (EXT-1)](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/quotation-approval-extensions-spec.md).
-7. **Trigger Advisor Notification**: The Frappe `Notification` framework automatically dispatches alerts to `doc.quotation_owner` on submit (see §7).
+6. **If `Partial Approval` or `Full Rejection`**: Log all `Rejected` job groups to the parent `Project` (if `self.project` is set) via `frappe.add_comment('Info', ...)`, listing each rejected item code, description, amount, and customer note. This ensures declined recommendations are preserved for review during future customer visits.
+7. **Trigger Advisor Notification**: The Frappe `Notification` framework automatically dispatches alerts to `doc.quotation_owner` on submit for digital link submissions (see §7).
 8. **If `Full Rejection`**: No Sales Order generated. Quotation remains submitted in `Customer Rejected` state. Advisor can initiate an amended version (`Revise Quote`).
 
 ---
@@ -216,11 +218,11 @@ In real-world shop operations, automated digital approvals (SMS/Email token link
 - Customer visiting the shop in person and granting verbal authorization ("Walk-In").
 - Customer unable or unwilling to open a web link on their personal device.
 
-To ensure shop operations are never blocked by gateway failures, the system provides a **Staff / Manager Manual Approval Override** workflow directly on the `Quotation` form.
+To ensure shop operations are never blocked by gateway failures, the system provides a **Staff / Manager Manual Approval Override** workflow directly on the `Quotation` form. Approval workflows strictly take place after the quotation has been submitted (`docstatus = 1`).
 
 #### "Log Manual Approval" Action Button & Interactive Dialog
 
-When a Quotation is in `Draft`, `Sent to Customer`, or `Customer No Response` state, authorized staff (`Sales User`, `Sales Manager`) see an action button on the Quotation form: **"Log Manual Approval"** (under `Actions`).
+When a Quotation is in `Sent to Customer` or `Customer No Response` state (`docstatus = 1`), authorized staff (`Sales User`, `Sales Manager`) see an action button on the Quotation form: **"Log Manual Approval"** (under `Actions`).
 
 ```mermaid
 sequenceDiagram
@@ -232,7 +234,7 @@ sequenceDiagram
 
     S->>Q: Clicks "Log Manual Approval" button
     Q->>D: Opens dialog with pre-filled quotation items
-    S->>D: Confirms/adjusts line item decisions (Approve/Defer)
+    S->>D: Confirms/adjusts line item decisions (Approve/Reject per job group)
     S->>D: Enters approver name, signature method & notes
     S->>D: Clicks "Submit Approval"
     D->>API: create_manual_approval_record(args)
@@ -253,12 +255,12 @@ Clicking **"Log Manual Approval"** opens an interactive Frappe dialog (`frappe.u
    - `internal_notes`: Small Text for staff justification (e.g. "SMS provider down; customer called in at 2:30 PM to approve verbally")
    - *(Note: `approval_channel` is not requested from staff; it is set automatically to `Staff Manual Override` by the backend).*
 2. **Pre-Filled Line-Item Decision Table**:
-   - Renders a child table populated with all lines from the Quotation.
-   - Each row displays: `item_code`, `item_name`, `qty`, `amount`, and a `decision` selector (`Approved` / `Deferred` / `Rejected`), defaulting to `Approved`.
-   - Allows line-item customization if the customer verbally approved a subset of work over the phone.
+   - Renders a child table populated with grouped service & parts lines from the Quotation.
+   - Each job group row displays: service/item code, description, quantity, amount, and a binary `decision` selector (`Approved` / `Rejected`), defaulting to `Approved`.
+   - Allows job-group customization if the customer verbally approved a subset of work over the phone.
 3. **Submission Endpoint**:
    - Submitting the dialog calls `induct_shop.api.quotation_approval.create_manual_approval_record`.
-   - The API constructs, inserts, and submits the `Quotation Approval Record` (`ignore_permissions=False` using staff permissions). If `approval_token` is `None` (e.g., manual approval logged directly from `Draft` prior to sending link), token status updates are safely skipped.
+   - The API validates that the parent Quotation is submitted (`docstatus = 1`), constructs, inserts, and submits the `Quotation Approval Record` (`ignore_permissions=False` using staff permissions).
    - Triggers the standard `on_submit` downstream logic (§4.5): workflow state sync, PDF snapshot (§9), and Sales Order auto-creation (§5.1).
 
 #### Audit & Security Safeguards
@@ -327,13 +329,14 @@ When the `Quotation Approval Record` is submitted with approved items, the contr
 
 After populating the approved line items, the controller MUST call `so.run_method("calculate_taxes_and_totals")` to recalculate taxes, charges, and header grand totals dynamically based on the filtered line items before saving. The generated `Sales Order` is saved in `Draft` status to allow advisor review before submission.
 
-**Product Bundles & Tax Rules**:
-- **Product Bundles (Kits)**: Product bundles on the Quotation are treated as atomic / grouped selectable lines on the approval interface to prevent customers from approving child components while rejecting parent bundles.
+**Sequential Service & Parts Grouping**:
+- Services and their associated child parts (grouped sequentially by preceding service line in `Quotation Item` child table or via `custom_parent_service_reference`) are approved or rejected as single atomic job groups.
+- When generating the `Sales Order`, approving a parent service automatically includes all associated child part lines in the `Sales Order`.
 - **Taxes & Charges**: Calling `so.run_method("calculate_taxes_and_totals")` recalculates percentage-based taxes and charges on the approved net total. Fixed-amount taxes or charges (e.g. flat shop disposal fees) remain at the original fixed amount on the reduced total unless manually modified by an advisor.
 
-### 5.2 Deferred Item Tracking
+### 5.2 Rejected Job Tracking for Future Visits
 
-Items marked `Deferred` represent future revenue opportunities and customer care follow-ups. In the initial implementation, these are logged to the parent `Project` (if linked) as structured comments listing each deferred item's code, description, quantity, amount, and the customer's note.
+Items marked `Rejected` represent declined work recommendations. In the initial implementation, these are logged to the parent `Project` (if linked) as structured comments listing each rejected item's code, description, quantity, amount, and the customer's note, ensuring advisors can reference declined work on future customer visits.
 
 > [!NOTE]
 > **Deferred Feature**: Structured `Deferred Recommendation` tracking (queryable child table on Project with follow-up workflow and next-visit surfacing) is specified in the [Quotation Approval Extensions (EXT-1)](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/quotation-approval-extensions-spec.md), tracked in the [Deferred Implementation Backlog](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/index.md) as `DEF-002`.
@@ -342,17 +345,14 @@ Items marked `Deferred` represent future revenue opportunities and customer care
 
 If a customer rejects or requests changes:
 
-1. Advisor clicks **"Revise Quote"** on the `Customer Rejected` quotation.
+1. Advisor clicks **"Revise Quote"** on the `Customer Rejected` or `Customer No Response` quotation.
 2. Frappe creates an **amended** Quotation (`Quotation-1` → `Quotation-1-1`).
 3. The amended quotation enters `Draft` state and follows the full customer authorization cycle again.
-4. The original `Quotation Approval Record` remains linked to the original quotation version, preserving full revision history.
+4. The original `Quotation Approval Record` remains linked to the original quotation version, preserving full revision history. The original Quotation record's `workflow_state` explicitly remains `Customer Rejected` or `Customer No Response` to preserve historical reporting accuracy.
 
-### 5.4 Post-Approval Mind-Changes on Deferred Items
+### 5.4 Mind-Changes on Previously Rejected Items
 
-If a customer who originally partially approved an estimate (e.g. approved Brakes, deferred Tires) later contacts the shop to authorize previously deferred items:
-
-1. **Option A (Manual Override)**: Staff can click **"Log Manual Approval"** to submit a second `Quotation Approval Record` specifically for the newly authorized line items, auto-generating an additional `Sales Order` for the remaining items.
-2. **Option B (Revision Flow)**: Staff can initiate an amended Quotation version (`make_amendment`) for the deferred items to follow standard authorization.
+If a customer who originally partially approved an estimate later contacts the shop to authorize previously rejected items, staff must initiate an amended Quotation version (**Revision Flow via `make_amendment`**) for the remaining items to follow standard customer authorization. Exactly one submitted `Quotation Approval Record` is supported per quotation version.
 
 ---
 
@@ -412,13 +412,13 @@ All customer-facing interactions go through whitelisted API methods. These are d
 
 | API Method | Auth | Input | Output | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `validate_token(token)` | Guest (token) | `token: str` | `{ quotation, customer_name, items[], totals, shop_info }` | Validates token and real-time expiry (`now <= expiry`), returns quotation data for rendering. |
-| `submit_approval(token, decisions, signature, approver_name, approver_contact)` | Guest (token) | Token + line-item decisions array + optional signature base64 | `{ success, approval_record_name, approval_type, approved_total }` | Creates and submits `Quotation Approval Record` (`approval_channel` auto-derived as `Customer Digital Link`). Decodes base64 signature string into a private `File` document attached to the record and links `file_url` to `digital_signature`. |
-| `get_approval_status(token)` | Guest (token) | `token: str` | `{ status, submitted_at, approval_type, items[] }` or `{ error }` | Allows re-checking status and viewing summary if customer revisits the link post-submission. |
+| `validate_token(token)` | Guest (token) | `token: str` | `{ quotation, customer_name, items[], totals, shop_info }` or `{ status: 'Used', summary }` | Validates token and expiry. If active, returns quotation data. If token status is `Used`, returns submitted summary via `get_approval_status(token)`. Decorated with `@rate_limit(limit=10, seconds=60)`. |
+| `submit_approval(token, decisions, signature, approver_name, approver_contact)` | Guest (token) | Token + line-item decisions array + optional signature base64 | `{ success, approval_record_name, approval_type, approved_total }` | Creates and submits `Quotation Approval Record`. Decodes signature string into a public `File` document (`is_private = 0`) linked to `digital_signature`. Decorated with `@rate_limit(limit=10, seconds=60)`. |
+| `get_approval_status(token)` | Guest (token) | `token: str` | `{ status, submitted_at, approval_type, items[] }` or `{ error }` | Allows re-checking status and viewing summary if customer revisits the link post-submission. Decorated with `@rate_limit(limit=10, seconds=60)`. |
 
 
 > [!NOTE]
-> The API methods are intentionally stateless and token-scoped. They do not rely on session cookies, `frappe.session.user`, or Frappe's standard web context. This makes them portable to any authentication scheme the future portal adopts (e.g., customer login, OAuth, magic links).
+> The API methods are intentionally stateless and token-scoped. All guest-accessible API methods are protected by Frappe's `@rate_limit(limit=10, seconds=60)` decorator to prevent brute-force enumeration.
 
 ### 6.4 Page Flow
 
@@ -433,7 +433,7 @@ sequenceDiagram
     W->>API: validate_token(token)
     API-->>W: Quotation data + line items (or error)
     W->>C: Renders line-item decision form
-    C->>C: Selects Approve/Defer/Reject per item
+    C->>C: Selects Approve/Reject per job group
     C->>C: Signs on canvas (optional)
     C->>W: Submits decisions
     W->>API: submit_approval(token, decisions, signature)
@@ -452,7 +452,7 @@ induct_shop/www/approve_quote/
 ├── approve_quote.py            # Route handler (calls validate_token, passes context)
 ├── approve_quote.css           # Minimal functional styles (no design system)
 └── modules/
-    ├── line_item_selector.js   # Renders item table with Approve/Defer/Reject toggles
+    ├── line_item_selector.js   # Renders item table with Approve/Reject toggles per job group
     ├── signature_pad.js        # Canvas-based signature capture (thin wrapper)
     ├── approval_summary.js     # Pre-submit confirmation: approved vs. total amounts
     └── approval_submit.js      # Handles form submission to API + confirmation display
@@ -470,7 +470,7 @@ The approval page prioritizes clarity and usability over visual sophistication:
 
 - **Mobile-first responsive**: Fluid layout that works on phone screens (320px+). Uses standard HTML form controls — no custom component library.
 - **No-login**: Token-only authentication. Must not redirect to a Frappe login page. If token is invalid or expired, shows a clear error message with the shop's contact information.
-- **Line-item display**: Each quotation line shows item name/description, quantity, rate, and amount. Each row has a three-state toggle (`Approve` / `Defer` / `Reject`) defaulting to `Approve`. Product Bundles (Kits) are rendered as grouped, atomic units so component items cannot be partially selected independently of parent bundles.
+- **Line-item display**: Each quotation line shows item name/description, quantity, rate, and amount. Each job group row has a binary toggle (`Approve` / `Reject`) defaulting to `Approve`. Service and associated child parts are rendered as grouped, atomic units so component items cannot be partially selected independently of parent services.
 - **Running totals**: A summary bar at the bottom updates in real-time showing `Approved: $X / Total: $Y` as the customer makes selections.
 - **Signature capture**: HTML5 `<canvas>` element for touch/stylus input. Clear/redo button. Optional — the system works without a signature (controlled by `signature_method` on the approval record).
 - **Confirmation step**: Before final submission, a summary screen shows the customer's decisions and asks for explicit confirmation. No accidental one-click approvals.
@@ -535,7 +535,7 @@ Approved Items:
 {% endif %}
 {% endfor %}
 
-Deferred / Rejected Items:
+Rejected Items:
 {% for item in doc.items %}
 
 
@@ -561,7 +561,7 @@ The `Notification` record is exported as a fixture (`hooks.py` → `fixtures` li
 - `event`: `Submit`
 - `channel`: `Email` and `System` (dual-channel)
 - `recipients`: Dynamic — `doc.quotation_owner` (Read-only Link field on `Quotation Approval Record` populated during `validate()`)
-- `condition`: None (fires on every submission)
+- `condition`: `doc.approval_channel == 'Customer Digital Link'` (fires only on customer link submissions, suppressing redundant alerts for staff manual overrides)
 - `message`: Jinja template per §7.3
 
 ### 7.5 Implementation Details
@@ -889,6 +889,7 @@ To minimize implementation friction and ensure immediate compatibility, the syst
 | `approval_token_expiry_hours` | Int | `72` | Token validity period in hours from generation. |
 | `approval_reminder_hours_before` | Int | `24` | Hours before expiry to send customer reminder. Set `0` to disable. |
 | `max_approval_resends` | Int | `3` | Maximum re-sends per quotation version. `0` for unlimited. |
+| `quotation_approval_print_format` | Link | `"Standard"` | Target Print Format used to generate the PDF snapshot on submission. |
 
 
 ---
