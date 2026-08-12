@@ -24,4 +24,3 @@ This directory contains specifications and technical feature modules that have b
 
 | ID | Title / Feature | Originating Spec | Deferred Spec File | Status | Date Deferred |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `DEF-001` | User Roles & Permissions Governance | [quotation-approval-system-spec.md](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/quotation-approval-system-spec.md) | [user-roles-and-permissions-spec.md](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/docs/development/deferred/user-roles-and-permissions-spec.md) | Deferred | 2026-08-10 |
