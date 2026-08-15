@@ -24,3 +24,4 @@ This directory contains specifications and technical feature modules that have b
 
 | ID | Title / Feature | Originating Spec | Deferred Spec File | Status | Date Deferred |
 | :--- | :--- | :--- | :--- | :--- | :--- |
+| DEF-001 | Customer SMS/iMessage/RCS Messaging Dispatch | [Quotation Approval System](/docs/development/quotation-approval-system-spec.md) | [customer-messaging-dispatch-spec.md](/docs/development/deferred/customer-messaging-dispatch-spec.md) | Deferred | 2026-08-12 |
