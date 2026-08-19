@@ -1,5 +1,8 @@
 # Directory Update Log
 
+## 2026-08-15
+* **Creation**: Created technical specification for [Quotation Approval System](/development/quotation-approval-system-spec.md) in `development` focusing on strict server-side Sales Order conversion blocking, audit-compliant approval recording, quote lifecycle state machine, and modular extension hooks.
+
 ## 2026-08-07
 * **Creation**: Created agent workflow [.agents/workflows/generate-checklist.md](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/.agents/workflows/generate-checklist.md) standardizing implementation checklist generation from specs based on historical spec/checklist analysis and 6 core refinements.
 
