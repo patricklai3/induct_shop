@@ -1,5 +1,11 @@
 # Directory Update Log
 
+## 2026-08-21
+* **Creation**: Established the authoritative [Business Profile & Operating Charter](/business/established/business-profile.md) in `docs/business/established/` defining Kitchener-Waterloo (Ontario, Canada) as the operating jurisdiction, Tesla Priority #1 mechanical focus, early phase exclusions (no high-voltage components, no tires), and independent future greenlight project roadmaps.
+* **Creation**: Added [Corporate Formation & Legal Entity Specification](/business/in-progress/corporate-formation-spec.md) in `docs/business/in-progress/` providing an unpopulated decision framework for Ontario vs. Federal incorporation vs. partnership, CRA tax accounts, OBR, WSIB, and Induct software licensing.
+* **Update**: Realigned all in-progress specifications ([Equipment Procurement](/business/in-progress/equipment-procurement-spec.md), [Permits & Licensing](/business/in-progress/permits-and-licensing-spec.md), [Insurance Selection](/business/in-progress/insurance-selection-spec.md), [Site Selection](/business/in-progress/site-selection-spec.md), [IT & Telephony](/business/in-progress/it-and-telephony-setup-spec.md)) into unpopulated Ontario/Kitchener-Waterloo discussion templates with fill-in blanks for upcoming prospective owner meetings.
+* **Update**: Updated business sub-indexes in [In-Progress](/business/in-progress/index.md), [Established](/business/established/index.md), and [Business Knowledge Base Index](/business/index.md).
+
 ## 2026-08-20
 * **Initialization**: Created the [Business Knowledge Base](/business/index.md) (`docs/business/`) as the single source of truth for shop opening and commercial operations.
 * **Creation**: Established the [Business Vault Governance Protocol](/business/README.md) defining the 3-stage lifecycle mechanics (`in-progress` -> `established` -> `archive`) and OKF frontmatter conventions for human and AI agents.

@@ -1,11 +1,12 @@
 # In-Progress Business Initiatives & Decision Checklists
 
-This directory contains active decision frameworks, parameter checklists with fill-in blanks, vendor quote evaluations, and procurement tracking forms for the shop opening project.
+This directory contains active decision frameworks, parameter checklists with fill-in blanks, vendor quote evaluations, and procurement tracking forms for the prospective business owners.
 
-# Shop Opening Tasks & Specifications
+# Active Specifications & Decision Checklists
 
-* [Site Selection Specification](./site-selection-spec.md) - Location parameters, bay count, ceiling clearance, electrical capacity, and candidate property comparisons.
-* [Insurance Selection Specification](./insurance-selection-spec.md) - Commercial liability, direct primary garagekeepers, EV battery risk riders, and broker quote evaluations.
-* [Equipment Procurement Specification](./equipment-procurement-spec.md) - Vehicle lifts, tire & alignment systems, CAT III/IV 1000V insulated safety toolkits, A/C machines, and equipment vendor quotes.
-* [IT & Telephony Setup Specification](./it-and-telephony-setup-spec.md) - High-speed networking, Telnyx VoIP/SMS routing, technician tablets, POS hardware, and barcode scanners.
-* [Permits & Licensing Specification](./permits-and-licensing-spec.md) - State automotive repair dealer license, hazardous waste disposal IDs, fire safety permits, and filing tracker.
+* [Corporate Formation & Legal Entity Specification](./corporate-formation-spec.md) - Legal structure selection (Ontario/Federal corporation vs. partnership), equity splits, CRA tax accounts (GST/HST, Payroll), OBR registration, WSIB setup, and commercial banking.
+* [Site Selection Specification](./site-selection-spec.md) - Kitchener-Waterloo location parameters, industrial zoning verification, hydro utility capacity, bay counts, and candidate property comparisons.
+* [Equipment Procurement Specification](./equipment-procurement-spec.md) - Phase 1 Tesla mechanical tooling, heavy-duty lifts, air compressor, diagnostic setups, deferred tire/HV project roadmaps, and Canadian equipment vendor quotes.
+* [Insurance Selection Specification](./insurance-selection-spec.md) - Ontario commercial lines (OAP 4 Garage Auto, CGL, Property, Business Interruption), WSIB compliance, and Ontario broker quote evaluations.
+* [Permits & Licensing Specification](./permits-and-licensing-spec.md) - Municipal business licensing (Kitchener/Waterloo), MECP HWIN hazardous waste registration, ESA electrical inspection, fire rescue safety, and regulatory filing tracker.
+* [IT & Telephony Setup Specification](./it-and-telephony-setup-spec.md) - Kitchener-Waterloo high-speed ISP options, Telnyx VoIP / automated SMS routing (Canadian numbers & CASL compliance), and technician intake tablets.
