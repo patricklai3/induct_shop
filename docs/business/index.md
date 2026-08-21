@@ -2,6 +2,10 @@
 
 Welcome to the central knowledge repository for Induct Shop's commercial operations, corporate foundation, facility infrastructure, procurement, and established operational policies.
 
+# Project Management & Tracking
+
+* [Shop Opening GitHub Project (Project 13)](https://github.com/users/patricklai3/projects/13) - Live task tracking, kanban board, and milestone roadmaps for the physical shop opening.
+
 # Governance
 
 * [Business Vault Governance Protocol](./README.md) - Operating guidelines, 3-stage lifecycle mechanics (in-progress -> established -> archive), and OKF frontmatter standards for human and AI agents.

@@ -15,7 +15,7 @@ This document establishes the operational rules and lifecycle mechanics governin
 
 ## 1. Directory Purpose & Core Philosophy
 
-The `docs/business/` knowledge vault is dedicated to capturing and managing all non-code, commercial, operational, and facility aspects of Induct Shop — starting with the shop opening initiative and extending into ongoing operations.
+The `docs/business/` knowledge vault is dedicated to capturing and managing all non-code, commercial, operational, and facility aspects of Induct Shop — starting with the shop opening initiative and extending into ongoing operations. Active milestones and task deliverables are tracked live on the [Shop Opening GitHub Project (Project 13)](https://github.com/users/patricklai3/projects/13).
 
 It mirrors the promotion lifecycle established in the software development directory (`docs/development/` $\rightarrow$ `docs/systems/` / `docs/doctypes/`):
 

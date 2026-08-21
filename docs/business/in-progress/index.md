@@ -2,6 +2,10 @@
 
 This directory contains active decision frameworks, parameter checklists with fill-in blanks, vendor quote evaluations, and procurement tracking forms for the prospective business owners.
 
+# Project Tracking Board
+
+* [Shop Opening GitHub Project (Project 13)](https://github.com/users/patricklai3/projects/13) - Active milestones, tasks, and kanban board tracking all shop opening deliverables.
+
 # Active Specifications & Decision Checklists
 
 * [Corporate Formation & Legal Entity Specification](./corporate-formation-spec.md) - Legal structure selection (Ontario/Federal corporation vs. partnership), equity splits, CRA tax accounts (GST/HST, Payroll), OBR registration, WSIB setup, and commercial banking.

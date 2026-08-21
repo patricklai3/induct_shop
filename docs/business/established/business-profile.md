@@ -13,7 +13,7 @@ timestamp: 2026-08-21T00:00:00Z
 
 Induct Shop is an automotive service venture operating in the **Kitchener-Waterloo area (Region of Waterloo), Ontario, Canada**.
 
-This document serves as the foundational, active single source of truth for the shop's strategic operating parameters, vehicle specialization priorities, service boundaries, corporate relationship model, and phased project roadmap.
+This document serves as the foundational, active single source of truth for the shop's strategic operating parameters, vehicle specialization priorities, service boundaries, corporate relationship model, and phased project roadmap. Live project task execution and milestones are tracked on the [Shop Opening GitHub Project (Project 13)](https://github.com/users/patricklai3/projects/13).
 
 All operational decisions, facility configurations, tooling procurements, and software workflows must align with the core principles established herein.
 
