@@ -29,3 +29,8 @@ Welcome to the central repository for metadata, context, and operational playboo
 # Doctypes
 
 * [Doctypes](/doctypes/index.md) - Custom implemented doctypes and their documentation.
+
+# Business Operations
+
+* [Business Knowledge Base](/business/index.md) - Source of truth for the shop opening project, commercial policies, facilities, equipment, and established operational realities.
+

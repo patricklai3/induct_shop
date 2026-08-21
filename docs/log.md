@@ -1,5 +1,11 @@
 # Directory Update Log
 
+## 2026-08-20
+* **Initialization**: Created the [Business Knowledge Base](/business/index.md) (`docs/business/`) as the single source of truth for shop opening and commercial operations.
+* **Creation**: Established the [Business Vault Governance Protocol](/business/README.md) defining the 3-stage lifecycle mechanics (`in-progress` -> `established` -> `archive`) and OKF frontmatter conventions for human and AI agents.
+* **Creation**: Added OKF shop opening decision specifications in `docs/business/in-progress/`: [Site Selection](/business/in-progress/site-selection-spec.md), [Insurance Selection](/business/in-progress/insurance-selection-spec.md), [Equipment Procurement](/business/in-progress/equipment-procurement-spec.md), [IT & Telephony Setup](/business/in-progress/it-and-telephony-setup-spec.md), and [Permits & Licensing](/business/in-progress/permits-and-licensing-spec.md) featuring owner parameter checklists with fill-in blanks and quote comparison grids.
+* **Creation**: Established sub-indexes in [In-Progress](/business/in-progress/index.md), [Established](/business/established/index.md), and [Archive](/business/archive/index.md), and updated root [Knowledge Base Index](/index.md).
+
 ## 2026-08-07
 * **Creation**: Created agent workflow [.agents/workflows/generate-checklist.md](file:///home/real2/projects/.project/frappe_docker/development/frappe-bench/apps/induct_shop/.agents/workflows/generate-checklist.md) standardizing implementation checklist generation from specs based on historical spec/checklist analysis and 6 core refinements.
 
